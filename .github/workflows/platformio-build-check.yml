@@ -50,7 +50,7 @@ jobs:
 
     strategy:
       fail-fast: false
-      #max-parallel: 1
+      max-parallel: 20
       
       matrix:
         example:
@@ -117,6 +117,10 @@ jobs:
           - example: Simple
             unit: UnitAtomMatrixRGB
             board: AtomMatrix
+            framework: Arduino
+            espressif32: latest
+          - example: ViaPbHub
+            board: Core
             framework: Arduino
             espressif32: latest
 
