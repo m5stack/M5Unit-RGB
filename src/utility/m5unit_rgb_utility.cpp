@@ -59,7 +59,6 @@ uint32_t hsv2rgb(const uint8_t h, const uint8_t s, const uint8_t v)
     return (uint32_t(r) << 16) | (uint32_t(g) << 8) | uint32_t(b);
 }
 
-
 }  // namespace rgb
 }  // namespace unit
 }  // namespace m5
