@@ -43,7 +43,7 @@ m5::unit::UnitHex unit;
 #elif defined(USING_UNIT_NEO_HEX)
 m5::unit::UnitNeoHex unit;
 #elif defined(USING_UNIT_NECO)
-m5::unit::UnitNeko unit;
+m5::unit::UnitNeco unit;
 #elif defined(USING_UNIT_RGBLED15)
 m5::unit::UnitRGBLED15 unit;
 #elif defined(USING_UNIT_RGBLED_STRIP30)

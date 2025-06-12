@@ -14,7 +14,7 @@
                    |
                    +--> ch:3 UnitRGBLED15
                    |
-                   +--> ch:4 UnitNeko
+                   +--> ch:4 UnitNeco
                    |
                    +--> ch5: UnitRGBLEDStrip30
 
@@ -40,7 +40,7 @@ m5::unit::UnitPuzzle puzzle[2];
 m5::unit::UnitHex hex;
 m5::unit::UnitNeoHex neoHex;
 m5::unit::UnitRGBLED15 rgbled;
-m5::unit::UnitNeko neko;
+m5::unit::UnitNeco neco;
 m5::unit::UnitRGBLEDStrip30 strip;
 
 LGFX_Sprite sprite;
@@ -112,7 +112,7 @@ void loop_rgbled(const m5::unit::types::elapsed_time_t now)
     }
 }
 
-void loop_neko(const m5::unit::types::elapsed_time_t now)
+void loop_neco(const m5::unit::types::elapsed_time_t now)
 {
     static auto ms = m5::utility::millis();
     static uint32_t counter{};
@@ -120,15 +120,15 @@ void loop_neko(const m5::unit::types::elapsed_time_t now)
     if (now - ms > 40) {
         int idx = roundTrip(++counter, 17);  // 0-17-0...
 
-        neko.clear();
+        neco.clear();
         if (idx == 17) {
-            neko.setPixelColor(idx, 0, 100, 0);
+            neco.setPixelColor(idx, 0, 100, 0);
 
         } else {
-            neko.setPixelColor(idx, 0, 100, 0);
-            neko.setPixelColor(35 - idx - 1, 0, 100, 0);
+            neco.setPixelColor(idx, 0, 100, 0);
+            neco.setPixelColor(35 - idx - 1, 0, 100, 0);
         }
-        neko.show();
+        neco.show();
     }
 }
 
@@ -168,7 +168,7 @@ void setup()
         !hex.add(neoHex, 0) ||           // UnitHex -> UnitNexoHex
         !hub.add(hex, 2) ||              // PbHub ch:2 -> UnitHex
         !hub.add(rgbled, 3) ||           // PbHub ch:3 -> UnitRGBLED15
-        !hub.add(neko, 4) ||             // PbHub ch:4 -> UnitNeko
+        !hub.add(neco, 4) ||             // PbHub ch:4 -> UnitNeco
         !hub.add(strip, 5) ||            // PbHub ch:5 -> UnitRGBLEDStrip
         !Units.add(hub, Wire) ||         // Core -> PbHub
         !Units.begin()) {
@@ -225,6 +225,6 @@ void loop()
     loop_puzzle(now);
     loop_hex(now);
     loop_rgbled(now);
-    loop_neko(now);
+    loop_neco(now);
     loop_strip(now);
 }
