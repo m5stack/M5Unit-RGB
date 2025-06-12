@@ -32,6 +32,7 @@ M5AtomMatrix  has a 5*5 RGB Led matrix on the panel. This library can manage Led
 
 
 ## Related Link
+See also examples using conventional methods here.
 
 - [Unit RGB & Datasheet](https://docs.m5stack.com/en/unit/rgb)
 - [Unit RGB LED & Datasheet](https://docs.m5stack.com/en/unit/neopixel)
