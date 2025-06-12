@@ -6,4 +6,4 @@
 /*
   Example of using via UnitPbHub
 */
-#include "main/ViaPaHub.cpp"
+#include "main/ViaPbHub.cpp"
