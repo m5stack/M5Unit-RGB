@@ -30,18 +30,15 @@ bool UnitNeco::begin()
 
 void UnitNeco::update(const bool)
 {
-    auto prev   = _press;
-    _wasPressed = _wasReleased = false;
-
     /*
       Connection via PbHub does not get button status accurately
      */
     if (adapter()->type() == Adapter::Type::GPIO) {
         bool rx{};
-        _press = readDigitalRX(rx) && !rx;
+        if (readDigitalRX(rx)) {
+            setRawState(m5::utility::millis(), !rx);
+        }
     }
-    _wasPressed  = (_press != prev) && _press;
-    _wasReleased = (_press != prev) && !_press;
 }
 
 }  // namespace unit
