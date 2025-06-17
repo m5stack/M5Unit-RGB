@@ -40,7 +40,7 @@ m5::unit::UnitPuzzle puzzle[2];
 m5::unit::UnitHex hex;
 m5::unit::UnitNeoHex neoHex;
 m5::unit::UnitRGBLED15 rgbled;
-m5::unit::UnitNeco neco;
+m5::unit::UnitNeco neco;  // Button API is not available that via PbHub
 m5::unit::UnitRGBLEDStrip30 strip;
 
 LGFX_Sprite sprite;

@@ -223,7 +223,7 @@ void loop()
                 draw_pxiel_color();
                 m5::utility::delay(1000);
 
-                unit.fill(0x00FFFFFF);
+                unit.fill(Color(0x00FFFFFF));
                 unit.show();
                 draw_pxiel_color();
                 m5::utility::delay(1000);

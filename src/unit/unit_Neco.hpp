@@ -11,6 +11,7 @@
 #define M5_UNIT_RGB_UNIT_NECO_HPP
 
 #include "unit_WS2812.hpp"
+#include "m5_utility/button_status.hpp"
 
 namespace m5 {
 namespace unit {
@@ -18,8 +19,9 @@ namespace unit {
 /*!
   @class m5::unit::UnitNeco
   @brief Neco LED Unit
+  @note Button related functions are available from m5::utility::button::Status
 */
-class UnitNeco : public UnitWS2812 {
+class UnitNeco : public UnitWS2812, public m5::utility::button::Status {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitNeco, 0x00);
 
 public:
@@ -31,31 +33,6 @@ public:
     }
     virtual bool begin() override;
     virtual void update(const bool force = false) override;
-
-    ///@note State is not updated until update() is processed
-    ///@warning Not available for connection via PbHub
-    ///@name Button
-    ///@{
-    inline bool isPressed() const
-    {
-        return _press;
-    }
-    inline bool wasPressed() const
-    {
-        return _wasPressed;
-    }
-    inline bool isReleased() const
-    {
-        return !_press;
-    }
-    inline bool wasReleased() const
-    {
-        return _wasReleased;
-    }
-    ///@}
-
-protected:
-    bool _press{}, _wasPressed{}, _wasReleased{};
 };
 
 }  // namespace unit
