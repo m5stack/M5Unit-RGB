@@ -267,14 +267,29 @@ bool UnitLED::begin()
 {
     // Search root unit
     Component* p = this;
-    while (p && p->parent() && (is_unit_led(p) || is_unit_pbhub(p))) {
+    // 1st: Exists PbHub in tree?
+    while (p && p->parent()) {
         p = p->parent();
+        if (is_unit_pbhub(p)) {
+            break;
+        }
+    }
+    // 2nd: Search root UnitLED
+    if (!p) {  // No PbHub
+        p = parent();
+        while (p && is_unit_led(p)) {
+            p = p->parent();
+        }
     }
     //  p is root (UnitLED or UnitPbHub)
+    if (!p) {
+        M5_LIB_LOGE("Valid root unit is not found");
+        return false;
+    }
 
     // begin RMT if Root is not UnitPbHub
+    M5_LIB_LOGI("Root is %s", p->deviceName());
     if (!is_unit_pbhub(p)) {
-        M5_LIB_LOGD("Root is UnitLED");
         gpio::adapter_config_t cfg = rmt_config();
         // .channel and .gpio_num will set in begin(cfg)
         auto ad = asAdapter<AdapterGPIO>(Adapter::Type::GPIO);
@@ -284,7 +299,6 @@ bool UnitLED::begin()
         }
         _interface.reset(new InterfaceGPIO(*this));
     } else {
-        M5_LIB_LOGD("Root is PbHub");
         _interface.reset(new InterfacePbHub(*this));
     }
 
@@ -350,21 +364,23 @@ bool UnitLED::fillRainbow(const uint16_t first, const uint16_t count, const uint
     uint16_t hue         = firstHue * 256U;  // 0 - 65535
     const uint16_t delta = 65536 / num;
 
-    for (uint32_t i = first; i < first + num; ++i) {
+    for (uint16_t i = first; i < first + num; ++i) {
         setPixelColor(i, hsv2rgb(hue >> 8, 255, 255));  // Using upper 8bits
         hue += delta;
     }
     return true;
 }
 
-bool UnitLED::fillGradation(const uint32_t first, const Color& firstClr, const Color& lastClr, const uint32_t count)
+bool UnitLED::fillGradation(const rgb::Color& firstClr, const rgb::Color& lastClr, const uint16_t first,
+                            const uint16_t count)
+
 {
     auto num = count ? count : (_numPixels - first);
     if (first + num > _numPixels || num < 2) {
         return false;
     }
 
-    for (uint32_t i = 0; i < num - 1; ++i) {
+    for (uint16_t i = 0; i < num - 1; ++i) {
         float ratio = static_cast<float>(i) / (num - 1);
         uint8_t r   = static_cast<uint8_t>(firstClr.r + ratio * (lastClr.r - firstClr.r));
         uint8_t g   = static_cast<uint8_t>(firstClr.g + ratio * (lastClr.g - firstClr.g));
@@ -383,7 +399,7 @@ bool UnitLED::fillRandom(const uint16_t first, const uint16_t count)
         return false;
     }
 
-    for (uint32_t i = first; i < first + num; ++i) {
+    for (uint16_t i = first; i < first + num; ++i) {
         setPixelColor(i, esp_random(), esp_random(), esp_random());
     }
     return true;
@@ -401,21 +417,21 @@ void UnitLED::setRotation(const int8_t rot)
     std::vector<Color> temp;
     temp.reserve(_numPixels);
 
-    for (uint32_t i = 0; i < _numPixels; ++i) {
+    for (uint16_t i = 0; i < _numPixels; ++i) {
         temp[i] = get_pixel_color(i);  // abs position
     }
 
     _rot = rotation_of(new_rot - prev);  // delta rotation
     // M5_LIB_LOGD("Rot %d -> %d -> delta:%d (%d)", prev, new_rot, _rot, maxRotation());
     //  abs position to delta rotate position
-    for (uint32_t i = 0; i < _numPixels; ++i) {
+    for (uint16_t i = 0; i < _numPixels; ++i) {
         set_pixel_color(index_of(i), temp[i]);
     }
     _rot = new_rot;  // abs rot
 }
 
 //
-Color UnitLED::get_pixel_color(const uint32_t n) const
+Color UnitLED::get_pixel_color(const uint16_t n) const
 {
     Color c{};
     if (n < _numPixels) {
@@ -428,7 +444,7 @@ Color UnitLED::get_pixel_color(const uint32_t n) const
     return c;
 }
 
-bool UnitLED::set_pixel_color(const uint32_t n, const Color& c)
+bool UnitLED::set_pixel_color(const uint16_t n, const Color& c)
 {
     if (n < _numPixels) {
         //        M5_LIB_LOGV("[%u]:%08X", n, c.wrgb);
