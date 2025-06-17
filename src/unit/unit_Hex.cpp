@@ -54,7 +54,7 @@ template class UnitHexLED37<UnitSK6812GRB>;
 
 // class UnitHexLED37
 template <class BaseClass>
-uint32_t UnitHexLED37<BaseClass>::index_of(const uint32_t n) const
+uint16_t UnitHexLED37<BaseClass>::index_of(const uint16_t n) const
 {
     return index_table[this->rotation()][n % this->numPixels()];
 }

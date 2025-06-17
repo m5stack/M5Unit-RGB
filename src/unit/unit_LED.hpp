@@ -251,7 +251,7 @@ public:
       @return Color if exists
       @note Affected by rotation
     */
-    inline rgb::Color color(const uint32_t n) const
+    inline rgb::Color color(const uint16_t n) const
     {
         return (n < _numPixels) ? get_pixel_color(index_of(n)) : rgb::Color();
     }
@@ -261,7 +261,7 @@ public:
       @return Color if exists
       @note Not affected by rotation
     */
-    inline rgb::Color absoluteColor(const uint32_t n) const
+    inline rgb::Color absoluteColor(const uint16_t n) const
     {
         return (n < _numPixels) ? get_pixel_color(n) : rgb::Color();
     }
@@ -344,19 +344,6 @@ public:
     }
     /*!
       @brief Fill the specified range with the specified color
-      @param c WRGB 32bits color
-      @param first First position of the pixels
-      @param count Number of pixels to fill (To the end if zero)
-      @return True if successful
-      @note Affected by rotation
-      @warning If white is not supported, white is ignored
-     */
-    inline bool fill(const rgb::wrgb32_color_t c, const uint16_t first = 0, const uint16_t count = 0)
-    {
-        return fill(rgb::Color(c), first, count);
-    }
-    /*!
-      @brief Fill the specified range with the specified color
       @param c rgb::Color
       @param first First position of the pixels
       @param count Number of pixels to fill (To the end if zero)
@@ -371,7 +358,7 @@ public:
      */
     inline void clear(void)
     {
-        fill(0);
+        fill(rgb::Color());
     }
     /*!
       @brief Fill the specified range to rainbow
@@ -384,15 +371,15 @@ public:
     bool fillRainbow(const uint16_t first = 0, const uint16_t count = 0, const uint8_t firstHue = 0);
     /*!
       @brief Fill the specified range to gradation pixels
-      @param first First position of the pixels
       @param firstClr First Color
       @param lastClr Last Color
+      @param first First position of the pixels
       @param count Number of pixels to fill (To the end if zero)
       @return True if successful
       @note Affected by rotation
      */
-    bool fillGradation(const uint32_t first, const rgb::Color& firstClr, const rgb::Color& lastClr,
-                       const uint32_t count = 0);
+    bool fillGradation(const rgb::Color& firstClr, const rgb::Color& lastClr, const uint16_t first = 0,
+                       const uint16_t count = 0);
     /*!
       @brief Fill the specified range torandom color pixels
       @param first First position of the pixels
@@ -469,14 +456,14 @@ public:
     ///@name Pixels element access
     ///@{
     //! @brief rvalue
-    rgb::Color operator[](uint32_t i) const
+    rgb::Color operator[](const uint16_t i) const
     {
         return color(i);
     }
     //! @brief lvalue
-    PixelProxy operator[](uint32_t i)
+    PixelProxy operator[](const uint16_t i)
     {
-        return PixelProxy(*this, index_of(i));
+        return PixelProxy(*this, i);
     }
     ///@}
 
@@ -542,15 +529,15 @@ protected:
     }
 
     // Not affected by rotation
-    rgb::Color get_pixel_color(const uint32_t n) const;
-    bool set_pixel_color(const uint32_t n, const rgb::Color& c);
+    rgb::Color get_pixel_color(const uint16_t n) const;
+    bool set_pixel_color(const uint16_t n, const rgb::Color& c);
 
     inline uint8_t rotation_of(const int8_t r) const
     {
         return (r % maxRotation() + maxRotation()) % maxRotation();
     }
 
-    inline virtual uint32_t index_of(const uint32_t n) const
+    inline virtual uint16_t index_of(const uint16_t n) const
     {
         // 0 or 180 deg
         return _rot ? _numPixels - (n % _numPixels) - 1 : n;

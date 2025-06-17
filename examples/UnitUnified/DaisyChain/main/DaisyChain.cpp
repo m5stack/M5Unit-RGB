@@ -71,7 +71,7 @@ void init_each()
 
     hex.fillRainbow();
 
-    tape.fillGradation(0, Color(0, 200, 0), Color(200, 0, 200));
+    tape.fillGradation(Color(0, 200, 0), Color(200, 0, 200));
     tape.show();  // If the last tail is applied, it is applied to all
 }
 
@@ -95,73 +95,65 @@ void loop_each()
 
     auto now = m5::utility::millis();
 
-    if (1) {
-        static uint8_t phase{};
-        if (now >= rgb_ms + 1000) {
-            phase  = (phase + 1) % 3;
-            rgb_ms = now;
-            switch (phase) {
-                case 0:
-                    rgb.setPixelColor(0, 0, 0, 100);
-                    rgb.fill(Color(), 1);
-                    break;
-                case 1:
-                    rgb.setPixelColor(0, 0, 0, 0);
-                    rgb.setPixelColor(1, 100, 100, 0);
-                    rgb.setPixelColor(2, 0, 0, 0);
-                    break;
-                case 2:
-                    rgb.fill(Color(), 0, 2);
-                    rgb.setPixelColor(2, 100, 0, 0);
-                    break;
-            }
-            rgb.show();
+    static uint8_t phase{};
+    if (now >= rgb_ms + 1000) {
+        phase  = (phase + 1) % 3;
+        rgb_ms = now;
+        switch (phase) {
+            case 0:
+                rgb.setPixelColor(0, 0, 0, 100);
+                rgb.fill(Color(), 1);
+                break;
+            case 1:
+                rgb.setPixelColor(0, 0, 0, 0);
+                rgb.setPixelColor(1, 100, 100, 0);
+                rgb.setPixelColor(2, 0, 0, 0);
+                break;
+            case 2:
+                rgb.fill(Color(), 0, 2);
+                rgb.setPixelColor(2, 100, 0, 0);
+                break;
         }
+        rgb.show();
     }
 
-    if (1) {
-        if (now >= puz0_ms + 100) {
-            puz0_ms = now;
-            puzzle[0].rotateRight(1);
-            puzzle[0].show();
-        }
-        if (now >= puz1_ms + 50) {
-            static int16_t bri{10};
-            static int16_t add{2};
-            puz1_ms = now;
+    if (now >= puz0_ms + 100) {
+        puz0_ms = now;
+        puzzle[0].rotateRight(1);
+        puzzle[0].show();
+    }
+    if (now >= puz1_ms + 50) {
+        static int16_t bri{10};
+        static int16_t add{2};
+        puz1_ms = now;
 
-            bri += add;
-            if (bri > 32) {
-                bri = 32;
-                add = -add;
-            }
-            if (bri < 0) {
-                bri = 0;
-                add = -add;
-                set_char_pixel('!' + (esp_random() % (127 - 33)));
-            }
-            puzzle[1].setBrightness(bri);
-            puzzle[1].show();
+        bri += add;
+        if (bri > 32) {
+            bri = 32;
+            add = -add;
         }
+        if (bri < 0) {
+            bri = 0;
+            add = -add;
+            set_char_pixel('!' + (esp_random() % (127 - 33)));
+        }
+        puzzle[1].setBrightness(bri);
+        puzzle[1].show();
     }
 
-    if (1) {
-        if (now >= hex_ms + 250) {
-            static uint8_t rot{};
-            ++rot;
-            hex_ms = now;
-            hex.setRotation(rot);
-            hex.show();
-        }
+    if (now >= hex_ms + 250) {
+        static uint8_t rot{};
+        ++rot;
+        hex_ms = now;
+        hex.setRotation(rot);
+        hex.show();
     }
 
-    if (1) {
-        if (now >= tape_ms + 2000) {
-            tape_ms = now;
-            Color c(esp_random(), esp_random(), 0);
-            tape.fillGradation(0, c, Color(255 - c.r, 255 - c.g, 255 - c.b));
-            tape.show();
-        }
+    if (now >= tape_ms + 2000) {
+        tape_ms = now;
+        Color c(esp_random(), esp_random(), 0);
+        tape.fillGradation(c, Color(255 - c.r, 255 - c.g, 255 - c.b));
+        tape.show();
     }
 }
 #else

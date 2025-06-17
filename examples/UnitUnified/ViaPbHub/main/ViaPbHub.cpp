@@ -194,8 +194,6 @@ void setup()
 
     puzzle[0].setRotation(1);
     puzzle[1].setRotation(-1);
-    //    puzzle[0].fillGradation(0, Color(esp_random(), esp_random(), 255), Color(esp_random(), esp_random(), 0));
-    //    puzzle[1].fillGradation(0, Color(0, esp_random(), esp_random()), Color(255, esp_random(), esp_random()));
     puzzle[0].fillRainbow();
     puzzle[1].fillRainbow();
     puzzle[1].show();
@@ -216,15 +214,13 @@ void loop()
         pause = !pause;
     }
 
-    if (pause) {
-        return;
+    if (!pause) {
+        auto now = m5::utility::millis();
+        loop_rgb(now);
+        loop_puzzle(now);
+        loop_hex(now);
+        loop_rgbled(now);
+        loop_neco(now);
+        loop_strip(now);
     }
-
-    auto now = m5::utility::millis();
-    loop_rgb(now);
-    loop_puzzle(now);
-    loop_hex(now);
-    loop_rgbled(now);
-    loop_neco(now);
-    loop_strip(now);
 }

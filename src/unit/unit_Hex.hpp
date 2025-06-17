@@ -32,7 +32,7 @@ public:
     UnitHexLED37() : BaseClass(37)
     {
     }
-    virtual uint32_t index_of(const uint32_t n) const override;
+    virtual uint16_t index_of(const uint16_t n) const override;
 
     inline virtual uint8_t maxRotation() const
     {

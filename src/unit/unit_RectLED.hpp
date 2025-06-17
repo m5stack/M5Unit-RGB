@@ -46,7 +46,7 @@ public:
     }
 
 protected:
-    virtual uint32_t index_of(const uint32_t n) const override
+    virtual uint16_t index_of(const uint16_t n) const override
     {
         uint8_t x = n % WIDTH;
         uint8_t y = n / WIDTH;
