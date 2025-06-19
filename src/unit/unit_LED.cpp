@@ -268,24 +268,20 @@ bool UnitLED::begin()
     // Search root unit
     Component* p = this;
     // 1st: Exists PbHub in tree?
-    while (p && p->parent()) {
+    while (p) {
         p = p->parent();
-        if (is_unit_pbhub(p)) {
+        if (p && is_unit_pbhub(p)) {
             break;
         }
     }
     // 2nd: Search root UnitLED
     if (!p) {  // No PbHub
-        p = parent();
-        while (p && is_unit_led(p)) {
+        p = this;
+        while (p->parent() && is_unit_led(p->parent())) {
             p = p->parent();
         }
     }
     //  p is root (UnitLED or UnitPbHub)
-    if (!p) {
-        M5_LIB_LOGE("Valid root unit is not found");
-        return false;
-    }
 
     // begin RMT if Root is not UnitPbHub
     M5_LIB_LOGI("Root is %s", p->deviceName());
