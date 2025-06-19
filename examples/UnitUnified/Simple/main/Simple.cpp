@@ -88,7 +88,6 @@ void draw_pxiel_color()
 
 void setup()
 {
-    delay(2000);
     M5.begin();
 
     // The screen shall be in landscape mode

@@ -25,21 +25,6 @@ using namespace m5::unit::rgb;
 constexpr uint16_t NUM_OF_PIXELS{4};
 constexpr Color black{};
 
-#if 0
-class TestSK6812GRB : public GPIOComponentTestBase<UnitSK6812GRB, bool> {
-protected:
-    virtual UnitSK6812GRB* get_instance() override
-    {
-        auto ptr = new m5::unit::UnitSK6812GRB(NUM_OF_PIXELS);
-        return ptr;
-    }
-    virtual bool is_using_hal() const override
-    {
-        return GetParam();
-    };
-};
-#endif
-
 template <class U>
 class TestLED : public GPIOComponentTestBase<U, bool> {
 protected:
@@ -51,7 +36,6 @@ protected:
     virtual bool is_using_hal() const override
     {
         return this->GetParam();
-        ;
     };
 };
 

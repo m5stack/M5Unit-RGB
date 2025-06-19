@@ -15,11 +15,11 @@
 
 namespace m5 {
 namespace unit {
-
 /*!
   @class m5::unit::UnitNeco
   @brief Neco LED Unit
   @note Button related functions are available from m5::utility::button::Status
+  @warning Button status cannot be acquired by daisy chain or connection via PbHub
 */
 class UnitNeco : public UnitWS2812, public m5::utility::button::Status {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitNeco, 0x00);

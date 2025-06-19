@@ -8,7 +8,7 @@
 
   **** NOTICE *********************************************************************
   This example assumes the following connections
-  Core -> UnitRGB -> UnitPuzzle -> UnitPuzzle -> UnitHex -> UnitRGBLed15
+  Core -> UnitRGB -> UnitPuzzle -> UnitPuzzle -> UnitHex -> UnitRGBLed15 -> UnitNeco
 
   Modify the source code to suit your own connection situation.
   *********************************************************************************
@@ -33,13 +33,15 @@ m5::unit::UnitRGB rgb;
 m5::unit::UnitPuzzle puzzle[2];
 m5::unit::UnitHex hex;
 m5::unit::UnitRGBLED15 tape;
+m5::unit::UnitNeco neco;
 #else
 // Number of the all pixles
 constexpr uint16_t NUMS{
     3 +         // RGB
     (64 * 2) +  // Puzzle x2
     37 +        // Hex
-    15          // RGBLed15 (10cm)
+    15 +        // RGBLed15 (10cm)
+    35          // Neco
 };
 m5::unit::UnitSK6812GRB unit(NUMS);  // Handle LEDs in bulk like FastLED and Adafruit_NeoPixel
 #endif
@@ -72,7 +74,10 @@ void init_each()
     hex.fillRainbow();
 
     tape.fillGradation(Color(0, 200, 0), Color(200, 0, 200));
-    tape.show();  // If the last tail is applied, it is applied to all
+
+    neco.fillRainbow();
+
+    neco.show();  // If the last tail is applied, it is applied to all
 }
 
 void clear_each()
@@ -82,7 +87,8 @@ void clear_each()
     puzzle[1].clear();
     hex.clear();
     tape.clear();
-    tape.show();  // If the last tail is applied, it is applied to all
+    neco.clear();
+    neco.show();  // If the last tail is applied, it is applied to all
 }
 
 void loop_each()
@@ -92,6 +98,7 @@ void loop_each()
     static auto puz1_ms = rgb_ms;
     static auto hex_ms  = rgb_ms;
     static auto tape_ms = rgb_ms;
+    static auto neco_ms = rgb_ms;
 
     auto now = m5::utility::millis();
 
@@ -155,6 +162,17 @@ void loop_each()
         tape.fillGradation(c, Color(255 - c.r, 255 - c.g, 255 - c.b));
         tape.show();
     }
+
+    if (now >= neco_ms + 150) {
+        neco.rotateRight(1);
+        neco.show();
+    }
+    /*
+      Button status in UnitNeco cannot be acquired by daisy chain or connection via PbHub
+      if(neco.wasClicked()){
+           // Not reached!
+      }
+     */
 }
 #else
 void init_all()
@@ -174,7 +192,7 @@ void loop_all()
     static auto ms = m5::utility::millis();
     auto now       = m5::utility::millis();
 
-    if (now > ms + 100) {
+    if (now > ms + 50) {
         ms = now;
         unit.rotateRight(1);
         unit.show();
@@ -208,7 +226,8 @@ void setup()
     M5_LOGI("getPin: OUT:%d", pin_num_gpio_out);
 
 #if defined(USING_EACH_UNIT)
-    if (!hex.add(tape, 0) ||                                   // hex -> RGB LED
+    if (!tape.add(neco, 0) ||                                  // RGBLED -> Neco
+        !hex.add(tape, 0) ||                                   // hex -> RGBLED
         !puzzle[1].add(hex, 0) ||                              // puzzle[1] -> hex
         !puzzle[0].add(puzzle[1], 0) ||                        // puzzle[0] -> puzzle[1]
         !rgb.add(puzzle[0], 0) ||                              // rgb -> puzzle[0]
@@ -243,6 +262,7 @@ void setup()
     puzzle[1].setBrightness(10);
     hex.setBrightness(10);
     tape.setBrightness(10);
+    neco.setBrightness(10);
     init_each();
 #else
     unit.setBrightness(10);
