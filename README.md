@@ -34,14 +34,14 @@ M5AtomMatrix  has a 5*5 RGB Led matrix on the panel. This library can manage Led
 ## Related Link
 See also examples using conventional methods here.
 
-- [Unit RGB & Datasheet](https://docs.m5stack.com/en/unit/rgb)
-- [Unit RGB LED & Datasheet](https://docs.m5stack.com/en/unit/neopixel)
-- [Unit Hex & Datasheet](https://docs.m5stack.com/en/unit/hex)
-- [Unit NeoHex & Datasheet](https://docs.m5stack.com/en/unit/neohex)
-- [Unit RGB LED Strip & Datasheet](https://docs.m5stack.com/en/unit/rgb_led_strip)
-- [Unit Neco & Datasheet](https://docs.m5stack.com/en/unit/Neco%20Unit)
-- [Unit Puzzle & Datasheet](https://docs.m5stack.com/en/unit/Unit-Puzzle)
-- [M5AtomMatrix](https://docs.m5stack.com/en/core/ATOM%20Matrix)
+- [Unit RGB - Document & Datasheet](https://docs.m5stack.com/en/unit/rgb)
+- [Unit RGB LED - Document & Datasheet](https://docs.m5stack.com/en/unit/neopixel)
+- [Unit Hex - Document & Datasheet](https://docs.m5stack.com/en/unit/hex)
+- [Unit NeoHex - Document & Datasheet](https://docs.m5stack.com/en/unit/neohex)
+- [Unit RGB LED Strip - Document & Datasheet](https://docs.m5stack.com/en/unit/rgb_led_strip)
+- [Unit Neco - Document & Datasheet](https://docs.m5stack.com/en/unit/Neco%20Unit)
+- [Unit Puzzle - Document & Datasheet](https://docs.m5stack.com/en/unit/Unit-Puzzle)
+- [M5AtomMatrix - Document & Datasheet](https://docs.m5stack.com/en/core/ATOM%20Matrix)
 
 
 ### Required Libraries:
