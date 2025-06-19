@@ -68,6 +68,9 @@ See also examples using conventional methods here.
 
 See also [M5Unit-HUB](https://github.com/m5stack/M5Unit-HUB)
 
+#### Limitations via PbHub
+- Each channel can control up to **MAX 74 LEDs each**
+- **Button status of UnitNeco** cannot be retrieved
 
 ## Examples
 See also [examples/UnitUnified](examples/UnitUnified)
