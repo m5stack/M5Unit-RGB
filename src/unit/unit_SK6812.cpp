@@ -25,10 +25,10 @@ const types::attr_t UnitSK6812::attr{attribute::AccessGPIO};
 adapter_config_t UnitSK6812::rmt_config()
 {
     adapter_config_t cfg{};
-    cfg.mode           = Mode::RmtTX;
-    cfg.tx.tick_ns     = 50;
-    cfg.tx.mem_blocks  = 4;
-    cfg.tx.idle_output = true;
+    cfg.mode                   = Mode::RmtTX;
+    cfg.tx.tick_ns             = 50;
+    cfg.tx.mem_blocks          = 4;
+    cfg.tx.idle_output_enabled = true;
     return cfg;
 }
 
