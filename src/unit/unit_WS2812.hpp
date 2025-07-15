@@ -32,15 +32,15 @@ public:
 
 protected:
     virtual gpio::adapter_config_t rmt_config() override;
-    inline virtual gpio::m5_rmt_item_t rmt_item_one()
+    inline virtual gpio::m5_rmt_item_t rmt_item_one() override
     {
         return gpio::m5_rmt_item_t{{14, 1, 12, 0}};
     }
-    inline virtual gpio::m5_rmt_item_t rmt_item_zero()
+    inline virtual gpio::m5_rmt_item_t rmt_item_zero() override
     {
         return gpio::m5_rmt_item_t{{7, 1, 16, 0}};
     }
-    inline virtual gpio::m5_rmt_item_t rmt_item_reset()
+    inline virtual gpio::m5_rmt_item_t rmt_item_reset() override
     {
         //        return gpio::m5_rmt_item_t{{1000, 0, 0, 0}};  // 50us
         return gpio::m5_rmt_item_t{{1600, 0, 0, 0}};  // Same as SK6812 (Measures for SK/WS mixed daisy chain)

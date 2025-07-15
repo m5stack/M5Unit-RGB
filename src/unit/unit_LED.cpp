@@ -311,7 +311,7 @@ bool UnitLED::writePixels(void)
         // GPIO
         case Adapter::Type::GPIO: {
             auto v = _interface->items_from_root();
-            ret    = _interface->write((const uint8_t*)v.data(), v.size());
+            ret    = _interface->write((const uint8_t*)v.data(), v.size() * sizeof(gpio::m5_rmt_item_t));
         } break;
         // PbHub
         case Adapter::Type::I2C: {
