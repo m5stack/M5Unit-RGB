@@ -14,20 +14,29 @@
 
 // *********************************************************************
 // Choose using unit
-// *********************************************************************
+// *************************************************************
+// Choose one define symbol to match the unit you are using
+// *************************************************************
 #if !defined(USING_UNIT_RGB) && !defined(USING_UNIT_PUZZLE) && !defined(USING_UNIT_HEX) &&        \
     !defined(USING_UNIT_NEO_HEX) && !defined(USING_UNIT_NECO) && !defined(USING_UNIT_RGBLED15) && \
     !defined(USING_UNIT_RGBLED_STRIP30) && !defined(USING_ATOM_MATRIX_RGB)
+// For Unit RGB (U003)
 // #define USING_UNIT_RGB
+// For Unit Puzzle (U193)
 // #define USING_UNIT_PUZZLE
+// For Unit Hex (A045)
 // #define USING_UNIT_HEX
+// For Unit NeoHex (A045-B)
 // #define USING_UNIT_NEO_HEX
+// For Unit Neco (U163)
 // #define USING_UNIT_NECO
+// For Unit RGB LED (A035)
 // #define USING_UNIT_RGBLED15
+// For Unit RGB LED Strip (A093)
 // #define USING_UNIT_RGBLED_STRIP30
+// For ATOM Matrix built-in 5x5 RGB LED
 // #define USING_ATOM_MATRIX_RGB
 #endif
-// *********************************************************************
 
 using m5::unit::rgb::Color;
 
@@ -35,20 +44,28 @@ namespace {
 auto& lcd = M5.Display;
 m5::unit::UnitUnified Units;
 #if defined(USING_UNIT_RGB)
+#pragma message "Using: USING_UNIT_RGB"
 m5::unit::UnitRGB unit;
 #elif defined(USING_UNIT_PUZZLE)
+#pragma message "Using: USING_UNIT_PUZZLE"
 m5::unit::UnitPuzzle unit;
 #elif defined(USING_UNIT_HEX)
+#pragma message "Using: USING_UNIT_HEX"
 m5::unit::UnitHex unit;
 #elif defined(USING_UNIT_NEO_HEX)
+#pragma message "Using: USING_UNIT_NEO_HEX"
 m5::unit::UnitNeoHex unit;
 #elif defined(USING_UNIT_NECO)
+#pragma message "Using: USING_UNIT_NECO"
 m5::unit::UnitNeco unit;
 #elif defined(USING_UNIT_RGBLED15)
+#pragma message "Using: USING_UNIT_RGBLED15"
 m5::unit::UnitRGBLED15 unit;
 #elif defined(USING_UNIT_RGBLED_STRIP30)
+#pragma message "Using: USING_UNIT_RGBLED_STRIP30"
 m5::unit::UnitRGBLEDStrip30 unit;
 #elif defined(USING_ATOM_MATRIX_RGB)
+#pragma message "Using: USING_ATOM_MATRIX_RGB"
 m5::unit::UnitAtomMatrixRGB unit;
 #else
 #error Choose unit!
@@ -59,12 +76,12 @@ void log_pixel_color()
     std::string s{};
     for (uint32_t i = 0; i < unit.numPixels(); ++i) {
         Color c = unit.absoluteColor(i);
-        s += m5::utility::formatString("[%02u]:(%3u,%3u,%3u)\n", i, c.r, c.g, c.b, c.w);
+        s += m5::utility::formatString("[%02u]:(%3u,%3u,%3u,%3u)\n", i, c.w, c.r, c.g, c.b);
     }
     M5.Log.printf(s.c_str());
 }
 
-void draw_pxiel_color()
+void draw_pixel_color()
 {
     uint32_t ww = lcd.width() / 16;
     uint32_t hh = lcd.height() / 16;
@@ -88,22 +105,19 @@ void draw_pxiel_color()
 
 void setup()
 {
+    delay(2000);
+
     M5.begin();
+    M5.setTouchButtonHeightByRatio(100);
 
     // The screen shall be in landscape mode
     if (lcd.height() > lcd.width()) {
         lcd.setRotation(1);
     }
 
-    // AtomMatrix RGB
 #if defined(USING_ATOM_MATRIX_RGB)
-    auto brd = M5.getBoard();
-    if (brd != m5::board_t::board_M5AtomMatrix) {
-        M5_LOGE("This core is not M5AtomMatrix %u", brd);
-        while (true) {
-            m5::utility::delay(10000);
-        }
-    }
+    // ATOM Matrix built-in 5x5 RGB LED (not an external unit)
+    M5_LOGI("USING_ATOM_MATRIX_RGB");
     auto pin_num_gpio_in  = -1;
     auto pin_num_gpio_out = 27;
 #else
@@ -126,21 +140,22 @@ void setup()
             m5::utility::delay(10000);
         }
     }
-    M5_LOGI("M5UnitUnified has been begun");
+    M5_LOGI("M5UnitUnified initialized");
     M5_LOGI("%s", Units.debugInfo().c_str());
 
     unit.setBrightness(10);
     unit.show();
 
     lcd.fillScreen(0);
-    draw_pxiel_color();
+    draw_pixel_color();
     log_pixel_color();
 }
 
 void loop()
 {
+    M5_LOGI("--- USING_ATOM_MATRIX_RGB");
+
     M5.update();
-    auto touch = M5.Touch.getDetail();
     Units.update();
 #if defined(USING_UNIT_NECO)
     if (unit.wasPressed()) {
@@ -152,7 +167,7 @@ void loop()
     }
 #endif
 
-    if (M5.BtnA.wasClicked() || touch.wasClicked()) {
+    if (M5.BtnA.wasClicked()) {
         static uint32_t func{};
 
         switch (func) {
@@ -163,7 +178,7 @@ void loop()
                 unit.setPixelColor(1, 0, 100, 0);
                 unit.setPixelColor(2, 0, 0, 100);
                 unit.show();
-                draw_pxiel_color();
+                draw_pixel_color();
                 break;
 
             case 1:  // brightness 0
@@ -173,7 +188,7 @@ void loop()
                 unit.setPixelColor(2, 0, 0, 100);
                 unit.setBrightness(0);
                 unit.show();
-                draw_pxiel_color();
+                draw_pixel_color();
                 break;
 
             case 2:  // brightness 16
@@ -181,7 +196,7 @@ void loop()
                 M5.Log.printf("==== brightness 16\n");
                 unit.setBrightness(10);
                 unit.show();
-                draw_pxiel_color();
+                draw_pixel_color();
                 break;
 
             case 3:  // setPixelColor
@@ -190,7 +205,7 @@ void loop()
                 unit.setPixelColor(1, 0x0000FF00);        // WRGB32
                 unit.setPixelColor(2, Color(100, 0, 0));  // Color
                 unit.show();
-                draw_pxiel_color();
+                draw_pixel_color();
                 break;
 
             case 4:  // Swap [0] <-> [1]
@@ -200,7 +215,7 @@ void loop()
                 unit.setPixelColor(0, unit.color(1));
                 unit.setPixelColor(1, tmp);
                 unit.show();
-                draw_pxiel_color();
+                draw_pixel_color();
             } break;
 
             case 5:  // Swap [1] <-> [2]
@@ -211,7 +226,7 @@ void loop()
                 unit[1]   = unit[2];
                 unit[2]   = tmp;
                 unit.show();
-                draw_pxiel_color();
+                draw_pixel_color();
             } break;
 
             case 6:  // flll
@@ -219,17 +234,17 @@ void loop()
                 unit.fill(Color(100, 0, 0), 0, unit.numPixels() / 3);
                 unit.fill(Color(0, 100, 0), unit.numPixels() / 3);
                 unit.show();
-                draw_pxiel_color();
+                draw_pixel_color();
                 m5::utility::delay(1000);
 
                 unit.fill(Color(0x00FFFFFF));
                 unit.show();
-                draw_pxiel_color();
+                draw_pixel_color();
                 m5::utility::delay(1000);
 
                 unit.clear();
                 unit.show();
-                draw_pxiel_color();
+                draw_pixel_color();
                 m5::utility::delay(1000);
                 break;
 
@@ -238,17 +253,17 @@ void loop()
 
                 unit.fillRandom(unit.numPixels() / 2);
                 unit.show();
-                draw_pxiel_color();
+                draw_pixel_color();
                 m5::utility::delay(1000);
 
                 unit.fillRandom(0, unit.numPixels() / 2);
                 unit.show();
-                draw_pxiel_color();
+                draw_pixel_color();
                 m5::utility::delay(1000);
 
                 unit.fillRandom();
                 unit.show();
-                draw_pxiel_color();
+                draw_pixel_color();
                 m5::utility::delay(1000);
                 break;
 
@@ -258,13 +273,13 @@ void loop()
 
                 unit.fillRainbow();
                 unit.show();
-                draw_pxiel_color();
+                draw_pixel_color();
 
                 uint32_t count = std::min((uint16_t)10U, unit.numPixels());
                 while (count--) {
                     unit.shiftRight(2);
                     unit.show();
-                    draw_pxiel_color();
+                    draw_pixel_color();
                     m5::utility::delay(20);
                 }
                 unit.fillRainbow();
@@ -275,7 +290,7 @@ void loop()
                 while (count--) {
                     unit.shiftLeft(2);
                     unit.show();
-                    draw_pxiel_color();
+                    draw_pixel_color();
                     m5::utility::delay(20);
                 }
             } break;
@@ -284,23 +299,23 @@ void loop()
                 M5.Log.printf("==== rotate\n");
                 unit.fillRainbow();
                 unit.show();
-                draw_pxiel_color();
+                draw_pixel_color();
                 m5::utility::delay(200);
                 for (uint16_t i = 0; i < unit.numPixels(); ++i) {
                     unit.rotateRight(1);
                     unit.show();
-                    draw_pxiel_color();
+                    draw_pixel_color();
                     m5::utility::delay(20);
                 }
 
                 unit.fillRainbow();
                 unit.show();
-                draw_pxiel_color();
+                draw_pixel_color();
                 m5::utility::delay(200);
                 for (uint16_t i = 0; i < unit.numPixels(); ++i) {
                     unit.rotateLeft(1);
                     unit.show();
-                    draw_pxiel_color();
+                    draw_pixel_color();
                     m5::utility::delay(20);
                 }
                 break;

@@ -9,8 +9,12 @@
   **** NOTICE *********************************************************************
   This example assumes the following connections
   Core -> UnitRGB -> UnitPuzzle -> UnitPuzzle -> UnitHex -> UnitRGBLed15 -> UnitNeco
+  -> UnitRGBLEDStrip30
 
   Modify the source code to suit your own connection situation.
+
+  NOTE: Depending on the core device, the power supply from the port may not be
+  sufficient for all LEDs.
   *********************************************************************************
 */
 #include <M5Unified.h>
@@ -19,35 +23,20 @@
 #include <M5Utility.h>
 #include <esp_random.h>
 
-// When this is defined, treat each individual unit separately
-#define USING_EACH_UNIT
-
 using m5::unit::rgb::Color;
 
 namespace {
 auto& lcd = M5.Display;
 m5::unit::UnitUnified Units;
 
-#if defined(USING_EACH_UNIT)
 m5::unit::UnitRGB rgb;
 m5::unit::UnitPuzzle puzzle[2];
 m5::unit::UnitHex hex;
 m5::unit::UnitRGBLED15 tape;
 m5::unit::UnitNeco neco;
-#else
-// Number of the all pixles
-constexpr uint16_t NUMS{
-    3 +         // RGB
-    (64 * 2) +  // Puzzle x2
-    37 +        // Hex
-    15 +        // RGBLed15 (10cm)
-    35          // Neco
-};
-m5::unit::UnitSK6812GRB unit(NUMS);  // Handle LEDs in bulk like FastLED and Adafruit_NeoPixel
-#endif
+m5::unit::UnitRGBLEDStrip30 strip;
 LGFX_Sprite sprite;
 
-#if defined(USING_EACH_UNIT)
 void set_char_pixel(const char ch)
 {
     sprite.setCursor(0, 0);
@@ -77,7 +66,11 @@ void init_each()
 
     neco.fillRainbow();
 
-    neco.show();  // If the last tail is applied, it is applied to all
+    //    neco.show();  // If the last tail is applied, it is applied to all
+
+    //
+    strip.fillRainbow();
+    strip.show();
 }
 
 void clear_each()
@@ -93,12 +86,13 @@ void clear_each()
 
 void loop_each()
 {
-    static auto rgb_ms  = m5::utility::millis();
-    static auto puz0_ms = rgb_ms;
-    static auto puz1_ms = rgb_ms;
-    static auto hex_ms  = rgb_ms;
-    static auto tape_ms = rgb_ms;
-    static auto neco_ms = rgb_ms;
+    static auto rgb_ms   = m5::utility::millis();
+    static auto puz0_ms  = rgb_ms;
+    static auto puz1_ms  = rgb_ms;
+    static auto hex_ms   = rgb_ms;
+    static auto tape_ms  = rgb_ms;
+    static auto neco_ms  = rgb_ms;
+    static auto strip_ms = rgb_ms;
 
     auto now = m5::utility::millis();
 
@@ -164,6 +158,7 @@ void loop_each()
     }
 
     if (now >= neco_ms + 150) {
+        neco_ms = now;
         neco.rotateRight(1);
         neco.show();
     }
@@ -173,32 +168,10 @@ void loop_each()
            // Not reached!
       }
      */
-}
-#else
-void init_all()
-{
-    unit.fillRainbow();
-    unit.show();
-}
-
-void clear_all()
-{
-    unit.clear();
-    unit.show();
-}
-
-void loop_all()
-{
-    static auto ms = m5::utility::millis();
-    auto now       = m5::utility::millis();
-
-    if (now > ms + 50) {
-        ms = now;
-        unit.rotateRight(1);
-        unit.show();
+    if (now >= strip_ms + 334) {
+        //        strip.show();
     }
 }
-#endif
 
 }  // namespace
 
@@ -206,8 +179,8 @@ void loop_all()
 
 void setup()
 {
-    //    esp_log_level_set("*", ESP_LOG_DEBUG);
     M5.begin();
+    M5.setTouchButtonHeightByRatio(100);
 
     // The screen shall be in landscape mode
     if (lcd.height() > lcd.width()) {
@@ -225,8 +198,27 @@ void setup()
     }
     M5_LOGI("getPin: OUT:%d", pin_num_gpio_out);
 
-#if defined(USING_EACH_UNIT)
-    if (!tape.add(neco, 0) ||                                  // RGBLED -> Neco
+    // Debug: Show power status
+    M5_LOGI("=== Power Status ===");
+    M5_LOGI("ExtOutput: %d", M5.Power.getExtOutput());
+    M5_LOGI("BatVoltage: %d mV", M5.Power.getBatteryVoltage());
+    M5_LOGI("BatCurrent: %d mA", M5.Power.getBatteryCurrent());
+    M5_LOGI("BatLevel: %d%%", M5.Power.getBatteryLevel());
+    M5_LOGI("isCharging: %d", M5.Power.isCharging());
+    M5_LOGI("PMIC type: %d", M5.Power.getType());
+    M5_LOGI("====================");
+
+    // Enable DMA for RMT if supported (improves stability with long LED chains)
+#if SOC_RMT_SUPPORT_DMA
+    {
+        auto ucfg     = rgb.config();
+        ucfg.with_dma = true;
+        rgb.config(ucfg);
+    }
+#endif
+
+    if (!neco.add(strip, 0) ||                                 //
+        !tape.add(neco, 0) ||                                  // RGBLED -> Neco
         !hex.add(tape, 0) ||                                   // hex -> RGBLED
         !puzzle[1].add(hex, 0) ||                              // puzzle[1] -> hex
         !puzzle[0].add(puzzle[1], 0) ||                        // puzzle[0] -> puzzle[1]
@@ -239,24 +231,14 @@ void setup()
             m5::utility::delay(10000);
         }
     }
-#else
-    if (!Units.add(unit, pin_num_gpio_in, pin_num_gpio_out) || !Units.begin()) {
-        M5_LOGE("Failed to begin");
-        lcd.fillScreen(TFT_RED);
-        while (true) {
-            m5::utility::delay(10000);
-        }
-    }
-#endif
 
-    M5_LOGI("M5UnitUnified has been begun");
+    M5_LOGI("M5UnitUnified initialized");
     M5_LOGI("%s", Units.debugInfo().c_str());
 
     sprite.setPsram(false);
     sprite.setColorDepth(1);
     sprite.createSprite(8, 8);
 
-#if defined(USING_EACH_UNIT)
     rgb.setBrightness(10);
     puzzle[0].setBrightness(10);
     puzzle[1].setBrightness(10);
@@ -264,10 +246,6 @@ void setup()
     tape.setBrightness(10);
     neco.setBrightness(10);
     init_each();
-#else
-    unit.setBrightness(10);
-    init_all();
-#endif
 
     lcd.fillScreen(TFT_DARKGREEN);
 }
@@ -276,32 +254,19 @@ void loop()
     static bool show{true};
 
     M5.update();
-    auto touch = M5.Touch.getDetail();
     Units.update();
 
-    if (M5.BtnA.wasClicked() || touch.wasClicked()) {
+    if (M5.BtnA.wasClicked()) {
         show = !show;
-#if defined(USING_EACH_UNIT)
         if (show) {
             init_each();
         } else {
             clear_each();
         }
-#else
-        if (show) {
-            init_all();
-        } else {
-            clear_all();
-        }
-#endif
     }
 
     if (show) {
-#if defined(USING_EACH_UNIT)
         loop_each();
-#else
-        loop_all();
-#endif
     }
     m5::utility::delay(1);
 }
