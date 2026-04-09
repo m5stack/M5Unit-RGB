@@ -17,7 +17,9 @@ namespace unit {
 
 /*!
   @class m5::unit::UnitAtomMatrixRGB
-  @brief For AtomMatrix RGB (5x5 LED)
+  @brief ATOM Matrix built-in 5x5 RGB LED (not an external unit)
+  @warning Do not set brightness too high. Excessive brightness can generate high temperatures
+  and damage the LEDs and acrylic panel. Recommended brightness is 20 or less.
 */
 class UnitAtomMatrixRGB : public UnitRectLED<5, 5, UnitWS2812> {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitAtomMatrixRGB, 0x00);
@@ -28,6 +30,7 @@ public:
         auto ccfg = component_config();
         component_config(ccfg);
     }
+    //! @brief Begin the unit
     virtual bool begin() override;
 };
 

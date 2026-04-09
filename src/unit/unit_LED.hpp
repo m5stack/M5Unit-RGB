@@ -41,14 +41,14 @@ union Color {
     {
         return wrgb;
     }
-    //! @brief Make Color form HSV
+    //! @brief Make Color from HSV
     static Color fromHSV(const uint8_t h, const uint8_t s, const uint8_t v);
 
     wrgb32_color_t wrgb{};  //!< WRGB 32bits
     struct {
         uint8_t b;  //!< Blue
         uint8_t g;  //!< Green
-        uint8_t r;  //!< Read
+        uint8_t r;  //!< Red
         uint8_t w;  //!< White
     };
     uint8_t a[4];  //!< Array
@@ -162,22 +162,29 @@ public:
      */
     struct config_t {
         uint8_t brightness{10};  //!< Initial brightness
+        //! @brief RMT memory blocks (0 = use chip default). Ignored via PbHub
+        uint8_t mem_blocks{0};
+        //! @brief Use DMA for RMT (RMT v2 only, e.g. ESP32-S3/C6). Ignored via PbHub
+        bool with_dma{false};
     };
 
     ///@name Configuration for begin
     ///@{
-    /*! @brief Gets the configration */
+    /*! @brief Gets the configuration */
     inline config_t config()
     {
         return _cfg;
     }
-    //! @brief Set the configration
+    //! @brief Set the configuration
     inline void config(const config_t& cfg)
     {
         _cfg = cfg;
     }
     ///@}
 
+    //! @brief Constructor
+    //! @param num_of_pixels Number of pixels
+    //! @param order Color order
     explicit UnitLED(const uint16_t num_of_pixels, const rgb::Order order)
         : Component(0x00), _order{order}, _numPixels{num_of_pixels}
     {
@@ -192,6 +199,7 @@ public:
     {
     }
 
+    //! @brief Begin the unit
     virtual bool begin() override;
 
     ///@name Properties
@@ -295,7 +303,7 @@ public:
     /*!
       @brief Set pixel color (RGB)
       @param n Position of the pixels
-      @param r Read
+      @param r Red
       @param g Green
       @param b Blue
       @return True if successful
@@ -306,7 +314,7 @@ public:
     /*!
       @brief Set pixel color (RGBW)
       @param n Position of the pixels
-      @param r Read
+      @param r Red
       @param g Green
       @param b Blue
       @param w White
@@ -353,7 +361,7 @@ public:
      */
     bool fill(const rgb::Color& c, const uint16_t first = 0, const uint16_t count = 0);
     /*!
-      @brief Cleat pixels
+      @brief Clear pixels
       @note All pixel color to WRGB 0,0,0,0
      */
     inline void clear(void)
@@ -364,7 +372,7 @@ public:
       @brief Fill the specified range to rainbow
       @param first First position of the pixels
       @param count Number of pixels to fill (To the end if zero)
-      @param firtHue The first hue value
+      @param firstHue The first hue value
       @return True if successful
       @note Affected by rotation
      */
@@ -381,7 +389,7 @@ public:
     bool fillGradation(const rgb::Color& firstClr, const rgb::Color& lastClr, const uint16_t first = 0,
                        const uint16_t count = 0);
     /*!
-      @brief Fill the specified range torandom color pixels
+      @brief Fill the specified range to random color pixels
       @param first First position of the pixels
       @param count Number of pixels to fill (To the end if zero)
       @return True if successful
@@ -429,7 +437,7 @@ public:
     ///@}
 
     ///@note Calling writePixel or show is reflected in LEDs
-    ///@note 1 rot angle varies from unit to unit (e,g. Puzzle 90 deg Hex 60 deg)
+    ///@note 1 rot angle varies from unit to unit (e.g. Puzzle 90 deg Hex 60 deg)
     ///@note Rotation direction is clockwise
     ///@name Rotation
     ///@{
@@ -438,17 +446,17 @@ public:
     {
         return 2;  // 0,180 deg
     }
-    //! @brief Get the rortation angle per 1 (degree)
+    //! @brief Get the rotation angle per 1 (degree)
     inline float rotationDegree() const
     {
         return 360.f / maxRotation();
     }
-    //!! @brief Get the rotation
+    //! @brief Get the rotation
     inline int8_t rotation() const
     {
         return _rot;
     }
-    //!! @brief Set the rotation
+    //! @brief Set the rotation
     void setRotation(const int8_t rot);
     ///@}
 

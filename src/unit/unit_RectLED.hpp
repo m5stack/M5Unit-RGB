@@ -79,7 +79,6 @@ using m5::utility::mmh3::operator"" _mmh3;
 // class UnitRectLED
 template <const uint8_t WIDTH, const uint8_t HEIGHT, class BaseClass>
 const char UnitRectLED<WIDTH, HEIGHT, BaseClass>::name[] = "UnitRectLED";
-using m5::utility::mmh3::operator"" _mmh3;
 template <const uint8_t WIDTH, const uint8_t HEIGHT, class BaseClass>
 const types::uid_t UnitRectLED<WIDTH, HEIGHT, BaseClass>::uid{"UnitRectLED"_mmh3};
 template <const uint8_t WIDTH, const uint8_t HEIGHT, class BaseClass>
