@@ -26,23 +26,17 @@ constexpr uint16_t NUM_OF_PIXELS{4};
 constexpr Color black{};
 
 template <class U>
-class TestLED : public GPIOComponentTestBase<U, bool> {
+class TestLED : public GPIOComponentTestBase<U> {
 protected:
     virtual U* get_instance() override
     {
         auto ptr = new U(NUM_OF_PIXELS);
         return ptr;
     }
-    virtual bool is_using_hal() const override
-    {
-        return this->GetParam();
-    };
 };
 
 using TestSK6812GRB = TestLED<UnitSK6812GRB>;
 using TestWS2812    = TestLED<UnitWS2812>;
-INSTANTIATE_TEST_SUITE_P(SK6812, TestSK6812GRB, ::testing::Values(false));
-INSTANTIATE_TEST_SUITE_P(WS2812, TestWS2812, ::testing::Values(false));
 
 namespace testing {
 namespace internal {
@@ -132,7 +126,7 @@ void basic_test(UnitLED* unit)
     EXPECT_EQ(u[2], Color(10, 11, 12));
     EXPECT_EQ(u[3], Color(16, 17, 18));
 
-    // Rotation [0,1,2,3] => [3,2,1,0]
+    // Rotation 180 deg: [0,1,2,3] => [3,2,1,0]
     //    print_pixels(unit.get());
 
     EXPECT_EQ(unit->rotation(), 0);
@@ -150,13 +144,19 @@ void basic_test(UnitLED* unit)
     EXPECT_EQ(unit->absoluteColor(1), Color(10, 11, 12));
     EXPECT_EQ(unit->absoluteColor(2), Color(13, 14, 15));
     EXPECT_EQ(unit->absoluteColor(3), Color(4, 5, 6));
+
+    // Reset rotation for subsequent tests
+    unit->setRotation(0);
+    EXPECT_EQ(unit->rotation(), 0);
+    EXPECT_EQ(unit->absoluteColor(0), Color(4, 5, 6));
+    EXPECT_EQ(unit->absoluteColor(3), Color(16, 17, 18));
 }
 
 void fill_test(UnitLED* unit)
 {
     constexpr Color R(255, 0, 0);
     constexpr Color G(0, 255, 0);
-    constexpr Color B(0, 255, 0);
+    constexpr Color B(0, 0, 255);
     auto& u = *unit;
 
     unit->fill(R, 0, 1);
@@ -165,7 +165,7 @@ void fill_test(UnitLED* unit)
 
     EXPECT_EQ(u[0], R);
     EXPECT_EQ(u[1], G);
-    EXPECT_EQ(u[2], G);
+    EXPECT_EQ(u[2], B);
     EXPECT_EQ(u[3], B);
 
     unit->fillRainbow();
@@ -193,13 +193,47 @@ void fill_test(UnitLED* unit)
         std::set<Color> s(v.begin(), v.end());
         EXPECT_EQ(v.size(), s.size());
     }
+
+    // fill boundary: count=0 fills to end
+    unit->clear();
+    unit->fill(R, 0, 0);
+    EXPECT_EQ(u[0], R);
+    EXPECT_EQ(u[1], R);
+    EXPECT_EQ(u[2], R);
+    EXPECT_EQ(u[3], R);
+
+    // fill boundary: count=0 from midpoint
+    unit->clear();
+    unit->fill(G, 2, 0);
+    EXPECT_EQ(u[0], black);
+    EXPECT_EQ(u[1], black);
+    EXPECT_EQ(u[2], G);
+    EXPECT_EQ(u[3], G);
+
+    // fill boundary: out of range
+    unit->clear();
+    EXPECT_FALSE(unit->fill(R, 5, 1));
+
+    // fillRandom
+    unit->clear();
+    EXPECT_TRUE(unit->fillRandom());
+    {
+        bool any_nonblack = false;
+        for (uint16_t i = 0; i < unit->numPixels(); i++) {
+            if (unit->color(i).wrgb != 0) {
+                any_nonblack = true;
+                break;
+            }
+        }
+        EXPECT_TRUE(any_nonblack);
+    }
 }
 
 void shift_test(UnitLED* unit)
 {
     constexpr Color R(255, 0, 0);
     constexpr Color G(0, 255, 0);
-    constexpr Color B(0, 255, 0);
+    constexpr Color B(0, 0, 255);
     constexpr Color W(255, 255, 255);
 
     auto& u = *unit;
@@ -341,18 +375,63 @@ void shift_test(UnitLED* unit)
     EXPECT_EQ(u[3], W);
 }
 
-TEST_P(TestSK6812GRB, All)
+void color_test()
 {
-    SCOPED_TRACE(ustr);
-    basic_test(unit.get());
-    fill_test(unit.get());
-    shift_test(unit.get());
+    // fromHSV: Red (hue=0)
+    Color r = Color::fromHSV(0, 255, 255);
+    EXPECT_EQ(r.r, 255);
+    EXPECT_EQ(r.g, 0);
+    EXPECT_EQ(r.b, 0);
+
+    // fromHSV: Green (hue=85 ~ 120deg)
+    Color g = Color::fromHSV(85, 255, 255);
+    EXPECT_GT(g.g, g.r);
+    EXPECT_GT(g.g, g.b);
+
+    // fromHSV: Blue (hue=170 ~ 240deg)
+    Color b = Color::fromHSV(170, 255, 255);
+    EXPECT_GT(b.b, b.r);
+    EXPECT_GT(b.b, b.g);
+
+    // fromHSV: saturation=0 => white
+    Color w = Color::fromHSV(0, 0, 255);
+    EXPECT_EQ(w.r, 255);
+    EXPECT_EQ(w.g, 255);
+    EXPECT_EQ(w.b, 255);
+
+    // fromHSV: value=0 => black
+    Color k = Color::fromHSV(0, 255, 0);
+    EXPECT_EQ(k.r, 0);
+    EXPECT_EQ(k.g, 0);
+    EXPECT_EQ(k.b, 0);
 }
 
-TEST_P(TestWS2812, All)
+void config_test(UnitLED* unit)
+{
+    // config brightness is applied after begin()
+    auto cfg       = unit->config();
+    cfg.brightness = 42;
+    unit->config(cfg);
+    // Note: config is applied on next begin(), verify getter
+    EXPECT_EQ(unit->config().brightness, 42);
+}
+
+TEST_F(TestSK6812GRB, All)
 {
     SCOPED_TRACE(ustr);
     basic_test(unit.get());
     fill_test(unit.get());
     shift_test(unit.get());
+    color_test();
+    config_test(unit.get());
+}
+
+TEST_F(TestWS2812, All)
+{
+    SCOPED_TRACE(ustr);
+    basic_test(unit.get());
+    fill_test(unit.get());
+    shift_test(unit.get());
+    color_test();
+    config_test(unit.get());
 }

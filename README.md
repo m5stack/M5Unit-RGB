@@ -28,7 +28,9 @@ Unit Puzzle is a colorful light control unit composed of an 8x8 array of 64 WS28
 
 
 ### SKU:C008-B
-M5AtomMatrix  has a 5*5 RGB Led matrix on the panel. This library can manage Led matrix.
+ATOM Matrix has a built-in 5x5 RGB LED matrix on the panel. This library can manage the LED matrix.
+
+> **Warning:** Do not set brightness too high. Excessive brightness can generate high temperatures and damage the LEDs and acrylic panel. Recommended brightness is 20 or less.
 
 
 ## Related Link
@@ -49,31 +51,56 @@ See also examples using conventional methods here.
 - [M5Utility](https://github.com/m5stack/M5Utility)
 - [M5HAL](https://github.com/m5stack/M5HAL)
 
-## License
+## Support via [PbHub](https://docs.m5stack.com/en/unit/pbhub_1.1)
 
-- [M5Unit-RGB - MIT](LICENSE)
-
-### Support via [PbHub](https://docs.m5stack.com/en/unit/pbhub_1.1)
-
-|Unit|Support|
-|---|---|
-|UnitRGB|OK|
-|UnitRGBLED|OK|
-|UnitHex|OK|
-|UnitNeoHex|OK|
-|UnitRGBLEDStrip|OK|
-|UnitNeco|LED only OK, Button function NG||
-|UnitPuzzle|OK|
-|UnitAtomMatrixRGB|NG|
+|Unit|Support|Note|
+|---|---|---|
+|UnitRGB|OK||
+|UnitRGBLED|OK||
+|UnitHex|OK||
+|UnitNeoHex|OK||
+|UnitRGBLEDStrip|OK||
+|UnitNeco|OK|LED only, Button function NG|
+|UnitPuzzle|OK||
+|UnitAtomMatrixRGB|NG|Built-in LED, not an external unit|
 
 See also [M5Unit-HUB](https://github.com/m5stack/M5Unit-HUB)
 
-#### Limitations via PbHub
+### Limitations via PbHub
 - Each channel can control up to **MAX 74 LEDs each**
 - **Button status of UnitNeco** cannot be retrieved
 
 ## Examples
 See also [examples/UnitUnified](examples/UnitUnified)
+
+### For ArduinoIDE settings
+You must choose a define symbol for the unit you will use.
+(Rewrite source or specify with compile options)
+
+- Simple / ViaPbHub
+```cpp
+// *************************************************************
+// Choose one define symbol to match the unit you are using
+// *************************************************************
+#if !defined(USING_UNIT_RGB) && !defined(USING_UNIT_PUZZLE) && ...
+// For Unit RGB (U003)
+// #define USING_UNIT_RGB
+// For Unit Puzzle (U193)
+// #define USING_UNIT_PUZZLE
+// For Unit Hex (A045)
+// #define USING_UNIT_HEX
+// For Unit NeoHex (A045-B)
+// #define USING_UNIT_NEO_HEX
+// For Unit Neco (U163)
+// #define USING_UNIT_NECO
+// For Unit RGB LED (A035)
+// #define USING_UNIT_RGBLED15
+// For Unit RGB LED Strip (A093)
+// #define USING_UNIT_RGBLED_STRIP30
+// For ATOM Matrix built-in 5x5 RGB LED
+// #define USING_ATOM_MATRIX_RGB
+#endif
+```
 
 ### Doxygen document
 [GitHub Pages](https://m5stack.github.io/M5Unit-RGB/)
@@ -91,3 +118,7 @@ If you want to output Git commit hashes to html, do it for the git cloned folder
 - [Doxygen](https://www.doxygen.nl/)
 - [pcregrep](https://formulae.brew.sh/formula/pcre2)
 - [Git](https://git-scm.com/) (Output commit hash to html)
+
+## License
+
+- [M5Unit-RGB - MIT](LICENSE)

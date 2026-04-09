@@ -8,7 +8,7 @@
 
   Core ---> PbHub -+--> ch:0 UnitRGB
                    |
-                   +--> ch:1 UnitPuzzzle -> UnitPuzzle (NOTICE: 64+64 = 128)
+                   +--> ch:1 UnitPuzzle -> UnitPuzzle (NOTICE: 64+64 = 128)
                    |
                    +--> ch:2 UnitHex -> UnitNeoHex
                    |
@@ -18,12 +18,16 @@
                    |
                    +--> ch5: UnitRGBLEDStrip30
 
+  NOTE: Depending on the core device, the power supply from the port may not be
+  sufficient for all LEDs.
+
   NOTICE: The PbHUB can manage up to 74 LEDs per channel
 */
 #include <M5Unified.h>
 #include <M5UnitUnified.h>
 #include <M5UnitUnifiedRGB.h>
 #include <M5UnitUnifiedHUB.h>  // UnitPbHub
+#include <M5HAL.hpp>
 #include <M5Utility.h>
 
 using m5::unit::rgb::Color;
@@ -149,36 +153,61 @@ void loop_strip(const m5::unit::types::elapsed_time_t now)
 void setup()
 {
     M5.begin();
+    M5.setTouchButtonHeightByRatio(100);
 
     // The screen shall be in landscape mode
     if (lcd.height() > lcd.width()) {
         lcd.setRotation(1);
     }
 
-    //
-    auto pin_num_sda = M5.getPin(m5::pin_name_t::port_a_sda);
-    auto pin_num_scl = M5.getPin(m5::pin_name_t::port_a_scl);
-    M5_LOGI("getPin: SDA:%u SCL:%u", pin_num_sda, pin_num_scl);
-    Wire.end();
-    Wire.begin(pin_num_sda, pin_num_scl, 400000U);
-
+    // Connect units to hub
     if (!hub.add(rgb, 0) ||              // PbHub ch:0 -> UnitRGB
         !puzzle[0].add(puzzle[1], 0) ||  // UnitPuzzle[0] -> UnitPuzzle[1]
         !hub.add(puzzle[0], 1) ||        // PbHub ch:1 -> UnitPuzzle[0]
-        !hex.add(neoHex, 0) ||           // UnitHex -> UnitNexoHex
+        !hex.add(neoHex, 0) ||           // UnitHex -> UnitNeoHex
         !hub.add(hex, 2) ||              // PbHub ch:2 -> UnitHex
         !hub.add(rgbled, 3) ||           // PbHub ch:3 -> UnitRGBLED15
         !hub.add(neco, 4) ||             // PbHub ch:4 -> UnitNeco
-        !hub.add(strip, 5) ||            // PbHub ch:5 -> UnitRGBLEDStrip
-        !Units.add(hub, Wire) ||         // Core -> PbHub
-        !Units.begin()) {
+        !hub.add(strip, 5)) {            // PbHub ch:5 -> UnitRGBLEDStrip
+        M5_LOGE("Failed to connect units");
+        lcd.fillScreen(TFT_RED);
+        while (true) {
+            m5::utility::delay(10000);
+        }
+    }
+
+    // I2C 3-way branching
+    auto board = M5.getBoard();
+    bool unit_ready{};
+    if (board == m5::board_t::board_ArduinoNessoN1) {
+        auto pin_num_sda = M5.getPin(m5::pin_name_t::port_b_out);
+        auto pin_num_scl = M5.getPin(m5::pin_name_t::port_b_in);
+        M5_LOGI("getPin(M5HAL): SDA:%u SCL:%u", pin_num_sda, pin_num_scl);
+        m5::hal::bus::I2CBusConfig i2c_cfg;
+        i2c_cfg.pin_sda = m5::hal::gpio::getPin(pin_num_sda);
+        i2c_cfg.pin_scl = m5::hal::gpio::getPin(pin_num_scl);
+        auto i2c_bus    = m5::hal::bus::i2c::getBus(i2c_cfg);
+        unit_ready      = Units.add(hub, i2c_bus ? i2c_bus.value() : nullptr) && Units.begin();
+    } else if (board == m5::board_t::board_M5NanoC6) {
+        M5_LOGI("Using M5.Ex_I2C");
+        unit_ready = Units.add(hub, M5.Ex_I2C) && Units.begin();
+    } else {
+        auto pin_num_sda = M5.getPin(m5::pin_name_t::port_a_sda);
+        auto pin_num_scl = M5.getPin(m5::pin_name_t::port_a_scl);
+        M5_LOGI("getPin: SDA:%u SCL:%u", pin_num_sda, pin_num_scl);
+        Wire.end();
+        Wire.begin(pin_num_sda, pin_num_scl, 400000U);
+        unit_ready = Units.add(hub, Wire) && Units.begin();
+    }
+
+    if (!unit_ready) {
         M5_LOGE("Failed to begin");
         lcd.fillScreen(TFT_RED);
         while (true) {
             m5::utility::delay(10000);
         }
     }
-    M5_LOGI("M5UnitUnified has been begun");
+    M5_LOGI("M5UnitUnified initialized");
     M5_LOGI("%s", Units.debugInfo().c_str());
 
     lcd.startWrite();
@@ -206,11 +235,10 @@ void setup()
 void loop()
 {
     M5.update();
-    auto touch = M5.Touch.getDetail();
     Units.update();
 
     static bool pause{};
-    if (M5.BtnA.wasClicked() || touch.wasClicked()) {
+    if (M5.BtnA.wasClicked()) {
         pause = !pause;
     }
 

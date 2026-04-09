@@ -31,7 +31,10 @@ public:
         ccfg.max_children = 1;  // Can connect 1 Unit
         component_config(ccfg);
     }
+    //! @brief Begin the unit
     virtual bool begin() override;
+    //! @brief Update the unit
+    //! @param force Force update
     virtual void update(const bool force = false) override;
 };
 

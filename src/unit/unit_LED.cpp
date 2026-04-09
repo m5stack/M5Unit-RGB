@@ -288,6 +288,13 @@ bool UnitLED::begin()
     if (!is_unit_pbhub(p)) {
         gpio::adapter_config_t cfg = rmt_config();
         // .channel and .gpio_num will set in begin(cfg)
+        // Override RMT settings from config_t
+        if (_cfg.mem_blocks > 0) {
+            cfg.tx.mem_blocks = _cfg.mem_blocks;
+        }
+        if (_cfg.with_dma) {
+            cfg.tx.with_dma = true;
+        }
         auto ad = asAdapter<AdapterGPIO>(Adapter::Type::GPIO);
         if (!ad || !ad->begin(cfg)) {
             M5_LIB_LOGE("Failed to begin AdapterGPIO");
@@ -311,7 +318,7 @@ bool UnitLED::writePixels(void)
         // GPIO
         case Adapter::Type::GPIO: {
             auto v = _interface->items_from_root();
-            ret    = _interface->write((const uint8_t*)v.data(), v.size() * sizeof(gpio::m5_rmt_item_t));
+            ret = _interface->write(reinterpret_cast<const uint8_t*>(v.data()), v.size() * sizeof(gpio::m5_rmt_item_t));
         } break;
         // PbHub
         case Adapter::Type::I2C: {
@@ -411,7 +418,7 @@ void UnitLED::setRotation(const int8_t rot)
 
     // Rotate pixels
     std::vector<Color> temp;
-    temp.reserve(_numPixels);
+    temp.resize(_numPixels);
 
     for (uint16_t i = 0; i < _numPixels; ++i) {
         temp[i] = get_pixel_color(i);  // abs position

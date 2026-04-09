@@ -5,7 +5,7 @@
  */
 /*!
   @file M5UnitUnifiedRGB.h
-  @brief Main header of M5Unit-RGB using M5UnitUnfied
+  @brief Main header of M5Unit-RGB using M5UnitUnified
 */
 #ifndef M5_UNIT_UNIFIED_RGB_H
 #define M5_UNIT_UNIFIED_RGB_H
