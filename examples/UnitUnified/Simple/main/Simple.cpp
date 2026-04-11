@@ -5,6 +5,9 @@
  */
 /*
   Simple example
+
+  NOTE: Depending on the core device, the power supply from the port may not be
+  sufficient for all LEDs.
 */
 #include <M5Unified.h>
 #include <M5UnitUnified.h>
@@ -19,7 +22,7 @@
 // *************************************************************
 #if !defined(USING_UNIT_RGB) && !defined(USING_UNIT_PUZZLE) && !defined(USING_UNIT_HEX) &&        \
     !defined(USING_UNIT_NEO_HEX) && !defined(USING_UNIT_NECO) && !defined(USING_UNIT_RGBLED15) && \
-    !defined(USING_UNIT_RGBLED_STRIP30) && !defined(USING_ATOM_MATRIX_RGB)
+    !defined(USING_UNIT_RGBLED_STRIP30) && !defined(USING_ATOM_MATRIX_RGB) && !defined(USING_HAT_NEOFLASH)
 // For Unit RGB (U003)
 // #define USING_UNIT_RGB
 // For Unit Puzzle (U193)
@@ -36,11 +39,32 @@
 // #define USING_UNIT_RGBLED_STRIP30
 // For ATOM Matrix built-in 5x5 RGB LED
 // #define USING_ATOM_MATRIX_RGB
+// For Hat NeoFlash
+// #define USING_HAT_NEOFLASH
 #endif
 
 using m5::unit::rgb::Color;
 
 namespace {
+
+int get_hat_gpio_pin(const m5::board_t board)
+{
+    switch (board) {
+        case m5::board_t::board_M5StickC:
+        case m5::board_t::board_M5StickCPlus:
+        case m5::board_t::board_M5StickCPlus2:
+            return 26;
+        case m5::board_t::board_M5StickS3:
+            return 0;
+        case m5::board_t::board_M5StackCoreInk:
+            return 26;
+        case m5::board_t::board_ArduinoNessoN1:
+            return 7;
+        default:
+            return -1;
+    }
+}
+
 auto& lcd = M5.Display;
 m5::unit::UnitUnified Units;
 #if defined(USING_UNIT_RGB)
@@ -67,6 +91,9 @@ m5::unit::UnitRGBLEDStrip30 unit;
 #elif defined(USING_ATOM_MATRIX_RGB)
 #pragma message "Using: USING_ATOM_MATRIX_RGB"
 m5::unit::UnitAtomMatrixRGB unit;
+#elif defined(USING_HAT_NEOFLASH)
+#pragma message "Using: USING_HAT_NEOFLASH"
+m5::unit::HatNeoFlash unit;
 #else
 #error Choose unit!
 #endif
@@ -120,6 +147,10 @@ void setup()
     M5_LOGI("USING_ATOM_MATRIX_RGB");
     auto pin_num_gpio_in  = -1;
     auto pin_num_gpio_out = 27;
+#elif defined(USING_HAT_NEOFLASH)
+    M5_LOGI("USING_HAT_NEOFLASH");
+    auto pin_num_gpio_in  = -1;
+    auto pin_num_gpio_out = get_hat_gpio_pin(M5.getBoard());
 #else
     // PortB if available, PortA if not
     auto pin_num_gpio_in  = M5.getPin(m5::pin_name_t::port_b_in);
@@ -153,8 +184,6 @@ void setup()
 
 void loop()
 {
-    M5_LOGI("--- USING_ATOM_MATRIX_RGB");
-
     M5.update();
     Units.update();
 #if defined(USING_UNIT_NECO)
@@ -193,7 +222,7 @@ void loop()
 
             case 2:  // brightness 16
                 // Pixel values are retained despite changes in brightness
-                M5.Log.printf("==== brightness 16\n");
+                M5.Log.printf("==== brightness on\n");
                 unit.setBrightness(10);
                 unit.show();
                 draw_pixel_color();
@@ -320,7 +349,7 @@ void loop()
                 }
                 break;
         }
-        M5.Speaker.tone(2000, 20);
+        //        M5.Speaker.tone(2000, 20);
         if (++func > 9) {
             static int8_t rot{};
             --rot;                  // Rotate counter clock wise
