@@ -17,15 +17,13 @@ namespace unit {
 
 /*!
   @class m5::unit::HatNeoFlash
-  @brief Hat NeoFlash (7x18 LED)
+  @brief Hat NeoFlash (18x7 LED)
 */
-//class HatNeoFlash : public UnitRectLED<18, 7, UnitWS2812> {
-class HatNeoFlash : public UnitRectLED<18, 8, UnitWS2812> {
+class HatNeoFlash : public UnitRectLED<18, 7, UnitWS2812> {
     M5_UNIT_COMPONENT_HPP_BUILDER(HatNeoFlash, 0x00);
 
 public:
-    //    HatNeoFlash() : UnitRectLED<18, 7, UnitWS2812>()
-        HatNeoFlash() : UnitRectLED<18, 8, UnitWS2812>()
+    HatNeoFlash() : UnitRectLED<18, 7, UnitWS2812>()
     {
         auto ccfg         = component_config();
         ccfg.max_children = 1;  // Can connect 1 Unit
