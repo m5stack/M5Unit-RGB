@@ -48,29 +48,26 @@ public:
 protected:
     virtual uint16_t index_of(const uint16_t n) const override
     {
-        uint8_t x = n % WIDTH;
-        uint8_t y = n / WIDTH;
-        uint8_t new_x{}, new_y{};
-
         switch (this->rotation()) {
-            case 1:  // 90°
-                new_x = HEIGHT - 1 - y;
-                new_y = x;
-                break;
-            case 2:  // 180°
-                new_x = WIDTH - 1 - x;
-                new_y = HEIGHT - 1 - y;
-                break;
-            case 3:  // 270°
-                new_x = y;
-                new_y = WIDTH - 1 - x;
-                break;
-            default:  // 0°
-                new_x = x;
-                new_y = y;
-                break;
+            case 1: {  // 90° CW (logical grid: HEIGHT x WIDTH)
+                uint8_t x = n % HEIGHT;
+                uint8_t y = n / HEIGHT;
+                return x * WIDTH + (WIDTH - 1 - y);
+            }
+            case 2: {  // 180° (logical grid: WIDTH x HEIGHT)
+                uint8_t x = n % WIDTH;
+                uint8_t y = n / WIDTH;
+                return (HEIGHT - 1 - y) * WIDTH + (WIDTH - 1 - x);
+            }
+            case 3: {  // 270° CW (logical grid: HEIGHT x WIDTH)
+                uint8_t x = n % HEIGHT;
+                uint8_t y = n / HEIGHT;
+                return (HEIGHT - 1 - x) * WIDTH + y;
+            }
+            default: {  // 0°
+                return n;
+            }
         }
-        return new_y * WIDTH + new_x;
     }
 };
 

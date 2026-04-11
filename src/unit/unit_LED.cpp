@@ -158,33 +158,65 @@ public:
         return v;
     }
 
+    // Append RMT items for a single LED unit directly into buf (no temporary vector)
+    static void append_items(UnitLED& led, UnitLED::item_container_type& buf)
+    {
+        auto align = 3 + led.hasWhite();
+        auto roff  = led.offsetR();
+        auto goff  = led.offsetG();
+        auto boff  = led.offsetB();
+        auto woff  = led.offsetW();
+
+        const auto one   = led.rmt_item_one();
+        const auto zero  = led.rmt_item_zero();
+        const float scale = led.brightness() / 255.f;
+
+        for (uint32_t i = 0; i < led.numPixels(); ++i) {
+            const uint8_t* p = led.pixels().data() + i * align;
+            uint8_t colors[4]{};
+            colors[roff] = p[roff] * scale;
+            colors[goff] = p[goff] * scale;
+            colors[boff] = p[boff] * scale;
+            if (woff >= 0) {
+                colors[woff] = p[woff] * scale;
+            }
+            for (uint_fast8_t ci = 0; ci < align; ++ci) {
+                uint8_t bit{0x80};
+                while (bit) {
+                    buf.push_back((colors[ci] & bit) ? one : zero);
+                    bit >>= 1;
+                }
+            }
+        }
+    }
+
     virtual UnitLED::item_container_type items_from_root() override
     {
-        UnitLED::item_container_type v;
-        auto align = 3 + _unit.hasWhite();
-
-        // Get the number of items from the root LED
+        // 1. Walk to root and count total pixels
         uint32_t cnt = _unit.numPixels();
         auto p       = _unit.parent();
         while (p && is_unit_led(p)) {
             cnt += static_cast<UnitLED*>(p)->numPixels();
             p = p->parent();
         }
-        v.reserve(cnt * align * 8);
-        // M5_LIB_LOGE("  reserve:%u %u", cnt, cnt * (3 + hasWhite()) * 8);
 
-        // Get the items from the root LED
+        // 2. Single buffer allocation
+        auto align = 3 + _unit.hasWhite();
+        UnitLED::item_container_type v;
+        v.reserve(cnt * align * 8 + 1 /*reset*/);
+
+        // 3. Walk from root, append items directly
         p = &_unit;
         while (p && p->parent() && is_unit_led(p->parent())) {
             p = p->parent();
         }
         while (p && p != &_unit) {
-            auto i = static_cast<UnitLED*>(p)->items();
-            v.insert(v.end(), i.begin(), i.end());
+            append_items(*static_cast<UnitLED*>(p), v);
             p = p->child(0);
         }
-        auto i = items();
-        v.insert(v.end(), i.begin(), i.end());
+        append_items(_unit, v);
+
+        // 4. Reset item
         v.push_back(_unit.rmt_item_reset());
         return v;
     }
@@ -416,21 +448,18 @@ void UnitLED::setRotation(const int8_t rot)
         return;
     }
 
-    // Rotate pixels
-    std::vector<Color> temp;
-    temp.resize(_numPixels);
-
+    // Save logical pixel colors (read through current rotation)
+    std::vector<Color> logical;
+    logical.resize(_numPixels);
     for (uint16_t i = 0; i < _numPixels; ++i) {
-        temp[i] = get_pixel_color(i);  // abs position
+        logical[i] = get_pixel_color(index_of(i));  // color(i)
     }
 
-    _rot = rotation_of(new_rot - prev);  // delta rotation
-    // M5_LIB_LOGD("Rot %d -> %d -> delta:%d (%d)", prev, new_rot, _rot, maxRotation());
-    //  abs position to delta rotate position
+    // Apply new rotation and write logical colors back
+    _rot = new_rot;
     for (uint16_t i = 0; i < _numPixels; ++i) {
-        set_pixel_color(index_of(i), temp[i]);
+        set_pixel_color(index_of(i), logical[i]);
     }
-    _rot = new_rot;  // abs rot
 }
 
 //
