@@ -36,8 +36,9 @@ bool UnitNeco::begin()
             // GPIO_IS_VALID_OUTPUT_GPIO is false for these pins.
             _btn_available = GPIO_IS_VALID_OUTPUT_GPIO(ad->rx_pin());
             if (!_btn_available) {
-                M5_LIB_LOGW("RX GPIO %d is input-only (no pull-up); button disabled. Use a port with output-capable GPIO",
-                             static_cast<int>(ad->rx_pin()));
+                M5_LIB_LOGW(
+                    "RX GPIO %d is input-only (no pull-up); button disabled. Use a port with output-capable GPIO",
+                    static_cast<int>(ad->rx_pin()));
             }
         }
     }
