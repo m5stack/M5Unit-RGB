@@ -39,6 +39,17 @@ public:
     static constexpr uint8_t LED_WIDTH{WIDTH};
     static constexpr uint8_t LED_HEIGHT{HEIGHT};
 
+    //! @brief Logical width considering rotation (0/180: WIDTH, 90/270: HEIGHT)
+    inline virtual uint16_t width() const override
+    {
+        return (this->rotation() & 1) ? HEIGHT : WIDTH;
+    }
+    //! @brief Logical height considering rotation (0/180: HEIGHT, 90/270: WIDTH)
+    inline virtual uint16_t height() const override
+    {
+        return (this->rotation() & 1) ? WIDTH : HEIGHT;
+    }
+
     inline virtual uint8_t maxRotation() const
     {
         // 0:0 1:90 2:180 3:270

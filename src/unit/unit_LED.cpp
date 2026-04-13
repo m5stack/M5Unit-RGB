@@ -11,6 +11,12 @@
 #include "utility/m5unit_rgb_utility.hpp"
 #include <M5Utility.hpp>
 #include <esp_random.h>
+#if defined(M5_UNIT_UNIFIED_USING_RMT_V2)
+#include <driver/rmt_tx.h>
+#include <driver/rmt_encoder.h>
+#else
+#include <driver/rmt.h>
+#endif
 
 using namespace m5::utility::mmh3;
 using namespace m5::unit::types;
@@ -76,6 +82,36 @@ inline bool is_unit_pbhub(Component* u)
     static constexpr types::uid_t pbhub_uid{"UnitPbHub"_mmh3};
     return u->identifier() == pbhub_uid;
 }
+
+#if !defined(M5_UNIT_UNIFIED_USING_RMT_V2)
+// RMT V1: simple translator — converts bytes to RMT items (bit by bit, MSB first)
+struct SimpleTranslatorContext {
+    rmt_item32_t bit1;
+    rmt_item32_t bit0;
+};
+
+static void IRAM_ATTR led_rmt_translator(const void* src, rmt_item32_t* dest, size_t src_size, size_t wanted_num,
+                                         size_t* translated_size, size_t* item_num)
+{
+    SimpleTranslatorContext* ctx{};
+    rmt_translator_get_context(item_num, (void**)&ctx);
+
+    const uint8_t* psrc   = (const uint8_t*)src;
+    size_t items_produced = 0;
+    size_t bytes_consumed = 0;
+
+    while (items_produced + 8 <= wanted_num && bytes_consumed < src_size) {
+        uint8_t byte = psrc[bytes_consumed];
+        for (int bit = 7; bit >= 0; --bit) {
+            dest[items_produced++] = (byte & (1 << bit)) ? ctx->bit1 : ctx->bit0;
+        }
+        bytes_consumed++;
+    }
+
+    *translated_size = bytes_consumed;
+    *item_num        = items_produced;
+}
+#endif
 
 }  // namespace
 
@@ -167,8 +203,8 @@ public:
         auto boff  = led.offsetB();
         auto woff  = led.offsetW();
 
-        const auto one   = led.rmt_item_one();
-        const auto zero  = led.rmt_item_zero();
+        const auto one    = led.rmt_item_one();
+        const auto zero   = led.rmt_item_zero();
         const float scale = led.brightness() / 255.f;
 
         for (uint32_t i = 0; i < led.numPixels(); ++i) {
@@ -225,6 +261,153 @@ public:
     {
         return _unit.writeWithTransaction(data, size, 50 /* alldone wait ms */) == m5::hal::error::error_t::OK;
     }
+
+    // Build tree: root → leaf
+    void build_tree(std::vector<UnitLED*>& tree)
+    {
+        Component* p = &_unit;
+        while (p->parent() && is_unit_led(p->parent())) {
+            p = p->parent();
+        }
+        while (p) {
+            tree.push_back(static_cast<UnitLED*>(p));
+            p = p->child(0);
+        }
+    }
+
+    // Build brightness-applied byte buffer from tree
+    void build_pixel_bytes(const std::vector<UnitLED*>& tree, std::vector<uint8_t>& buf)
+    {
+        uint32_t total = 0;
+        for (auto* led : tree) {
+            total += led->numPixels() * (3 + led->hasWhite());
+        }
+        buf.reserve(total);
+        for (auto* led : tree) {
+            auto align         = 3 + led->hasWhite();
+            uint8_t bri        = led->brightness();
+            const uint8_t* src = led->pixels().data();
+            for (uint32_t i = 0; i < led->numPixels() * align; ++i) {
+                buf.push_back((src[i] * bri) >> 8);
+            }
+        }
+    }
+
+#if !defined(M5_UNIT_UNIFIED_USING_RMT_V2)
+    bool writePixelsDirect() override
+    {
+        auto ad = _unit.asAdapter<AdapterGPIO>(Adapter::Type::GPIO);
+        if (!ad) {
+            return false;
+        }
+        auto channel = (rmt_channel_t)ad->impl()->txChannelValue();
+        if (channel >= RMT_CHANNEL_MAX) {
+            return false;
+        }
+
+        // 1. Build brightness-applied byte buffer
+        std::vector<UnitLED*> tree;
+        build_tree(tree);
+        std::vector<uint8_t> buf;
+        build_pixel_bytes(tree, buf);
+        if (buf.empty()) {
+            return false;
+        }
+
+        // 2. Set up simple translator context (just bit patterns)
+        SimpleTranslatorContext ctx;
+        ctx.bit1 = _unit.rmt_item_one();
+        ctx.bit0 = _unit.rmt_item_zero();
+
+        // 3. Send pixel data
+        rmt_translator_init(channel, led_rmt_translator);
+        rmt_translator_set_context(channel, &ctx);
+        auto err = rmt_write_sample(channel, buf.data(), buf.size(), false);
+        if (err != ESP_OK) {
+            M5_LIB_LOGE("rmt_write_sample failed: %d", err);
+            return false;
+        }
+        err = rmt_wait_tx_done(channel, pdMS_TO_TICKS(100));
+        if (err != ESP_OK) {
+            M5_LIB_LOGE("rmt_wait_tx_done failed: %d", err);
+        }
+        return true;
+    }
+#else
+    bool writePixelsDirect() override
+    {
+        auto ad = _unit.asAdapter<AdapterGPIO>(Adapter::Type::GPIO);
+        if (!ad) {
+            return false;
+        }
+        auto tx_handle = static_cast<rmt_channel_handle_t>(ad->impl()->txHandleValue());
+        if (!tx_handle) {
+            return false;
+        }
+
+        // 1. Build tree and brightness-applied byte buffer
+        std::vector<UnitLED*> tree;
+        build_tree(tree);
+        std::vector<uint8_t> buf;
+        build_pixel_bytes(tree, buf);
+        if (buf.empty()) {
+            return false;
+        }
+
+        // 2. Create bytes encoder (lazy init)
+        if (!_bytes_encoder) {
+            auto bit1 = _unit.rmt_item_one();
+            auto bit0 = _unit.rmt_item_zero();
+            rmt_bytes_encoder_config_t enc_cfg{};
+            enc_cfg.bit0.duration0  = bit0.duration0;
+            enc_cfg.bit0.level0     = bit0.level0;
+            enc_cfg.bit0.duration1  = bit0.duration1;
+            enc_cfg.bit0.level1     = bit0.level1;
+            enc_cfg.bit1.duration0  = bit1.duration0;
+            enc_cfg.bit1.level0     = bit1.level0;
+            enc_cfg.bit1.duration1  = bit1.duration1;
+            enc_cfg.bit1.level1     = bit1.level1;
+            enc_cfg.flags.msb_first = 1;
+            auto err                = rmt_new_bytes_encoder(&enc_cfg, &_bytes_encoder);
+            if (err != ESP_OK) {
+                M5_LIB_LOGE("rmt_new_bytes_encoder failed: %d", err);
+                return false;
+            }
+        }
+
+        // 3. Transmit
+        rmt_transmit_config_t tx_cfg{};
+        tx_cfg.loop_count = 0;
+        auto err          = rmt_transmit(tx_handle, _bytes_encoder, buf.data(), buf.size(), &tx_cfg);
+        if (err != ESP_OK) {
+            M5_LIB_LOGE("rmt_transmit failed: %d", err);
+            return false;
+        }
+        err = rmt_tx_wait_all_done(tx_handle, pdMS_TO_TICKS(100));
+        if (err != ESP_OK) {
+            M5_LIB_LOGE("rmt_tx_wait_all_done failed: %d", err);
+            return false;
+        }
+
+        // 4. Send reset pulse
+        auto reset = _unit.rmt_item_reset();
+        rmt_transmit(tx_handle, _copy_encoder_for_reset(), &reset, sizeof(reset), &tx_cfg);
+        rmt_tx_wait_all_done(tx_handle, pdMS_TO_TICKS(10));
+        return true;
+    }
+
+    rmt_encoder_handle_t _copy_encoder_for_reset()
+    {
+        if (!_reset_encoder) {
+            rmt_copy_encoder_config_t cfg{};
+            rmt_new_copy_encoder(&cfg, &_reset_encoder);
+        }
+        return _reset_encoder;
+    }
+
+    rmt_encoder_handle_t _bytes_encoder{};
+    rmt_encoder_handle_t _reset_encoder{};
+#endif
 };
 
 class InterfacePbHub : public UnitLED::Interface {
@@ -349,8 +532,7 @@ bool UnitLED::writePixels(void)
     switch (adapter()->type()) {
         // GPIO
         case Adapter::Type::GPIO: {
-            auto v = _interface->items_from_root();
-            ret = _interface->write(reinterpret_cast<const uint8_t*>(v.data()), v.size() * sizeof(gpio::m5_rmt_item_t));
+            ret = _interface->writePixelsDirect();
         } break;
         // PbHub
         case Adapter::Type::I2C: {

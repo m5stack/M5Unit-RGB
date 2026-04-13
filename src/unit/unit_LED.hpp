@@ -217,6 +217,16 @@ public:
     {
         return _brightness;
     }
+
+    inline virtual uint16_t width() const
+    {
+        return numPixels();
+    }
+    inline virtual uint16_t height() const
+    {
+        return 1;
+    }
+
     //! @brief Has white data?
     inline bool hasWhite() const
     {
@@ -503,6 +513,12 @@ public:
         virtual UnitLED::container_type rgb888_items_from_root()
         {
             return {};
+        }
+
+        //! @brief Write pixels directly via protocol-specific method (bypasses items vector)
+        virtual bool writePixelsDirect()
+        {
+            return false;
         }
 
     protected:
