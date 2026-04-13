@@ -8,6 +8,8 @@
 
   NOTE: Depending on the core device, the power supply from the port may not be
   sufficient for all LEDs.
+  If the lights turn on unexpectedly, try lowering the brightness or reducing the
+  number of lights turned on at once to see if that resolves the issue.
 */
 // *********************************************************************
 // Choose using unit

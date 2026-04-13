@@ -8,12 +8,17 @@
 
   NOTE: Depending on the core device, the power supply from the port may not be
   sufficient for all LEDs.
+  If the lights turn on unexpectedly, try lowering the brightness or reducing the
+  number of lights turned on at once to see if that resolves the issue.
+  If the lights turn on unexpectedly, try lowering the brightness or reducing the number of lights turned on at once to
+  see if that resolves the issue.
 */
 #include <M5Unified.h>
 #include <M5UnitUnified.h>
 #include <M5UnitUnifiedRGB.h>
 #include <M5Utility.h>
 #include <esp_random.h>
+#include <driver/gpio.h>
 
 // *********************************************************************
 // Choose using unit
@@ -151,8 +156,16 @@ void setup()
     M5_LOGI("USING_HAT_NEOFLASH");
     auto pin_num_gpio_in  = -1;
     auto pin_num_gpio_out = get_hat_gpio_pin(M5.getBoard());
+    // StickS3 GPIO0 is a strapping pin shared with PMIC open-drain output.
+    // Max drive strength is required for stable WS2812 signal with USB connected.
+    if (M5.getBoard() == m5::board_t::board_M5StickS3 && pin_num_gpio_out == 0) {
+        gpio_set_drive_capability((gpio_num_t)pin_num_gpio_out, GPIO_DRIVE_CAP_3);
+    }
 #else
-    // PortB if available, PortA if not
+    // Neco button requires a GPIO with internal pull-up support.
+    // Some ports use input-only GPIOs (e.g. GPIO 36) that lack
+    // internal pull-up, so the button line floats and reads noise.
+    // Use a port with output-capable GPIO instead.
     auto pin_num_gpio_in  = M5.getPin(m5::pin_name_t::port_b_in);
     auto pin_num_gpio_out = M5.getPin(m5::pin_name_t::port_b_out);
     if (pin_num_gpio_in < 0 || pin_num_gpio_out < 0) {
@@ -186,6 +199,7 @@ void loop()
 {
     M5.update();
     Units.update();
+
 #if defined(USING_UNIT_NECO)
     if (unit.wasPressed()) {
         M5.Speaker.tone(4000, 20);
@@ -258,64 +272,90 @@ void loop()
                 draw_pixel_color();
             } break;
 
-            case 6:  // flll
+            case 6:  // Partial fill (power-safe: width() LEDs at a time, height() steps)
+            {
                 M5.Log.printf("==== fill\n");
-                unit.fill(Color(100, 0, 0), 0, unit.numPixels() / 3);
-                unit.fill(Color(0, 100, 0), unit.numPixels() / 3);
-                unit.show();
-                draw_pixel_color();
-                m5::utility::delay(1000);
-
-                unit.fill(Color(0x00FFFFFF));
-                unit.show();
-                draw_pixel_color();
-                m5::utility::delay(1000);
-
+                constexpr Color c_table[] = {
+                    {100, 0, 0}, {0, 100, 0}, {0, 0, 100}, {100, 100, 0}, {0, 100, 100}, {100, 0, 100},
+                };
+                uint16_t w    = std::max<uint16_t>(1, unit.width());
+                uint16_t cidx = 0;
+                // Forward: one row at a time
+                for (uint16_t row = 0; row < unit.height(); ++row) {
+                    unit.clear();
+                    uint16_t off = row * w;
+                    uint16_t cnt = std::min<uint16_t>(w, unit.numPixels() - off);
+                    unit.fill(c_table[cidx % 6], off, cnt);
+                    unit.show();
+                    draw_pixel_color();
+                    m5::utility::delay(300);
+                    ++cidx;
+                }
+                // Backward
+                for (int32_t row = unit.height() - 1; row >= 0; --row) {
+                    unit.clear();
+                    uint16_t off = row * w;
+                    uint16_t cnt = std::min<uint16_t>(w, unit.numPixels() - off);
+                    unit.fill(c_table[cidx % 6], off, cnt);
+                    unit.show();
+                    draw_pixel_color();
+                    m5::utility::delay(300);
+                    ++cidx;
+                }
                 unit.clear();
                 unit.show();
-                draw_pixel_color();
-                m5::utility::delay(1000);
-                break;
+            } break;
 
-            case 7:  // Fill random
+            case 7:  // Fill random (width() LEDs per row, height() steps)
+            {
                 M5.Log.printf("==== fill random\n");
-
-                unit.fillRandom(unit.numPixels() / 2);
+                uint16_t w = std::max<uint16_t>(1, unit.width());
+                // Forward
+                for (uint16_t row = 0; row < unit.height(); ++row) {
+                    unit.clear();
+                    uint16_t off = row * w;
+                    uint16_t cnt = std::min<uint16_t>(w, unit.numPixels() - off);
+                    unit.fillRandom(off, cnt);
+                    unit.show();
+                    draw_pixel_color();
+                    m5::utility::delay(300);
+                }
+                // Backward
+                for (int32_t row = unit.height() - 1; row >= 0; --row) {
+                    unit.clear();
+                    uint16_t off = row * w;
+                    uint16_t cnt = std::min<uint16_t>(w, unit.numPixels() - off);
+                    unit.fillRandom(off, cnt);
+                    unit.show();
+                    draw_pixel_color();
+                    m5::utility::delay(300);
+                }
+                unit.clear();
                 unit.show();
-                draw_pixel_color();
-                m5::utility::delay(1000);
+            } break;
 
-                unit.fillRandom(0, unit.numPixels() / 2);
-                unit.show();
-                draw_pixel_color();
-                m5::utility::delay(1000);
-
-                unit.fillRandom();
-                unit.show();
-                draw_pixel_color();
-                m5::utility::delay(1000);
-                break;
-
-            case 8:  // shift pixel array
+            case 8:  // shift pixel array (rainbow width() LEDs)
             {
                 M5.Log.printf("==== shift\n");
-
-                unit.fillRainbow();
+                uint16_t w = std::max<uint16_t>(1, unit.width());
+                unit.clear();
+                unit.fillRainbow(0, w);
                 unit.show();
                 draw_pixel_color();
 
-                uint32_t count = std::min((uint16_t)10U, unit.numPixels());
+                uint32_t count = std::min<uint16_t>(10U, unit.numPixels());
                 while (count--) {
                     unit.shiftRight(2);
                     unit.show();
                     draw_pixel_color();
                     m5::utility::delay(20);
                 }
-                unit.fillRainbow();
+                unit.clear();
+                unit.fillRainbow(0, w);
                 unit.show();
                 m5::utility::delay(500);
 
-                count = std::min((uint16_t)10U, unit.numPixels());
+                count = std::min<uint16_t>(10U, unit.numPixels());
                 while (count--) {
                     unit.shiftLeft(2);
                     unit.show();
@@ -324,9 +364,12 @@ void loop()
                 }
             } break;
 
-            case 9:  // rotate pixel array
+            case 9:  // rotate pixel array (rainbow width() LEDs)
+            {
                 M5.Log.printf("==== rotate\n");
-                unit.fillRainbow();
+                uint16_t w = std::max<uint16_t>(1, unit.width());
+                unit.clear();
+                unit.fillRainbow(0, w);
                 unit.show();
                 draw_pixel_color();
                 m5::utility::delay(200);
@@ -337,7 +380,8 @@ void loop()
                     m5::utility::delay(20);
                 }
 
-                unit.fillRainbow();
+                unit.clear();
+                unit.fillRainbow(0, w);
                 unit.show();
                 draw_pixel_color();
                 m5::utility::delay(200);
@@ -347,7 +391,7 @@ void loop()
                     draw_pixel_color();
                     m5::utility::delay(20);
                 }
-                break;
+            } break;
         }
         //        M5.Speaker.tone(2000, 20);
         if (++func > 9) {
