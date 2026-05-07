@@ -22,6 +22,7 @@
 #include "unit/unit_Puzzle.hpp"
 #include "unit/unit_Neco.hpp"
 #include "unit/unit_AtomMatrixRGB.hpp"
+#include "unit/unit_HatNeoFlash.hpp"
 
 /*!
   @namespace m5

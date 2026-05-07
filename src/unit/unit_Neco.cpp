@@ -25,19 +25,34 @@ bool UnitNeco::begin()
     if (!UnitLED::begin()) {
         return false;
     }
-    return pinModeRX(gpio::Mode::InputPullup);  // For Button
+    pinModeRX(gpio::Mode::InputPullup);  // For Button
+
+    if (adapter()->type() == Adapter::Type::GPIO) {
+        auto* ad = asAdapter<AdapterGPIOBase>(Adapter::Type::GPIO);
+        if (ad) {
+            // Input-only GPIOs (e.g. ESP32 GPIO 34-39) lack internal
+            // pull-up circuitry.  Without pull-up the button line
+            // floats, so reads return random noise.
+            // GPIO_IS_VALID_OUTPUT_GPIO is false for these pins.
+            _btn_available = GPIO_IS_VALID_OUTPUT_GPIO(ad->rx_pin());
+            if (!_btn_available) {
+                M5_LIB_LOGW(
+                    "RX GPIO %d is input-only (no pull-up); button disabled. Use a port with output-capable GPIO",
+                    static_cast<int>(ad->rx_pin()));
+            }
+        }
+    }
+    return true;
 }
 
 void UnitNeco::update(const bool)
 {
-    /*
-      Connection via PbHub does not get button status accurately
-     */
-    if (adapter()->type() == Adapter::Type::GPIO) {
-        bool rx{};
-        if (readDigitalRX(rx)) {
-            setRawState(m5::utility::millis(), !rx);
-        }
+    if (!_btn_available) {
+        return;
+    }
+    bool rx{};
+    if (readDigitalRX(rx)) {
+        setRawState(m5::utility::millis(), !rx);
     }
 }
 

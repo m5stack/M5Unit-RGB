@@ -27,6 +27,10 @@ Unit Neco is an RGB light board unit with a "cat ear design," featuring 35 WS281
 Unit Puzzle is a colorful light control unit composed of an 8x8 array of 64 WS2812E RGB LEDs. Each LED is separated by a grid structure to prevent interference between adjacent lights, ensuring clearer and purer light effects. The product features two Grove interfaces, one for input signal and the other for output, along with a connector for linking multiple Unit Puzzle units to expand the light display area. The output Grove interface also includes a reserved IO port, allowing connection to other M5 devices, such as the Unit Angle sensor with a Port B interface, enabling more interactive control functions. The Unit Puzzle is compact and easy to install, with an M2 hole at the bottom for secure mounting. The product measures only 24 x 24 x 15mm. It is suitable for applications such as smart lighting, decorative displays, and interactive installations.
 
 
+### SKU:U071
+Hat NeoFlash is a NeoPixel LED hat with 126 (7x18) WS2812B programmable LEDs. It connects via the Hat port and supports daisy-chaining for expansion.
+
+
 ### SKU:C008-B
 ATOM Matrix has a built-in 5x5 RGB LED matrix on the panel. This library can manage the LED matrix.
 
@@ -43,13 +47,18 @@ See also examples using conventional methods here.
 - [Unit RGB LED Strip - Document & Datasheet](https://docs.m5stack.com/en/unit/rgb_led_strip)
 - [Unit Neco - Document & Datasheet](https://docs.m5stack.com/en/unit/Neco%20Unit)
 - [Unit Puzzle - Document & Datasheet](https://docs.m5stack.com/en/unit/Unit-Puzzle)
+- [Hat NeoFlash - Document & Datasheet](https://docs.m5stack.com/en/hat/hat-neoflash)
 - [M5AtomMatrix - Document & Datasheet](https://docs.m5stack.com/en/core/ATOM%20Matrix)
 
 
-### Required Libraries:
+## Required Libraries:
 - [M5UnitUnified](https://github.com/m5stack/M5UnitUnified)
 - [M5Utility](https://github.com/m5stack/M5Utility)
 - [M5HAL](https://github.com/m5stack/M5HAL)
+
+## License
+
+- [M5Unit-RGB - MIT](LICENSE)
 
 ## Support via [PbHub](https://docs.m5stack.com/en/unit/pbhub_1.1)
 
@@ -62,6 +71,7 @@ See also examples using conventional methods here.
 |UnitRGBLEDStrip|OK||
 |UnitNeco|OK|LED only, Button function NG|
 |UnitPuzzle|OK||
+|HatNeoFlash|NG|Hat port, not a Grove unit|
 |UnitAtomMatrixRGB|NG|Built-in LED, not an external unit|
 
 See also [M5Unit-HUB](https://github.com/m5stack/M5Unit-HUB)
@@ -99,10 +109,12 @@ You must choose a define symbol for the unit you will use.
 // #define USING_UNIT_RGBLED_STRIP30
 // For ATOM Matrix built-in 5x5 RGB LED
 // #define USING_ATOM_MATRIX_RGB
+// For Hat NeoFlash
+// #define USING_HAT_NEOFLASH
 #endif
 ```
 
-### Doxygen document
+## Doxygen document
 [GitHub Pages](https://m5stack.github.io/M5Unit-RGB/)
 
 If you want to generate documents on your local machine, execute the following command
@@ -114,11 +126,7 @@ bash docs/doxy.sh
 It will output it under docs/html  
 If you want to output Git commit hashes to html, do it for the git cloned folder.
 
-#### Required
+### Required
 - [Doxygen](https://www.doxygen.nl/)
 - [pcregrep](https://formulae.brew.sh/formula/pcre2)
 - [Git](https://git-scm.com/) (Output commit hash to html)
-
-## License
-
-- [M5Unit-RGB - MIT](LICENSE)

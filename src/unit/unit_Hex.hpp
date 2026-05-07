@@ -34,6 +34,17 @@ public:
     }
     virtual uint16_t index_of(const uint16_t n) const override;
 
+    //! @brief Edge length of the hexagon (4 LEDs per edge)
+    inline virtual uint16_t width() const override
+    {
+        return 4;
+    }
+    //! @brief Number of rows in the hexagon (7 rows)
+    inline virtual uint16_t height() const override
+    {
+        return 7;
+    }
+
     inline virtual uint8_t maxRotation() const
     {
         // 0:0 1:60 2:120 3:180 4:240 5:300

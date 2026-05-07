@@ -39,6 +39,17 @@ public:
     static constexpr uint8_t LED_WIDTH{WIDTH};
     static constexpr uint8_t LED_HEIGHT{HEIGHT};
 
+    //! @brief Logical width considering rotation (0/180: WIDTH, 90/270: HEIGHT)
+    inline virtual uint16_t width() const override
+    {
+        return (this->rotation() & 1) ? HEIGHT : WIDTH;
+    }
+    //! @brief Logical height considering rotation (0/180: HEIGHT, 90/270: WIDTH)
+    inline virtual uint16_t height() const override
+    {
+        return (this->rotation() & 1) ? WIDTH : HEIGHT;
+    }
+
     inline virtual uint8_t maxRotation() const
     {
         // 0:0 1:90 2:180 3:270
@@ -48,29 +59,26 @@ public:
 protected:
     virtual uint16_t index_of(const uint16_t n) const override
     {
-        uint8_t x = n % WIDTH;
-        uint8_t y = n / WIDTH;
-        uint8_t new_x{}, new_y{};
-
         switch (this->rotation()) {
-            case 1:  // 90°
-                new_x = HEIGHT - 1 - y;
-                new_y = x;
-                break;
-            case 2:  // 180°
-                new_x = WIDTH - 1 - x;
-                new_y = HEIGHT - 1 - y;
-                break;
-            case 3:  // 270°
-                new_x = y;
-                new_y = WIDTH - 1 - x;
-                break;
-            default:  // 0°
-                new_x = x;
-                new_y = y;
-                break;
+            case 1: {  // 90° CW (logical grid: HEIGHT x WIDTH)
+                uint8_t x = n % HEIGHT;
+                uint8_t y = n / HEIGHT;
+                return x * WIDTH + (WIDTH - 1 - y);
+            }
+            case 2: {  // 180° (logical grid: WIDTH x HEIGHT)
+                uint8_t x = n % WIDTH;
+                uint8_t y = n / WIDTH;
+                return (HEIGHT - 1 - y) * WIDTH + (WIDTH - 1 - x);
+            }
+            case 3: {  // 270° CW (logical grid: HEIGHT x WIDTH)
+                uint8_t x = n % HEIGHT;
+                uint8_t y = n / HEIGHT;
+                return (HEIGHT - 1 - x) * WIDTH + y;
+            }
+            default: {  // 0°
+                return n;
+            }
         }
-        return new_y * WIDTH + new_x;
     }
 };
 

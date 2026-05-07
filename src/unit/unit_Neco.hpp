@@ -36,6 +36,9 @@ public:
     //! @brief Update the unit
     //! @param force Force update
     virtual void update(const bool force = false) override;
+
+private:
+    bool _btn_available{false};
 };
 
 }  // namespace unit
