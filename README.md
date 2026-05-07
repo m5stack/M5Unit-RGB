@@ -51,10 +51,14 @@ See also examples using conventional methods here.
 - [M5AtomMatrix - Document & Datasheet](https://docs.m5stack.com/en/core/ATOM%20Matrix)
 
 
-### Required Libraries:
+## Required Libraries:
 - [M5UnitUnified](https://github.com/m5stack/M5UnitUnified)
 - [M5Utility](https://github.com/m5stack/M5Utility)
 - [M5HAL](https://github.com/m5stack/M5HAL)
+
+## License
+
+- [M5Unit-RGB - MIT](LICENSE)
 
 ## Support via [PbHub](https://docs.m5stack.com/en/unit/pbhub_1.1)
 
@@ -110,7 +114,7 @@ You must choose a define symbol for the unit you will use.
 #endif
 ```
 
-### Doxygen document
+## Doxygen document
 [GitHub Pages](https://m5stack.github.io/M5Unit-RGB/)
 
 If you want to generate documents on your local machine, execute the following command
@@ -122,11 +126,7 @@ bash docs/doxy.sh
 It will output it under docs/html  
 If you want to output Git commit hashes to html, do it for the git cloned folder.
 
-#### Required
+### Required
 - [Doxygen](https://www.doxygen.nl/)
 - [pcregrep](https://formulae.brew.sh/formula/pcre2)
 - [Git](https://git-scm.com/) (Output commit hash to html)
-
-## License
-
-- [M5Unit-RGB - MIT](LICENSE)
