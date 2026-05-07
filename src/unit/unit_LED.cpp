@@ -300,7 +300,7 @@ public:
         if (!ad) {
             return false;
         }
-        auto channel = (rmt_channel_t)ad->impl()->txChannelValue();
+        auto channel = (rmt_channel_t)ad->impl()->rmtTxChannel();
         if (channel >= RMT_CHANNEL_MAX) {
             return false;
         }
@@ -340,7 +340,7 @@ public:
         if (!ad) {
             return false;
         }
-        auto tx_handle = static_cast<rmt_channel_handle_t>(ad->impl()->txHandleValue());
+        auto tx_handle = static_cast<rmt_channel_handle_t>(ad->impl()->rmtTxHandle());
         if (!tx_handle) {
             return false;
         }
