@@ -281,7 +281,8 @@ public:
         while (p->parent() && is_unit_led(p->parent())) {
             p = p->parent();
         }
-        while (p) {
+        // Only traverse UnitLED children so a non-LED child in the tree cannot be downcast to UnitLED*.
+        while (p && is_unit_led(p)) {
             tree.push_back(static_cast<UnitLED*>(p));
             p = p->child(0);
         }
@@ -469,7 +470,8 @@ public:
         while (p && p->parent() && is_unit_led(p->parent())) {
             p = p->parent();
         }
-        while (p && p != &_unit) {
+        // Stop at any non-LED child to avoid downcasting an unrelated Component to UnitLED*.
+        while (p && p != &_unit && is_unit_led(p)) {
             auto i = static_cast<UnitLED*>(p)->rgb888_items();
             v.insert(v.end(), i.begin(), i.end());
             p = p->child(0);
@@ -490,6 +492,11 @@ public:
 const char UnitLED::name[] = "UnitLED";
 const types::uid_t UnitLED::uid{"UnitLED"_mmh3};
 const types::attr_t UnitLED::attr{attribute::AccessGPIO};
+
+bool UnitLED::add(UnitLED& c, const int16_t channel)
+{
+    return Component::add(c, channel);
+}
 
 bool UnitLED::begin()
 {

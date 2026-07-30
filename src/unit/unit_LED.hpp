@@ -199,6 +199,15 @@ public:
     {
     }
 
+    /*!
+      @brief Connect an LED unit as a daisy-chained child
+      @param c Child LED unit
+      @param channel Channel number
+      @return True if successful
+      @note Shadows Component::add so only UnitLED subtypes are accepted as children of an LED daisy chain.
+     */
+    bool add(UnitLED& c, const int16_t channel);
+
     //! @brief Begin the unit
     virtual bool begin() override;
 
