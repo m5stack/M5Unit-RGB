@@ -52,6 +52,7 @@ using m5::unit::rgb::Color;
 
 namespace {
 
+#if defined(USING_HAT_NEOFLASH)
 int get_hat_gpio_pin(const m5::board_t board)
 {
     switch (board) {
@@ -69,6 +70,7 @@ int get_hat_gpio_pin(const m5::board_t board)
             return -1;
     }
 }
+#endif
 
 auto& lcd = M5.Display;
 m5::unit::UnitUnified Units;

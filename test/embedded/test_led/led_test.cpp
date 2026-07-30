@@ -57,7 +57,7 @@ std::string GetTypeName<UnitWS2812>()
 }  // namespace testing
 
 namespace {
-void print_pixels(const UnitLED* u)
+__attribute__((unused)) void print_pixels(const UnitLED* u)
 {
     for (uint16_t i = 0; i < u->numPixels(); ++i) {
         auto c  = u->color(i);
