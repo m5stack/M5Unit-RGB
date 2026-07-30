@@ -155,6 +155,18 @@ public:
     {
     }
 
+#if defined(M5_UNIT_UNIFIED_USING_RMT_V2)
+    virtual ~InterfaceGPIO()
+    {
+        if (_bytes_encoder) {
+            rmt_del_encoder(_bytes_encoder);
+        }
+        if (_reset_encoder) {
+            rmt_del_encoder(_reset_encoder);
+        }
+    }
+#endif
+
     virtual UnitLED::item_container_type items() override
     {
         const int bits_per_pixel  = 24 + 8 * _unit.hasWhite();
