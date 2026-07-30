@@ -344,6 +344,7 @@ public:
         err = rmt_wait_tx_done(channel, pdMS_TO_TICKS(100));
         if (err != ESP_OK) {
             M5_LIB_LOGE("rmt_wait_tx_done failed: %d", err);
+            return false;
         }
         return true;
     }
@@ -404,9 +405,21 @@ public:
         }
 
         // 4. Send reset pulse
+        auto reset_enc = _copy_encoder_for_reset();
+        if (!reset_enc) {
+            return false;
+        }
         auto reset = _unit.rmt_item_reset();
-        rmt_transmit(tx_handle, _copy_encoder_for_reset(), &reset, sizeof(reset), &tx_cfg);
-        rmt_tx_wait_all_done(tx_handle, pdMS_TO_TICKS(10));
+        err        = rmt_transmit(tx_handle, reset_enc, &reset, sizeof(reset), &tx_cfg);
+        if (err != ESP_OK) {
+            M5_LIB_LOGE("rmt_transmit(reset) failed: %d", err);
+            return false;
+        }
+        err = rmt_tx_wait_all_done(tx_handle, pdMS_TO_TICKS(10));
+        if (err != ESP_OK) {
+            M5_LIB_LOGE("rmt_tx_wait_all_done(reset) failed: %d", err);
+            return false;
+        }
         return true;
     }
 
@@ -414,7 +427,11 @@ public:
     {
         if (!_reset_encoder) {
             rmt_copy_encoder_config_t cfg{};
-            rmt_new_copy_encoder(&cfg, &_reset_encoder);
+            auto err = rmt_new_copy_encoder(&cfg, &_reset_encoder);
+            if (err != ESP_OK) {
+                M5_LIB_LOGE("rmt_new_copy_encoder failed: %d", err);
+                _reset_encoder = nullptr;
+            }
         }
         return _reset_encoder;
     }
