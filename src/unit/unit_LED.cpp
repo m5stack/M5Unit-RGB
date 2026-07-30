@@ -72,6 +72,12 @@ int8_t offset_of(const Order f, uint8_t off)
     return -1;
 }
 
+inline bool is_valid_order(const Order f)
+{
+    auto i = m5::stl::to_underlying(f);
+    return i >= 0 && static_cast<size_t>(i) < m5::stl::size(offset_table);
+}
+
 inline bool is_unit_led(const Component* u)
 {
     return (u->category() == category_t::UnitLED);
@@ -517,6 +523,15 @@ bool UnitLED::add(UnitLED& c, const int16_t channel)
 
 bool UnitLED::begin()
 {
+    if (!is_valid_order(_order)) {
+        M5_LIB_LOGE("invalid Order: %d", static_cast<int>(_order));
+        return false;
+    }
+    if (_numPixels == 0) {
+        M5_LIB_LOGE("numPixels must be > 0");
+        return false;
+    }
+
     // Search root unit
     Component* p = this;
     // 1st: Exists PbHub in tree?
@@ -558,12 +573,16 @@ bool UnitLED::begin()
     }
 
     _brightness = _cfg.brightness;
+    _ready      = true;
 
     return true;
 }
 
 bool UnitLED::writePixels(void)
 {
+    if (!_ready) {
+        return false;
+    }
     bool ret{};
 
     switch (adapter()->type()) {
@@ -585,24 +604,25 @@ bool UnitLED::writePixels(void)
 
 bool UnitLED::setPixelColor(const uint16_t n, const uint8_t r, const uint8_t g, const uint8_t b)
 {
-    if (n < _numPixels) {
-        Color c = color(n);
-        c.r     = r;
-        c.g     = g;
-        c.b     = b;
-        setPixelColor(n, c);
-        return true;
+    if (!_ready || n >= _numPixels) {
+        return false;
     }
-    return false;
+    Color c = color(n);
+    c.r     = r;
+    c.g     = g;
+    c.b     = b;
+    setPixelColor(n, c);
+    return true;
 }
 
 bool UnitLED::fill(const Color& c, const uint16_t first, const uint16_t count)
 {
-    if (first + count > _numPixels) {
+    if (!_ready || first >= _numPixels) {
         return false;
     }
-    auto last = count ? (first + count) : (first + _numPixels - first);
-    for (uint16_t n = first; n < last; ++n) {
+    const uint16_t remain = _numPixels - first;
+    const uint16_t num    = count ? std::min(count, remain) : remain;
+    for (uint16_t n = first; n < first + num; ++n) {
         setPixelColor(n, c);
     }
     return true;
@@ -610,10 +630,11 @@ bool UnitLED::fill(const Color& c, const uint16_t first, const uint16_t count)
 
 bool UnitLED::fillRainbow(const uint16_t first, const uint16_t count, const uint8_t firstHue)
 {
-    auto num = count ? count : (_numPixels - first);
-    if (first + num > _numPixels || !num) {
+    if (!_ready || first >= _numPixels) {
         return false;
     }
+    const uint16_t remain = _numPixels - first;
+    const uint16_t num    = count ? std::min(count, remain) : remain;
 
     uint16_t hue         = firstHue * 256U;  // 0 - 65535
     const uint16_t delta = 65536 / num;
@@ -629,8 +650,12 @@ bool UnitLED::fillGradation(const rgb::Color& firstClr, const rgb::Color& lastCl
                             const uint16_t count)
 
 {
-    auto num = count ? count : (_numPixels - first);
-    if (first + num > _numPixels || num < 2) {
+    if (!_ready || first >= _numPixels) {
+        return false;
+    }
+    const uint16_t remain = _numPixels - first;
+    const uint16_t num    = count ? std::min(count, remain) : remain;
+    if (num < 2) {
         return false;
     }
 
@@ -648,10 +673,11 @@ bool UnitLED::fillGradation(const rgb::Color& firstClr, const rgb::Color& lastCl
 
 bool UnitLED::fillRandom(const uint16_t first, const uint16_t count)
 {
-    auto num = count ? count : (_numPixels - first);
-    if (first + num > _numPixels || !num) {
+    if (!_ready || first >= _numPixels) {
         return false;
     }
+    const uint16_t remain = _numPixels - first;
+    const uint16_t num    = count ? std::min(count, remain) : remain;
 
     for (uint16_t i = first; i < first + num; ++i) {
         setPixelColor(i, esp_random(), esp_random(), esp_random());
@@ -661,6 +687,9 @@ bool UnitLED::fillRandom(const uint16_t first, const uint16_t count)
 
 void UnitLED::setRotation(const int8_t rot)
 {
+    if (!_ready) {
+        return;
+    }
     auto prev    = _rot;
     auto new_rot = rotation_of(rot);
     if (new_rot == prev) {
@@ -685,7 +714,7 @@ void UnitLED::setRotation(const int8_t rot)
 Color UnitLED::get_pixel_color(const uint16_t n) const
 {
     Color c{};
-    if (n < _numPixels) {
+    if (_ready && n < _numPixels) {
         const uint8_t* p = _pixels.data() + n * (3 + hasWhite());
         c.r              = p[_offsetR];
         c.g              = p[_offsetG];
@@ -697,18 +726,18 @@ Color UnitLED::get_pixel_color(const uint16_t n) const
 
 bool UnitLED::set_pixel_color(const uint16_t n, const Color& c)
 {
-    if (n < _numPixels) {
-        //        M5_LIB_LOGV("[%u]:%08X", n, c.wrgb);
-        uint8_t* p  = _pixels.data() + n * (3 + hasWhite());
-        p[_offsetR] = c.r;
-        p[_offsetG] = c.g;
-        p[_offsetB] = c.b;
-        if (_offsetW >= 0) {
-            p[_offsetW] = c.w;
-        }
-        return true;
+    if (!_ready || n >= _numPixels) {
+        return false;
     }
-    return false;
+    //        M5_LIB_LOGV("[%u]:%08X", n, c.wrgb);
+    uint8_t* p  = _pixels.data() + n * (3 + hasWhite());
+    p[_offsetR] = c.r;
+    p[_offsetG] = c.g;
+    p[_offsetB] = c.b;
+    if (_offsetW >= 0) {
+        p[_offsetW] = c.w;
+    }
+    return true;
 }
 
 UnitLED::item_container_type UnitLED::items()
@@ -723,6 +752,9 @@ UnitLED::container_type UnitLED::rgb888_items()
 
 void UnitLED::shift_left(const uint16_t count, const bool wrap)
 {
+    if (!_ready) {
+        return;
+    }
     uint16_t num = wrap ? (count % _numPixels) : std::min(count, _numPixels);
     if (!num) {
         return;
@@ -753,6 +785,9 @@ void UnitLED::shift_left(const uint16_t count, const bool wrap)
 
 void UnitLED::shift_right(uint16_t count, bool wrap)
 {
+    if (!_ready) {
+        return;
+    }
     uint16_t num = wrap ? (count % _numPixels) : std::min(count, _numPixels);
     if (!num) {
         return;

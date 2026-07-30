@@ -182,19 +182,6 @@ public:
     }
     ///@}
 
-    //! @brief Constructor
-    //! @param num_of_pixels Number of pixels
-    //! @param order Color order
-    explicit UnitLED(const uint16_t num_of_pixels, const rgb::Order order)
-        : Component(0x00), _order{order}, _numPixels{num_of_pixels}
-    {
-        _offsetR = rgb::offsetR(_order);
-        _offsetG = rgb::offsetG(_order);
-        _offsetB = rgb::offsetB(_order);
-        _offsetW = rgb::offsetW(_order);
-        _pixels.resize(_numPixels * (3 + hasWhite()));
-    }
-
     virtual ~UnitLED()
     {
     }
@@ -582,12 +569,28 @@ protected:
     void shift_left(const uint16_t count, const bool wrap);
     void shift_right(const uint16_t count, const bool wrap);
 
+protected:
+    //! @brief Constructor
+    //! @param num_of_pixels Number of pixels
+    //! @param order Color order
+    //! @note Protected so only derived types with hardcoded Order (UnitRGB / UnitPuzzle / ...) can construct.
+    explicit UnitLED(const uint16_t num_of_pixels, const rgb::Order order)
+        : Component(0x00), _order{order}, _numPixels{num_of_pixels}
+    {
+        _offsetR = rgb::offsetR(_order);
+        _offsetG = rgb::offsetG(_order);
+        _offsetB = rgb::offsetB(_order);
+        _offsetW = rgb::offsetW(_order);
+        _pixels.resize(_numPixels * (3 + hasWhite()));
+    }
+
 private:
     rgb::Order _order{rgb::Order::unknown};
     uint8_t _brightness{10};
     int8_t _rot{};
     int8_t _offsetR{-1}, _offsetG{-1}, _offsetB{-1}, _offsetW{-1};
     uint16_t _numPixels{};
+    bool _ready{false};
     container_type _pixels{};  // Order by rgb::Order
     std::unique_ptr<Interface> _interface{};
     config_t _cfg{};
