@@ -18,18 +18,18 @@
                    |
                    +--> ch5: UnitRGBLEDStrip30
 
-  NOTE: Depending on the core device, the power supply from the port may not be
-  sufficient for all LEDs.
-  If the lights turn on unexpectedly, try lowering the brightness or reducing the
-  number of lights turned on at once to see if that resolves the issue.
-
-  NOTICE: The PbHUB can manage up to 74 LEDs per channel
+  Hardware limits (see README "Note (large cascades / PbHub)"):
+    1. PbHub caps each channel at 74 LEDs. On ch:1 (64+64=128), the second Puzzle's
+       last 54 LEDs receive no data and stay unlit.
+    2. USB-powered boards (NanoC6 / NanoH2, ~500 mA) cannot supply enough current
+       for the full cascade; the 5V rail sags and downstream LEDs dim or go dark.
+       Reduce total LED count, lower brightness, or use an external 5V power source.
 */
 #include <M5Unified.h>
 #include <M5UnitUnified.h>
+#include <wiring/m5_unit_unified_wiring.hpp>
 #include <M5UnitUnifiedRGB.h>
 #include <M5UnitUnifiedHUB.h>  // UnitPbHub
-#include <M5HAL.hpp>
 #include <M5Utility.h>
 
 using m5::unit::rgb::Color;
@@ -178,29 +178,8 @@ void setup()
         }
     }
 
-    // I2C 3-way branching
-    auto board = M5.getBoard();
-    bool unit_ready{};
-    if (board == m5::board_t::board_ArduinoNessoN1) {
-        auto pin_num_sda = M5.getPin(m5::pin_name_t::port_b_out);
-        auto pin_num_scl = M5.getPin(m5::pin_name_t::port_b_in);
-        M5_LOGI("getPin(M5HAL): SDA:%u SCL:%u", pin_num_sda, pin_num_scl);
-        m5::hal::bus::I2CBusConfig i2c_cfg;
-        i2c_cfg.pin_sda = m5::hal::gpio::getPin(pin_num_sda);
-        i2c_cfg.pin_scl = m5::hal::gpio::getPin(pin_num_scl);
-        auto i2c_bus    = m5::hal::bus::i2c::getBus(i2c_cfg);
-        unit_ready      = Units.add(hub, i2c_bus ? i2c_bus.value() : nullptr) && Units.begin();
-    } else if (board == m5::board_t::board_M5NanoC6) {
-        M5_LOGI("Using M5.Ex_I2C");
-        unit_ready = Units.add(hub, M5.Ex_I2C) && Units.begin();
-    } else {
-        auto pin_num_sda = M5.getPin(m5::pin_name_t::port_a_sda);
-        auto pin_num_scl = M5.getPin(m5::pin_name_t::port_a_scl);
-        M5_LOGI("getPin: SDA:%u SCL:%u", pin_num_sda, pin_num_scl);
-        Wire.end();
-        Wire.begin(pin_num_sda, pin_num_scl, 400000U);
-        unit_ready = Units.add(hub, Wire) && Units.begin();
-    }
+    // Board-aware I2C: NessoN1 PortB -> SoftwareI2C, NanoC6/NanoH2 -> Ex_I2C, others -> Wire
+    bool unit_ready = m5::unit::wiring::addI2C(Units, hub, 400000) && Units.begin();
 
     if (!unit_ready) {
         M5_LOGE("Failed to begin");
