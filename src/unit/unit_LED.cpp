@@ -307,8 +307,7 @@ public:
             uint8_t bri        = led->brightness();
             const uint8_t* src = led->pixels().data();
             for (uint32_t i = 0; i < led->numPixels() * align; ++i) {
-                // Rounded divide-by-255 so bri=255 yields the source byte unchanged (>>8 would map 255*255 to 254).
-                buf.push_back(static_cast<uint8_t>((static_cast<uint16_t>(src[i]) * bri + 127) / 255));
+                buf.push_back(rgb::scale8(src[i], bri));
             }
         }
     }

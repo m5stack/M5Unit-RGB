@@ -13,6 +13,7 @@
 #ifndef M5_UNIT_UNIFIED_RGB_HPP
 #define M5_UNIT_UNIFIED_RGB_HPP
 
+#include "utility/m5unit_rgb_utility.hpp"
 #include "unit/unit_LED.hpp"
 #include "unit/unit_SK6812.hpp"
 #include "unit/unit_WS2812.hpp"

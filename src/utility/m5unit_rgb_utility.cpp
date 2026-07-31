@@ -18,9 +18,9 @@ uint32_t hsv2rgb(const uint8_t h, const uint8_t s, const uint8_t v)
     uint8_t region    = h / 43;  // 0-5
     uint8_t remainder = (h % 43) * 6;
 
-    uint8_t p = (v * (255 - s)) >> 8;
-    uint8_t q = (v * (255 - ((s * remainder) >> 8))) >> 8;
-    uint8_t t = (v * (255 - ((s * (255 - remainder)) >> 8))) >> 8;
+    uint8_t p = scale8(v, 255 - s);
+    uint8_t q = scale8(v, 255 - scale8(s, remainder));
+    uint8_t t = scale8(v, 255 - scale8(s, 255 - remainder));
     uint8_t r{}, g{}, b{};
 
     switch (region) {

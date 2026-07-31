@@ -375,6 +375,32 @@ void shift_test(UnitLED* unit)
     EXPECT_EQ(u[3], W);
 }
 
+void scale8_test()
+{
+    using m5::unit::rgb::scale8;
+    // Identity: scale8(a, 255) == a (b=255 must not shave off 1 via >>8 truncation)
+    EXPECT_EQ(scale8(0, 255), 0);
+    EXPECT_EQ(scale8(1, 255), 1);
+    EXPECT_EQ(scale8(128, 255), 128);
+    EXPECT_EQ(scale8(254, 255), 254);
+    EXPECT_EQ(scale8(255, 255), 255);  // regression: (255*255)>>8 == 254
+
+    // Symmetric: scale8(255, b) == b
+    EXPECT_EQ(scale8(255, 0), 0);
+    EXPECT_EQ(scale8(255, 1), 1);
+    EXPECT_EQ(scale8(255, 128), 128);
+    EXPECT_EQ(scale8(255, 254), 254);
+
+    // Zero on either side
+    EXPECT_EQ(scale8(0, 0), 0);
+    EXPECT_EQ(scale8(0, 128), 0);
+    EXPECT_EQ(scale8(128, 0), 0);
+
+    // Mid-range rounded values
+    EXPECT_EQ(scale8(128, 128), 64);  // (128*128+127)/255 = 16511/255 = 64
+    EXPECT_EQ(scale8(100, 100), 39);  // (100*100+127)/255 = 10127/255 = 39
+}
+
 void color_test()
 {
     // fromHSV: Red (hue=0)
@@ -393,7 +419,7 @@ void color_test()
     EXPECT_GT(b.b, b.r);
     EXPECT_GT(b.b, b.g);
 
-    // fromHSV: saturation=0 => white
+    // fromHSV: saturation=0 => white (v=255 must survive as 255, catches >>8 truncation)
     Color w = Color::fromHSV(0, 0, 255);
     EXPECT_EQ(w.r, 255);
     EXPECT_EQ(w.g, 255);
@@ -404,6 +430,24 @@ void color_test()
     EXPECT_EQ(k.r, 0);
     EXPECT_EQ(k.g, 0);
     EXPECT_EQ(k.b, 0);
+
+    // fromHSV: sat=0 => grayscale for any hue (v value must be preserved on every channel)
+    for (uint16_t hue : {0u, 43u, 85u, 128u, 170u, 213u}) {
+        Color gray = Color::fromHSV(static_cast<uint8_t>(hue), 0, 128);
+        EXPECT_EQ(gray.r, 128) << "hue=" << hue;
+        EXPECT_EQ(gray.g, 128) << "hue=" << hue;
+        EXPECT_EQ(gray.b, 128) << "hue=" << hue;
+    }
+
+    // fromHSV: sat=0, v extremes => value preserved (regression against >>8 rounding loss)
+    Color w1 = Color::fromHSV(0, 0, 1);
+    EXPECT_EQ(w1.r, 1);
+    EXPECT_EQ(w1.g, 1);
+    EXPECT_EQ(w1.b, 1);
+    Color w254 = Color::fromHSV(0, 0, 254);
+    EXPECT_EQ(w254.r, 254);
+    EXPECT_EQ(w254.g, 254);
+    EXPECT_EQ(w254.b, 254);
 }
 
 void config_test(UnitLED* unit)
@@ -422,6 +466,7 @@ TEST_F(TestSK6812GRB, All)
     basic_test(unit.get());
     fill_test(unit.get());
     shift_test(unit.get());
+    scale8_test();
     color_test();
     config_test(unit.get());
 }
@@ -432,6 +477,7 @@ TEST_F(TestWS2812, All)
     basic_test(unit.get());
     fill_test(unit.get());
     shift_test(unit.get());
+    scale8_test();
     color_test();
     config_test(unit.get());
 }
