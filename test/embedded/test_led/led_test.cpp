@@ -460,6 +460,43 @@ void config_test(UnitLED* unit)
     EXPECT_EQ(unit->config().brightness, 42);
 }
 
+// Range validation across fill / fillRainbow / fillGradation / fillRandom (#6).
+void range_test(UnitLED* unit)
+{
+    constexpr Color R(255, 0, 0);
+    const uint16_t n = unit->numPixels();
+
+    // first >= numPixels must return false for every fill variant.
+    EXPECT_FALSE(unit->fill(R, n, 0));
+    EXPECT_FALSE(unit->fill(R, n, 1));
+    EXPECT_FALSE(unit->fill(R, n + 5, 0));
+    EXPECT_FALSE(unit->fillRainbow(n, 0, 0));
+    EXPECT_FALSE(unit->fillRainbow(n + 5, 4, 0));
+    EXPECT_FALSE(unit->fillGradation(R, R, n, 0));
+    EXPECT_FALSE(unit->fillGradation(R, R, n + 1, 3));
+    EXPECT_FALSE(unit->fillRandom(n, 0));
+    EXPECT_FALSE(unit->fillRandom(n + 1, 3));
+
+    // count overflow is clamped to remaining pixels (fill succeeds).
+    unit->clear();
+    EXPECT_TRUE(unit->fill(R, 0, 999));
+    for (uint16_t i = 0; i < n; ++i) {
+        EXPECT_EQ(unit->color(i), R);
+    }
+}
+
+// End-to-end write test — regression coverage for 0.0.2:
+//   #3 RMT error propagation (writePixels must return true on success),
+//   #4 InterfaceGPIO destructor / RMT v2 encoder alloc,
+//   #5 brightness scaling (255 must map to 255).
+// Leaves LEDs lit as a visual "tests complete" indicator.
+void hw_write_test(UnitLED* unit)
+{
+    unit->setBrightness(255);
+    EXPECT_TRUE(unit->fill(Color(0, 32, 0)));  // dim green
+    EXPECT_TRUE(unit->show());
+}
+
 TEST_F(TestSK6812GRB, All)
 {
     SCOPED_TRACE(ustr);
@@ -469,6 +506,8 @@ TEST_F(TestSK6812GRB, All)
     scale8_test();
     color_test();
     config_test(unit.get());
+    range_test(unit.get());
+    hw_write_test(unit.get());
 }
 
 TEST_F(TestWS2812, All)
@@ -480,4 +519,6 @@ TEST_F(TestWS2812, All)
     scale8_test();
     color_test();
     config_test(unit.get());
+    range_test(unit.get());
+    hw_write_test(unit.get());
 }
