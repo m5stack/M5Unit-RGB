@@ -16,14 +16,15 @@
 
   Modify the source code to suit your own connection situation.
 
-  NOTE: Depending on the core device, the power supply from the port may not be
-  sufficient for all LEDs.
-  If the lights turn on unexpectedly, try lowering the brightness or reducing the
-  number of lights turned on at once to see if that resolves the issue.
+  Hardware limits (see README "Note (large cascades / PbHub)"):
+    - USB-powered boards (NanoC6 / NanoH2, ~500 mA) cannot supply enough current
+      for the full ~248-LED chain; the 5V rail sags and downstream LEDs dim or go
+      dark. Reduce chain length, lower brightness, or use an external 5V power source.
   *********************************************************************************
 */
 #include <M5Unified.h>
 #include <M5UnitUnified.h>
+#include <wiring/m5_unit_unified_wiring.hpp>
 #include <M5UnitUnifiedRGB.h>
 #include <M5Utility.h>
 #include <esp_random.h>
@@ -46,10 +47,10 @@ m5::unit::UnitRGBLEDStrip30 strip;
 constexpr uint8_t CHAIN_LEN{7};
 m5::unit::UnitLED* s_chain[CHAIN_LEN];
 
-// Per-unit LED offset and count within the flat chain (used by Demo C)
-constexpr uint16_t OFFSETS[CHAIN_LEN]{0, 3, 67, 131, 168, 183, 219};
-constexpr uint16_t COUNTS[CHAIN_LEN]{3, 64, 64, 37, 15, 36, 30};
-constexpr uint16_t TOTAL_LEDS{249};
+// Per-unit LED offset and count within the flat chain (used by Comet demo)
+constexpr uint16_t OFFSETS[CHAIN_LEN]{0, 3, 67, 131, 168, 183, 218};
+constexpr uint16_t COUNTS[CHAIN_LEN]{3, 64, 64, 37, 15, 35, 30};
+constexpr uint16_t TOTAL_LEDS{248};
 
 // Show entire chain via leaf
 void show_all()
@@ -89,7 +90,7 @@ uint8_t tri(uint16_t p)
 
 // =====================================================
 // Shared: rotation step for puzzle[0], puzzle[1], hex
-// step() called once per full loop completion by Demo C.
+// step() called once per full loop completion by Comet demo.
 // =====================================================
 namespace unit_rot {
 
@@ -182,7 +183,7 @@ void start()
 
     neco.setBrightness(10);
     neco.clear();
-    neco.fillRainbow(0, 6);  // 6 of 36 LEDs lit
+    neco.fillRainbow(0, 6);  // 6 of 35 LEDs lit
 
     strip.setBrightness(10);
     strip.clear();
@@ -390,16 +391,6 @@ void setup()
         lcd.setRotation(1);
     }
 
-    auto pin_num_gpio_in  = M5.getPin(m5::pin_name_t::port_b_in);
-    auto pin_num_gpio_out = M5.getPin(m5::pin_name_t::port_b_out);
-    if (pin_num_gpio_in < 0 || pin_num_gpio_out < 0) {
-        M5_LOGW("PortB is not available");
-        Wire.end();
-        pin_num_gpio_in  = M5.getPin(m5::pin_name_t::port_a_pin1);
-        pin_num_gpio_out = M5.getPin(m5::pin_name_t::port_a_pin2);
-    }
-    M5_LOGI("getPin: OUT:%d", pin_num_gpio_out);
-
 #if SOC_RMT_SUPPORT_DMA
     {
         auto ucfg     = rgb.config();
@@ -408,19 +399,17 @@ void setup()
     }
 #endif
 
-    if (!neco.add(strip, 0) ||                                 //
-        !tape.add(neco, 0) ||                                  //
-        !hex.add(tape, 0) ||                                   //
-        !puzzle[1].add(hex, 0) ||                              //
-        !puzzle[0].add(puzzle[1], 0) ||                        //
-        !rgb.add(puzzle[0], 0) ||                              //
-        !Units.add(rgb, pin_num_gpio_in, pin_num_gpio_out) ||  //
+    // Use default Both role — the chain contains a unit that needs rx (UnitNeco button).
+    if (!neco.add(strip, 0) ||                     //
+        !tape.add(neco, 0) ||                      //
+        !hex.add(tape, 0) ||                       //
+        !puzzle[1].add(hex, 0) ||                  //
+        !puzzle[0].add(puzzle[1], 0) ||            //
+        !rgb.add(puzzle[0], 0) ||                  //
+        !m5::unit::wiring::addGPIO(Units, rgb) ||  //
         !Units.begin()) {
         M5_LOGE("Failed to begin");
-        lcd.fillScreen(TFT_RED);
-        while (true) {
-            m5::utility::delay(10000);
-        }
+        m5::unit::wiring::failStop();
     }
     M5_LOGI("M5UnitUnified initialized");
     M5_LOGI("%s", Units.debugInfo().c_str());

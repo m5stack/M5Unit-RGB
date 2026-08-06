@@ -25,7 +25,7 @@ using namespace m5::unit::rgb;
 
 namespace {
 // Color order
-int8_t offset_table[][4] = {
+constexpr int8_t offset_table[][4] = {
     // 24bits
     {0, 1, 2, -1},  // rgb24
     {0, 2, 1, -1},  // rbg24
@@ -72,6 +72,12 @@ int8_t offset_of(const Order f, uint8_t off)
     return -1;
 }
 
+inline bool is_valid_order(const Order f)
+{
+    auto i = m5::stl::to_underlying(f);
+    return i >= 0 && static_cast<size_t>(i) < m5::stl::size(offset_table);
+}
+
 inline bool is_unit_led(const Component* u)
 {
     return (u->category() == category_t::UnitLED);
@@ -94,9 +100,9 @@ static void IRAM_ATTR led_rmt_translator(const void* src, rmt_item32_t* dest, si
                                          size_t* translated_size, size_t* item_num)
 {
     SimpleTranslatorContext* ctx{};
-    rmt_translator_get_context(item_num, (void**)&ctx);
+    rmt_translator_get_context(item_num, reinterpret_cast<void**>(&ctx));
 
-    const uint8_t* psrc   = (const uint8_t*)src;
+    const uint8_t* psrc   = static_cast<const uint8_t*>(src);
     size_t items_produced = 0;
     size_t bytes_consumed = 0;
 
@@ -155,6 +161,18 @@ public:
     {
     }
 
+#if defined(M5_UNIT_UNIFIED_USING_RMT_V2)
+    virtual ~InterfaceGPIO()
+    {
+        if (_bytes_encoder) {
+            rmt_del_encoder(_bytes_encoder);
+        }
+        if (_reset_encoder) {
+            rmt_del_encoder(_reset_encoder);
+        }
+    }
+#endif
+
     virtual UnitLED::item_container_type items() override
     {
         const int bits_per_pixel  = 24 + 8 * _unit.hasWhite();
@@ -176,13 +194,13 @@ public:
             const uint8_t* p = _unit.pixels().data() + i * align;
             float scale      = _unit.brightness() / 255.f;
             uint8_t colors[4]{};
-            colors[roff] = p[roff] * scale;
-            colors[goff] = p[goff] * scale;
-            colors[boff] = p[boff] * scale;
+            colors[roff] = static_cast<uint8_t>(p[roff] * scale);
+            colors[goff] = static_cast<uint8_t>(p[goff] * scale);
+            colors[boff] = static_cast<uint8_t>(p[boff] * scale);
             if (woff >= 0) {
-                colors[woff] = p[woff] * scale;
+                colors[woff] = static_cast<uint8_t>(p[woff] * scale);
             }
-            for (uint_fast8_t ci = 0; ci < align; ++ci) {
+            for (int ci = 0; ci < align; ++ci) {
                 uint8_t bit{0x80};
                 while (bit) {
                     v.push_back((colors[ci] & bit) ? one : zero);
@@ -210,13 +228,13 @@ public:
         for (uint32_t i = 0; i < led.numPixels(); ++i) {
             const uint8_t* p = led.pixels().data() + i * align;
             uint8_t colors[4]{};
-            colors[roff] = p[roff] * scale;
-            colors[goff] = p[goff] * scale;
-            colors[boff] = p[boff] * scale;
+            colors[roff] = static_cast<uint8_t>(p[roff] * scale);
+            colors[goff] = static_cast<uint8_t>(p[goff] * scale);
+            colors[boff] = static_cast<uint8_t>(p[boff] * scale);
             if (woff >= 0) {
-                colors[woff] = p[woff] * scale;
+                colors[woff] = static_cast<uint8_t>(p[woff] * scale);
             }
-            for (uint_fast8_t ci = 0; ci < align; ++ci) {
+            for (int ci = 0; ci < align; ++ci) {
                 uint8_t bit{0x80};
                 while (bit) {
                     buf.push_back((colors[ci] & bit) ? one : zero);
@@ -257,7 +275,7 @@ public:
         return v;
     }
 
-    virtual bool write(const uint8_t* data, const uint32_t size)
+    virtual bool write(const uint8_t* data, const uint32_t size) override
     {
         return _unit.writeWithTransaction(data, size, 50 /* alldone wait ms */) == m5::hal::error::error_t::OK;
     }
@@ -269,7 +287,8 @@ public:
         while (p->parent() && is_unit_led(p->parent())) {
             p = p->parent();
         }
-        while (p) {
+        // Only traverse UnitLED children so a non-LED child in the tree cannot be downcast to UnitLED*.
+        while (p && is_unit_led(p)) {
             tree.push_back(static_cast<UnitLED*>(p));
             p = p->child(0);
         }
@@ -288,7 +307,7 @@ public:
             uint8_t bri        = led->brightness();
             const uint8_t* src = led->pixels().data();
             for (uint32_t i = 0; i < led->numPixels() * align; ++i) {
-                buf.push_back((src[i] * bri) >> 8);
+                buf.push_back(rgb::scale8(src[i], bri));
             }
         }
     }
@@ -300,7 +319,7 @@ public:
         if (!ad) {
             return false;
         }
-        auto channel = (rmt_channel_t)ad->impl()->rmtTxChannel();
+        auto channel = static_cast<rmt_channel_t>(ad->impl()->rmtTxChannel());
         if (channel >= RMT_CHANNEL_MAX) {
             return false;
         }
@@ -330,6 +349,14 @@ public:
         err = rmt_wait_tx_done(channel, pdMS_TO_TICKS(100));
         if (err != ESP_OK) {
             M5_LIB_LOGE("rmt_wait_tx_done failed: %d", err);
+            return false;
+        }
+        // Latch: hold line low for the chip's reset window (per rmt_item_reset())
+        const auto reset_it = _unit.rmt_item_reset();
+        const auto cfg_tx   = _unit.rmt_config();
+        if (reset_it.duration0 > 0 && cfg_tx.tx.tick_ns > 0) {
+            const uint32_t reset_us = (static_cast<uint32_t>(reset_it.duration0) * cfg_tx.tx.tick_ns + 999) / 1000;
+            m5::utility::delayMicroseconds(reset_us);
         }
         return true;
     }
@@ -390,9 +417,21 @@ public:
         }
 
         // 4. Send reset pulse
+        auto reset_enc = _copy_encoder_for_reset();
+        if (!reset_enc) {
+            return false;
+        }
         auto reset = _unit.rmt_item_reset();
-        rmt_transmit(tx_handle, _copy_encoder_for_reset(), &reset, sizeof(reset), &tx_cfg);
-        rmt_tx_wait_all_done(tx_handle, pdMS_TO_TICKS(10));
+        err        = rmt_transmit(tx_handle, reset_enc, &reset, sizeof(reset), &tx_cfg);
+        if (err != ESP_OK) {
+            M5_LIB_LOGE("rmt_transmit(reset) failed: %d", err);
+            return false;
+        }
+        err = rmt_tx_wait_all_done(tx_handle, pdMS_TO_TICKS(100));
+        if (err != ESP_OK) {
+            M5_LIB_LOGE("rmt_tx_wait_all_done(reset) failed: %d", err);
+            return false;
+        }
         return true;
     }
 
@@ -400,7 +439,11 @@ public:
     {
         if (!_reset_encoder) {
             rmt_copy_encoder_config_t cfg{};
-            rmt_new_copy_encoder(&cfg, &_reset_encoder);
+            auto err = rmt_new_copy_encoder(&cfg, &_reset_encoder);
+            if (err != ESP_OK) {
+                M5_LIB_LOGE("rmt_new_copy_encoder failed: %d", err);
+                _reset_encoder = nullptr;
+            }
         }
         return _reset_encoder;
     }
@@ -416,7 +459,7 @@ public:
     {
     }
 
-    virtual UnitLED::container_type rgb888_items()
+    virtual UnitLED::container_type rgb888_items() override
     {
         UnitLED::container_type v;
         auto align        = 3 + _unit.hasWhite();
@@ -436,7 +479,7 @@ public:
         return v;
     }
 
-    virtual UnitLED::container_type rgb888_items_from_root()
+    virtual UnitLED::container_type rgb888_items_from_root() override
     {
         UnitLED::container_type v;
         // auto align = 3 + _unit.hasWhite();
@@ -456,7 +499,8 @@ public:
         while (p && p->parent() && is_unit_led(p->parent())) {
             p = p->parent();
         }
-        while (p && p != &_unit) {
+        // Stop at any non-LED child to avoid downcasting an unrelated Component to UnitLED*.
+        while (p && p != &_unit && is_unit_led(p)) {
             auto i = static_cast<UnitLED*>(p)->rgb888_items();
             v.insert(v.end(), i.begin(), i.end());
             p = p->child(0);
@@ -466,7 +510,7 @@ public:
         return v;
     }
 
-    virtual bool write(const uint8_t* data, const uint32_t size)
+    virtual bool write(const uint8_t* data, const uint32_t size) override
     {
         return _unit.writeWithTransaction(data, size, true) == m5::hal::error::error_t::OK;
     }
@@ -478,8 +522,22 @@ const char UnitLED::name[] = "UnitLED";
 const types::uid_t UnitLED::uid{"UnitLED"_mmh3};
 const types::attr_t UnitLED::attr{attribute::AccessGPIO};
 
+bool UnitLED::add(UnitLED& c, const int16_t channel)
+{
+    return Component::add(c, channel);
+}
+
 bool UnitLED::begin()
 {
+    if (!is_valid_order(_order)) {
+        M5_LIB_LOGE("invalid Order: %d", static_cast<int>(_order));
+        return false;
+    }
+    if (_numPixels == 0) {
+        M5_LIB_LOGE("numPixels must be > 0");
+        return false;
+    }
+
     // Search root unit
     Component* p = this;
     // 1st: Exists PbHub in tree?
@@ -521,12 +579,16 @@ bool UnitLED::begin()
     }
 
     _brightness = _cfg.brightness;
+    _ready      = true;
 
     return true;
 }
 
 bool UnitLED::writePixels(void)
 {
+    if (!_ready) {
+        return false;
+    }
     bool ret{};
 
     switch (adapter()->type()) {
@@ -548,24 +610,25 @@ bool UnitLED::writePixels(void)
 
 bool UnitLED::setPixelColor(const uint16_t n, const uint8_t r, const uint8_t g, const uint8_t b)
 {
-    if (n < _numPixels) {
-        Color c = color(n);
-        c.r     = r;
-        c.g     = g;
-        c.b     = b;
-        setPixelColor(n, c);
-        return true;
+    if (!_ready || n >= _numPixels) {
+        return false;
     }
-    return false;
+    Color c = color(n);
+    c.r     = r;
+    c.g     = g;
+    c.b     = b;
+    setPixelColor(n, c);
+    return true;
 }
 
 bool UnitLED::fill(const Color& c, const uint16_t first, const uint16_t count)
 {
-    if (first + count > _numPixels) {
+    if (!_ready || first >= _numPixels) {
         return false;
     }
-    auto last = count ? (first + count) : (first + _numPixels - first);
-    for (uint16_t n = first; n < last; ++n) {
+    const uint16_t remain = _numPixels - first;
+    const uint16_t num    = count ? std::min(count, remain) : remain;
+    for (uint16_t n = first; n < first + num; ++n) {
         setPixelColor(n, c);
     }
     return true;
@@ -573,10 +636,11 @@ bool UnitLED::fill(const Color& c, const uint16_t first, const uint16_t count)
 
 bool UnitLED::fillRainbow(const uint16_t first, const uint16_t count, const uint8_t firstHue)
 {
-    auto num = count ? count : (_numPixels - first);
-    if (first + num > _numPixels || !num) {
+    if (!_ready || first >= _numPixels) {
         return false;
     }
+    const uint16_t remain = _numPixels - first;
+    const uint16_t num    = count ? std::min(count, remain) : remain;
 
     uint16_t hue         = firstHue * 256U;  // 0 - 65535
     const uint16_t delta = 65536 / num;
@@ -592,8 +656,12 @@ bool UnitLED::fillGradation(const rgb::Color& firstClr, const rgb::Color& lastCl
                             const uint16_t count)
 
 {
-    auto num = count ? count : (_numPixels - first);
-    if (first + num > _numPixels || num < 2) {
+    if (!_ready || first >= _numPixels) {
+        return false;
+    }
+    const uint16_t remain = _numPixels - first;
+    const uint16_t num    = count ? std::min(count, remain) : remain;
+    if (num < 2) {
         return false;
     }
 
@@ -611,10 +679,11 @@ bool UnitLED::fillGradation(const rgb::Color& firstClr, const rgb::Color& lastCl
 
 bool UnitLED::fillRandom(const uint16_t first, const uint16_t count)
 {
-    auto num = count ? count : (_numPixels - first);
-    if (first + num > _numPixels || !num) {
+    if (!_ready || first >= _numPixels) {
         return false;
     }
+    const uint16_t remain = _numPixels - first;
+    const uint16_t num    = count ? std::min(count, remain) : remain;
 
     for (uint16_t i = first; i < first + num; ++i) {
         setPixelColor(i, esp_random(), esp_random(), esp_random());
@@ -624,8 +693,11 @@ bool UnitLED::fillRandom(const uint16_t first, const uint16_t count)
 
 void UnitLED::setRotation(const int8_t rot)
 {
-    auto prev    = _rot;
-    auto new_rot = rotation_of(rot);
+    if (!_ready) {
+        return;
+    }
+    const int8_t prev    = _rot;
+    const int8_t new_rot = static_cast<int8_t>(rotation_of(rot));
     if (new_rot == prev) {
         return;
     }
@@ -648,7 +720,7 @@ void UnitLED::setRotation(const int8_t rot)
 Color UnitLED::get_pixel_color(const uint16_t n) const
 {
     Color c{};
-    if (n < _numPixels) {
+    if (_ready && n < _numPixels) {
         const uint8_t* p = _pixels.data() + n * (3 + hasWhite());
         c.r              = p[_offsetR];
         c.g              = p[_offsetG];
@@ -660,18 +732,18 @@ Color UnitLED::get_pixel_color(const uint16_t n) const
 
 bool UnitLED::set_pixel_color(const uint16_t n, const Color& c)
 {
-    if (n < _numPixels) {
-        //        M5_LIB_LOGV("[%u]:%08X", n, c.wrgb);
-        uint8_t* p  = _pixels.data() + n * (3 + hasWhite());
-        p[_offsetR] = c.r;
-        p[_offsetG] = c.g;
-        p[_offsetB] = c.b;
-        if (_offsetW >= 0) {
-            p[_offsetW] = c.w;
-        }
-        return true;
+    if (!_ready || n >= _numPixels) {
+        return false;
     }
-    return false;
+    //        M5_LIB_LOGV("[%u]:%08X", n, c.wrgb);
+    uint8_t* p  = _pixels.data() + n * (3 + hasWhite());
+    p[_offsetR] = c.r;
+    p[_offsetG] = c.g;
+    p[_offsetB] = c.b;
+    if (_offsetW >= 0) {
+        p[_offsetW] = c.w;
+    }
+    return true;
 }
 
 UnitLED::item_container_type UnitLED::items()
@@ -686,6 +758,9 @@ UnitLED::container_type UnitLED::rgb888_items()
 
 void UnitLED::shift_left(const uint16_t count, const bool wrap)
 {
+    if (!_ready) {
+        return;
+    }
     uint16_t num = wrap ? (count % _numPixels) : std::min(count, _numPixels);
     if (!num) {
         return;
@@ -716,6 +791,9 @@ void UnitLED::shift_left(const uint16_t count, const bool wrap)
 
 void UnitLED::shift_right(uint16_t count, bool wrap)
 {
+    if (!_ready) {
+        return;
+    }
     uint16_t num = wrap ? (count % _numPixels) : std::min(count, _numPixels);
     if (!num) {
         return;

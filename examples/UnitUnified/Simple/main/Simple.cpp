@@ -10,11 +10,10 @@
   sufficient for all LEDs.
   If the lights turn on unexpectedly, try lowering the brightness or reducing the
   number of lights turned on at once to see if that resolves the issue.
-  If the lights turn on unexpectedly, try lowering the brightness or reducing the number of lights turned on at once to
-  see if that resolves the issue.
 */
 #include <M5Unified.h>
 #include <M5UnitUnified.h>
+#include <wiring/m5_unit_unified_wiring.hpp>
 #include <M5UnitUnifiedRGB.h>
 #include <M5Utility.h>
 #include <esp_random.h>
@@ -42,33 +41,15 @@
 // #define USING_UNIT_RGBLED15
 // For Unit RGB LED Strip (A093)
 // #define USING_UNIT_RGBLED_STRIP30
-// For ATOM Matrix built-in 5x5 RGB LED
+// For ATOM Matrix built-in 5x5 RGB LED (C008-B)
 // #define USING_ATOM_MATRIX_RGB
-// For Hat NeoFlash
+// For Hat NeoFlash (U071)
 // #define USING_HAT_NEOFLASH
 #endif
 
 using m5::unit::rgb::Color;
 
 namespace {
-
-int get_hat_gpio_pin(const m5::board_t board)
-{
-    switch (board) {
-        case m5::board_t::board_M5StickC:
-        case m5::board_t::board_M5StickCPlus:
-        case m5::board_t::board_M5StickCPlus2:
-            return 26;
-        case m5::board_t::board_M5StickS3:
-            return 0;
-        case m5::board_t::board_M5StackCoreInk:
-            return 26;
-        case m5::board_t::board_ArduinoNessoN1:
-            return 7;
-        default:
-            return -1;
-    }
-}
 
 auto& lcd = M5.Display;
 m5::unit::UnitUnified Units;
@@ -137,8 +118,6 @@ void draw_pixel_color()
 
 void setup()
 {
-    delay(2000);
-
     M5.begin();
     M5.setTouchButtonHeightByRatio(100);
 
@@ -147,42 +126,33 @@ void setup()
         lcd.setRotation(1);
     }
 
+    bool unit_ready{};
 #if defined(USING_ATOM_MATRIX_RGB)
-    // ATOM Matrix built-in 5x5 RGB LED (not an external unit)
+    // ATOM Matrix built-in 5x5 RGB LED — fixed GPIO 27 (not routed through GROVE/Hat).
     M5_LOGI("USING_ATOM_MATRIX_RGB");
-    auto pin_num_gpio_in  = -1;
-    auto pin_num_gpio_out = 27;
+    unit_ready = Units.add(unit, -1, 27) && Units.begin();
 #elif defined(USING_HAT_NEOFLASH)
+    // Hat NeoFlash uses the rx-side pin of the Hat header as data-out (WS2812 signal).
     M5_LOGI("USING_HAT_NEOFLASH");
-    auto pin_num_gpio_in  = -1;
-    auto pin_num_gpio_out = get_hat_gpio_pin(M5.getBoard());
+    const auto hat_pin_out = m5::unit::wiring::hatGPIOPins().rx;
     // StickS3 GPIO0 is a strapping pin shared with PMIC open-drain output.
     // Max drive strength is required for stable WS2812 signal with USB connected.
-    if (M5.getBoard() == m5::board_t::board_M5StickS3 && pin_num_gpio_out == 0) {
-        gpio_set_drive_capability((gpio_num_t)pin_num_gpio_out, GPIO_DRIVE_CAP_3);
+    // NOTE: On StickS3 the Hat header uses GPIO 0 = boot-mode strap pin. HatNeoFlash's
+    // WS2812 DIN pulls GPIO 0 low at reset, forcing DOWNLOAD MODE. Detach the Hat
+    // before flashing and re-attach after boot.
+    if (M5.getBoard() == m5::board_t::board_M5StickS3 && hat_pin_out == 0) {
+        gpio_set_drive_capability(static_cast<gpio_num_t>(hat_pin_out), GPIO_DRIVE_CAP_3);
     }
+    unit_ready = Units.add(unit, -1, hat_pin_out) && Units.begin();
 #else
-    // Neco button requires a GPIO with internal pull-up support.
-    // Some ports use input-only GPIOs (e.g. GPIO 36) that lack
-    // internal pull-up, so the button line floats and reads noise.
-    // Use a port with output-capable GPIO instead.
-    auto pin_num_gpio_in  = M5.getPin(m5::pin_name_t::port_b_in);
-    auto pin_num_gpio_out = M5.getPin(m5::pin_name_t::port_b_out);
-    if (pin_num_gpio_in < 0 || pin_num_gpio_out < 0) {
-        M5_LOGW("PortB is not available");
-        Wire.end();
-        pin_num_gpio_in  = M5.getPin(m5::pin_name_t::port_a_pin1);
-        pin_num_gpio_out = M5.getPin(m5::pin_name_t::port_a_pin2);
-    }
+    // Board-aware GROVE GPIO: port_b (with port_a fallback).
+    // Neco button needs a GPIO with internal pull-up so we request Both pins.
+    unit_ready = m5::unit::wiring::addGPIO(Units, unit) && Units.begin();
 #endif
-    M5_LOGI("getPin :%d,%d", pin_num_gpio_in, pin_num_gpio_out);
 
-    if (!Units.add(unit, pin_num_gpio_in, pin_num_gpio_out) || !Units.begin()) {
+    if (!unit_ready) {
         M5_LOGE("Failed to begin");
-        lcd.fillScreen(TFT_RED);
-        while (true) {
-            m5::utility::delay(10000);
-        }
+        m5::unit::wiring::failStop();
     }
     M5_LOGI("M5UnitUnified initialized");
     M5_LOGI("%s", Units.debugInfo().c_str());
@@ -203,10 +173,10 @@ void loop()
 #if defined(USING_UNIT_NECO)
     if (unit.wasPressed()) {
         M5.Speaker.tone(4000, 20);
-        M5.Log.printf("WasPressed Neko\n");
+        M5.Log.printf("WasPressed Neco\n");
     }
     if (unit.wasReleased()) {
-        M5.Log.printf("WasReleased Neko\n");
+        M5.Log.printf("WasReleased Neco\n");
     }
 #endif
 

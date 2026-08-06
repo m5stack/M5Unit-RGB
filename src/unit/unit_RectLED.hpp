@@ -33,24 +33,35 @@ class UnitRectLED : public BaseClass {
 
 public:
     using BaseClass::BaseClass;
+    //! @brief Default constructor (uses WIDTH x HEIGHT pixels)
     UnitRectLED() : BaseClass(WIDTH * HEIGHT)
     {
     }
     static constexpr uint8_t LED_WIDTH{WIDTH};
     static constexpr uint8_t LED_HEIGHT{HEIGHT};
 
-    //! @brief Logical width considering rotation (0/180: WIDTH, 90/270: HEIGHT)
+    /*!
+      @brief Logical width considering rotation (0/180: WIDTH, 90/270: HEIGHT)
+      @return Width in pixels
+     */
     inline virtual uint16_t width() const override
     {
         return (this->rotation() & 1) ? HEIGHT : WIDTH;
     }
-    //! @brief Logical height considering rotation (0/180: HEIGHT, 90/270: WIDTH)
+    /*!
+      @brief Logical height considering rotation (0/180: HEIGHT, 90/270: WIDTH)
+      @return Height in pixels
+     */
     inline virtual uint16_t height() const override
     {
         return (this->rotation() & 1) ? WIDTH : HEIGHT;
     }
 
-    inline virtual uint8_t maxRotation() const
+    /*!
+      @brief Get the max rotation (4 steps: 0/90/180/270 deg)
+      @return 4
+     */
+    inline virtual uint8_t maxRotation() const override
     {
         // 0:0 1:90 2:180 3:270
         return 4;

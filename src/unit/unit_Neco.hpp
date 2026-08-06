@@ -25,17 +25,31 @@ class UnitNeco : public UnitWS2812, public m5::utility::button::Status {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitNeco, 0x00);
 
 public:
+    //! @brief Constructor (35 LEDs)
     UnitNeco() : UnitWS2812(35 /* 35 pixels */)
     {
         auto ccfg         = component_config();
         ccfg.max_children = 1;  // Can connect 1 Unit
         component_config(ccfg);
     }
-    //! @brief Begin the unit
+    /*!
+      @brief Begin the unit
+      @return True if successful
+     */
     virtual bool begin() override;
     //! @brief Update the unit
-    //! @param force Force update
-    virtual void update(const bool force = false) override;
+    virtual void update(const bool = false) override;
+
+    /*!
+      @brief Whether the button is usable on the current wiring
+      @return True if the RX pin was successfully configured as InputPullup at begin()
+      @note Determined at begin(); false if RX pin is unassigned or cannot support InputPullup
+      (e.g. ESP32 classic GPIO 34-39 are input-only with no internal pull-up).
+     */
+    inline bool buttonAvailable() const
+    {
+        return _btn_available;
+    }
 
 private:
     bool _btn_available{false};

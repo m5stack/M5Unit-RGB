@@ -35,6 +35,12 @@ Hat NeoFlash is a NeoPixel LED hat with 126 (7x18) WS2812B programmable LEDs. It
 ATOM Matrix has a built-in 5x5 RGB LED matrix on the panel. This library can manage the LED matrix.
 
 > **Warning:** Do not set brightness too high. Excessive brightness can generate high temperatures and damage the LEDs and acrylic panel. Recommended brightness is 20 or less.
+>
+> **Note (large cascades / PbHub):** Two hardware limits apply to the cascaded examples (`DaisyChain`, `ViaPbHub`):
+> 1. **PbHub caps each channel at 74 LEDs.** LEDs past the 74th on any channel receive no data — e.g. running two Unit Puzzles (64 + 64) on a single PbHub channel leaves 54 LEDs in the second puzzle unlit.
+> 2. **USB-powered boards (NanoC6 / NanoH2, ~500 mA)** cannot supply enough current for the full example configurations; the 5V rail sags and downstream LEDs dim or go dark. Reduce total LED count, lower brightness, or use an external 5V power source.
+>
+> **Note (StickS3 + HatNeoFlash boot):** StickS3's Hat header uses GPIO 0 (ESP32-S3 boot-mode strap). HatNeoFlash's WS2812 DIN pulls GPIO 0 low at reset, forcing DOWNLOAD MODE (silent boot). Detach the Hat before flashing, then re-attach after the firmware starts.
 
 
 ## Related Link
@@ -80,10 +86,14 @@ See also [M5Unit-HUB](https://github.com/m5stack/M5Unit-HUB)
 - Each channel can control up to **MAX 74 LEDs each**
 - **Button status of UnitNeco** cannot be retrieved
 
+## Limitations for UnitNeco button (direct GPIO connection)
+- Button read requires an input GPIO with internal pull-up on the host's Grove port. Some boards route `port_b_in` to an input-only pin lacking pull-up (e.g. **M5Stack Core = GPIO 36**), on which the button is disabled at runtime (logged as `RX GPIO NN is not usable for button; button disabled`) — the LEDs still work.
+- To use the button on such boards, connect Neco to another port whose input pin has internal pull-up (e.g. Port A or Port C on boards that expose them) and add manually via `Units.add(unit, rx, tx)` with the chosen pins instead of `wiring::addGPIO`.
+
 ## Examples
 See also [examples/UnitUnified](examples/UnitUnified)
 
-### For ArduinoIDE settings
+### For Arduino IDE settings
 You must choose a define symbol for the unit you will use.
 (Rewrite source or specify with compile options)
 
@@ -128,5 +138,4 @@ If you want to output Git commit hashes to html, do it for the git cloned folder
 
 ### Required
 - [Doxygen](https://www.doxygen.nl/)
-- [pcregrep](https://formulae.brew.sh/formula/pcre2)
 - [Git](https://git-scm.com/) (Output commit hash to html)

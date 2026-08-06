@@ -28,6 +28,7 @@ protected:
     }
 
 public:
+    //! @brief Destructor
     virtual ~UnitSK6812()
     {
     }
@@ -56,9 +57,14 @@ class UnitSK6812GRB : public UnitSK6812 {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitSK6812GRB, 0x00);
 
 public:
+    /*!
+      @brief Constructor
+      @param num_of_pixels Number of pixels
+     */
     explicit UnitSK6812GRB(const uint16_t num_of_pixels) : UnitSK6812(num_of_pixels, rgb::Order::grb24)
     {
     }
+    //! @brief Destructor
     virtual ~UnitSK6812GRB()
     {
     }
@@ -72,9 +78,14 @@ class UnitSK6812GRBW : public UnitSK6812 {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitSK6812GRBW, 0x00);
 
 public:
+    /*!
+      @brief Constructor
+      @param num_of_pixels Number of pixels
+     */
     explicit UnitSK6812GRBW(const uint16_t num_of_pixels) : UnitSK6812(num_of_pixels, rgb::Order::grbw32)
     {
     }
+    //! @brief Destructor
     virtual ~UnitSK6812GRBW()
     {
     }
