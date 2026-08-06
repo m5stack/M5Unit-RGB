@@ -39,6 +39,10 @@ docs/html/
 
 # IDE
 .vscode/
+.clangd
+
+# clangd index cache
+.cache/
 
 # macOS
 .DS_Store
