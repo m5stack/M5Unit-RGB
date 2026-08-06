@@ -1,5 +1,8 @@
 var unionm5_1_1unit_1_1rgb_1_1_color =
 [
+    [ "Color", "unionm5_1_1unit_1_1rgb_1_1_color.html#abaa57758290f86608a180ee98b28d278", null ],
+    [ "Color", "unionm5_1_1unit_1_1rgb_1_1_color.html#a9efa37e588ff801b09110463d2f8fd23", null ],
+    [ "operator wrgb32_color_t", "unionm5_1_1unit_1_1rgb_1_1_color.html#ac85adabc864ddf315e396a9f461c8ba2", null ],
     [ "a", "unionm5_1_1unit_1_1rgb_1_1_color.html#a24fbd470834f1479c1f7f64d8b3174bb", null ],
     [ "b", "unionm5_1_1unit_1_1rgb_1_1_color.html#a03e22549e937d7c7fb67db383e00e1d9", null ],
     [ "g", "unionm5_1_1unit_1_1rgb_1_1_color.html#a8513b37f19776f2eca1268a32deeee87", null ],

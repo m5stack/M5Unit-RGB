@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">M5Unit-RGB<span id="projectnumber">&#160;0.0.1 git rev:55cb205</span>
+   <div id="projectname">M5Unit-RGB<span id="projectnumber">&#160;0.0.2 git rev:51dfbe6</span>
    </div>
   </td>
  </tr>
@@ -113,21 +113,26 @@ $(function(){initNavTree('unit___puzzle_8hpp_source.html',''); initResizable(tru
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceunit.html">unit</a> {</div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="keyword">class </span>UnitPuzzle : <span class="keyword">public</span> UnitRectLED&lt;8, 8, UnitWS2812&gt; {</div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    M5_UNIT_COMPONENT_HPP_BUILDER(UnitPuzzle, 0x00);</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    M5_UNIT_COMPONENT_HPP_BUILDER(<a class="code hl_function" href="classm5_1_1unit_1_1_unit_puzzle.html#a40120d974276e6c89a0232325d4fb7b0">UnitPuzzle</a>, 0x00);</div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="keyword">public</span>:</div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    UnitPuzzle() : UnitRectLED&lt;8, 8, UnitWS2812&gt;()</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    {</div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>        <span class="keyword">auto</span> ccfg         = component_config();</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        ccfg.max_children = 1;  <span class="comment">// Can connect 1 Unit</span></div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>        component_config(ccfg);</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    }</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>};</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>}  <span class="comment">// namespace unit</span></div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>}  <span class="comment">// namespace m5</span></div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#endif</span></div>
-<div class="ttc" id="anamespacem5_html"><div class="ttname"><a href="namespacem5.html">m5</a></div><div class="ttdoc">Top level namespace of M5stack.</div></div>
+<div class="foldopen" id="foldopen00027" data-start="{" data-end="}">
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="classm5_1_1unit_1_1_unit_puzzle.html#a40120d974276e6c89a0232325d4fb7b0">   27</a></span>    <a class="code hl_function" href="classm5_1_1unit_1_1_unit_puzzle.html#a40120d974276e6c89a0232325d4fb7b0">UnitPuzzle</a>() : <a class="code hl_class" href="classm5_1_1unit_1_1_unit_rect_l_e_d.html">UnitRectLED</a>&lt;8, 8, <a class="code hl_class" href="classm5_1_1unit_1_1_unit_w_s2812.html">UnitWS2812</a>&gt;()</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    {</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        <span class="keyword">auto</span> ccfg         = component_config();</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>        ccfg.max_children = 1;  <span class="comment">// Can connect 1 Unit</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>        component_config(ccfg);</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    }</div>
+</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>};</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>}  <span class="comment">// namespace unit</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>}  <span class="comment">// namespace m5</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aclassm5_1_1unit_1_1_unit_puzzle_html_a40120d974276e6c89a0232325d4fb7b0"><div class="ttname"><a href="classm5_1_1unit_1_1_unit_puzzle.html#a40120d974276e6c89a0232325d4fb7b0">m5::unit::UnitPuzzle::UnitPuzzle</a></div><div class="ttdeci">UnitPuzzle()</div><div class="ttdoc">Constructor (8x8 = 64 LEDs)</div><div class="ttdef"><b>Definition</b> unit_Puzzle.hpp:27</div></div>
+<div class="ttc" id="aclassm5_1_1unit_1_1_unit_rect_l_e_d_html"><div class="ttname"><a href="classm5_1_1unit_1_1_unit_rect_l_e_d.html">m5::unit::UnitRectLED</a></div><div class="ttdoc">Rectangular array LED unit.</div></div>
+<div class="ttc" id="aclassm5_1_1unit_1_1_unit_w_s2812_html"><div class="ttname"><a href="classm5_1_1unit_1_1_unit_w_s2812.html">m5::unit::UnitWS2812</a></div><div class="ttdoc">WS2812 Unit.</div></div>
+<div class="ttc" id="anamespacem5_html"><div class="ttname"><a href="namespacem5.html">m5</a></div><div class="ttdoc">Top level namespace of M5Stack.</div></div>
 <div class="ttc" id="anamespaceunit_html"><div class="ttname"><a href="namespaceunit.html">unit</a></div><div class="ttdoc">Unit-related namespace.</div></div>
 <div class="ttc" id="aunit___rect_l_e_d_8hpp_html"><div class="ttname"><a href="unit___rect_l_e_d_8hpp.html">unit_RectLED.hpp</a></div><div class="ttdoc">Rectangular array LED unit.</div></div>
 </div><!-- fragment --></div><!-- contents -->

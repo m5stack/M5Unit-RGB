@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">M5Unit-RGB<span id="projectnumber">&#160;0.0.1 git rev:55cb205</span>
+   <div id="projectname">M5Unit-RGB<span id="projectnumber">&#160;0.0.2 git rev:51dfbe6</span>
    </div>
   </td>
  </tr>
@@ -118,17 +118,19 @@ Inheritance diagram for m5::unit::UnitRectLED&lt; WIDTH, HEIGHT, BaseClass &gt;:
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ad1a0563b3a8daa89035ed0722ba731fe" id="r_ad1a0563b3a8daa89035ed0722ba731fe"><td class="memItemLeft" align="right" valign="top"><a id="ad1a0563b3a8daa89035ed0722ba731fe" name="ad1a0563b3a8daa89035ed0722ba731fe"></a>
-virtual uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>width</b> () const override</td></tr>
-<tr class="memdesc:ad1a0563b3a8daa89035ed0722ba731fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Logical width considering rotation (0/180: WIDTH, 90/270: HEIGHT) <br /></td></tr>
+<tr class="memitem:a273f45e36e10b6946150c07c6c73ead4" id="r_a273f45e36e10b6946150c07c6c73ead4"><td class="memItemLeft" align="right" valign="top"><a id="a273f45e36e10b6946150c07c6c73ead4" name="a273f45e36e10b6946150c07c6c73ead4"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>UnitRectLED</b> ()</td></tr>
+<tr class="memdesc:a273f45e36e10b6946150c07c6c73ead4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor (uses WIDTH x HEIGHT pixels) <br /></td></tr>
+<tr class="separator:a273f45e36e10b6946150c07c6c73ead4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad1a0563b3a8daa89035ed0722ba731fe" id="r_ad1a0563b3a8daa89035ed0722ba731fe"><td class="memItemLeft" align="right" valign="top">virtual uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad1a0563b3a8daa89035ed0722ba731fe">width</a> () const override</td></tr>
+<tr class="memdesc:ad1a0563b3a8daa89035ed0722ba731fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Logical width considering rotation (0/180: WIDTH, 90/270: HEIGHT)  <br /></td></tr>
 <tr class="separator:ad1a0563b3a8daa89035ed0722ba731fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa4d29f895979a0bab5dc1b677be995a9" id="r_aa4d29f895979a0bab5dc1b677be995a9"><td class="memItemLeft" align="right" valign="top"><a id="aa4d29f895979a0bab5dc1b677be995a9" name="aa4d29f895979a0bab5dc1b677be995a9"></a>
-virtual uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>height</b> () const override</td></tr>
-<tr class="memdesc:aa4d29f895979a0bab5dc1b677be995a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Logical height considering rotation (0/180: HEIGHT, 90/270: WIDTH) <br /></td></tr>
+<tr class="memitem:aa4d29f895979a0bab5dc1b677be995a9" id="r_aa4d29f895979a0bab5dc1b677be995a9"><td class="memItemLeft" align="right" valign="top">virtual uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa4d29f895979a0bab5dc1b677be995a9">height</a> () const override</td></tr>
+<tr class="memdesc:aa4d29f895979a0bab5dc1b677be995a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Logical height considering rotation (0/180: HEIGHT, 90/270: WIDTH)  <br /></td></tr>
 <tr class="separator:aa4d29f895979a0bab5dc1b677be995a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abaa157c40daefad58b6b20fa76560135" id="r_abaa157c40daefad58b6b20fa76560135"><td class="memItemLeft" align="right" valign="top"><a id="abaa157c40daefad58b6b20fa76560135" name="abaa157c40daefad58b6b20fa76560135"></a>
-virtual uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>maxRotation</b> () const</td></tr>
-<tr class="separator:abaa157c40daefad58b6b20fa76560135"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1d9c2341a5af8c765626f21472fc4d42" id="r_a1d9c2341a5af8c765626f21472fc4d42"><td class="memItemLeft" align="right" valign="top">virtual uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1d9c2341a5af8c765626f21472fc4d42">maxRotation</a> () const override</td></tr>
+<tr class="memdesc:a1d9c2341a5af8c765626f21472fc4d42"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the max rotation (4 steps: 0/90/180/270 deg)  <br /></td></tr>
+<tr class="separator:a1d9c2341a5af8c765626f21472fc4d42"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
@@ -156,7 +158,98 @@ class m5::unit::UnitRectLED&lt; WIDTH, HEIGHT, BaseClass &gt;</div><p>Rectangula
   </table>
   </dd>
 </dl>
-</div></div><!-- contents -->
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="aa4d29f895979a0bab5dc1b677be995a9" name="aa4d29f895979a0bab5dc1b677be995a9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa4d29f895979a0bab5dc1b677be995a9">&#9670;&#160;</a></span>height()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;const uint8_t WIDTH, const uint8_t HEIGHT, class BaseClass &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual uint16_t <a class="el" href="classm5_1_1unit_1_1_unit_rect_l_e_d.html">m5::unit::UnitRectLED</a>&lt; WIDTH, HEIGHT, BaseClass &gt;::height </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Logical height considering rotation (0/180: HEIGHT, 90/270: WIDTH) </p>
+<dl class="section return"><dt>Returns</dt><dd>Height in pixels </dd></dl>
+
+</div>
+</div>
+<a id="a1d9c2341a5af8c765626f21472fc4d42" name="a1d9c2341a5af8c765626f21472fc4d42"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1d9c2341a5af8c765626f21472fc4d42">&#9670;&#160;</a></span>maxRotation()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;const uint8_t WIDTH, const uint8_t HEIGHT, class BaseClass &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual uint8_t <a class="el" href="classm5_1_1unit_1_1_unit_rect_l_e_d.html">m5::unit::UnitRectLED</a>&lt; WIDTH, HEIGHT, BaseClass &gt;::maxRotation </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the max rotation (4 steps: 0/90/180/270 deg) </p>
+<dl class="section return"><dt>Returns</dt><dd>4 </dd></dl>
+
+</div>
+</div>
+<a id="ad1a0563b3a8daa89035ed0722ba731fe" name="ad1a0563b3a8daa89035ed0722ba731fe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad1a0563b3a8daa89035ed0722ba731fe">&#9670;&#160;</a></span>width()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;const uint8_t WIDTH, const uint8_t HEIGHT, class BaseClass &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual uint16_t <a class="el" href="classm5_1_1unit_1_1_unit_rect_l_e_d.html">m5::unit::UnitRectLED</a>&lt; WIDTH, HEIGHT, BaseClass &gt;::width </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Logical width considering rotation (0/180: WIDTH, 90/270: HEIGHT) </p>
+<dl class="section return"><dt>Returns</dt><dd>Width in pixels </dd></dl>
+
+</div>
+</div>
+</div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->

@@ -1,5 +1,24 @@
 var searchData=
 [
-  ['unitled_0',['UnitLED',['../classm5_1_1unit_1_1_unit_l_e_d.html#a89308df162f0fc975421ec5f37e78c29',1,'m5::unit::UnitLED']]],
-  ['update_1',['update',['../classm5_1_1unit_1_1_unit_neco.html#a89cb940ace6424ce0ee07ac298410328',1,'m5::unit::UnitNeco']]]
+  ['unitatommatrixrgb_0',['UnitAtomMatrixRGB',['../classm5_1_1unit_1_1_unit_atom_matrix_r_g_b.html#a09f1ffcbd3cae835e6e08e081b09fb06',1,'m5::unit::UnitAtomMatrixRGB']]],
+  ['unithex_1',['UnitHex',['../classm5_1_1unit_1_1_unit_hex.html#abbcb0331b9253a6bd2bf5418bf0534e8',1,'m5::unit::UnitHex']]],
+  ['unithexled37_2',['UnitHexLED37',['../classm5_1_1unit_1_1_unit_hex_l_e_d37.html#a35461efb2da5668e30bb067960fa74a5',1,'m5::unit::UnitHexLED37']]],
+  ['unitneco_3',['UnitNeco',['../classm5_1_1unit_1_1_unit_neco.html#a00736f7a0c6424ca7654f80b434b218d',1,'m5::unit::UnitNeco']]],
+  ['unitneohex_4',['UnitNeoHex',['../classm5_1_1unit_1_1_unit_neo_hex.html#a0ab49319b2ff34d6400f3a96bbe8ec15',1,'m5::unit::UnitNeoHex']]],
+  ['unitpuzzle_5',['UnitPuzzle',['../classm5_1_1unit_1_1_unit_puzzle.html#a40120d974276e6c89a0232325d4fb7b0',1,'m5::unit::UnitPuzzle']]],
+  ['unitrectled_6',['UnitRectLED',['../classm5_1_1unit_1_1_unit_rect_l_e_d.html#a273f45e36e10b6946150c07c6c73ead4',1,'m5::unit::UnitRectLED']]],
+  ['unitrgb_7',['UnitRGB',['../classm5_1_1unit_1_1_unit_r_g_b.html#a817a4f34d1c998c6e90293cc4abff476',1,'m5::unit::UnitRGB']]],
+  ['unitrgbled144_8',['UnitRGBLED144',['../classm5_1_1unit_1_1_unit_r_g_b_l_e_d144.html#a003017c3c4caf3d5bb560006f1c86c94',1,'m5::unit::UnitRGBLED144']]],
+  ['unitrgbled15_9',['UnitRGBLED15',['../classm5_1_1unit_1_1_unit_r_g_b_l_e_d15.html#a47e0f771d58e510b675b12276d33ac06',1,'m5::unit::UnitRGBLED15']]],
+  ['unitrgbled288_10',['UnitRGBLED288',['../classm5_1_1unit_1_1_unit_r_g_b_l_e_d288.html#adc3b9f669361f07e7500df541e68d0bb',1,'m5::unit::UnitRGBLED288']]],
+  ['unitrgbled29_11',['UnitRGBLED29',['../classm5_1_1unit_1_1_unit_r_g_b_l_e_d29.html#a8146e7b1b3dfb0d8718bab61d53355cf',1,'m5::unit::UnitRGBLED29']]],
+  ['unitrgbled72_12',['UnitRGBLED72',['../classm5_1_1unit_1_1_unit_r_g_b_l_e_d72.html#a39c89f14972d1623c0b9fe66d2c8e162',1,'m5::unit::UnitRGBLED72']]],
+  ['unitrgbledstrip120_13',['UnitRGBLEDStrip120',['../classm5_1_1unit_1_1_unit_r_g_b_l_e_d_strip120.html#a474715339bd440b6fcc81cffe3ae18a2',1,'m5::unit::UnitRGBLEDStrip120']]],
+  ['unitrgbledstrip30_14',['UnitRGBLEDStrip30',['../classm5_1_1unit_1_1_unit_r_g_b_l_e_d_strip30.html#a11abc0295b98aa68725941716e3b35a8',1,'m5::unit::UnitRGBLEDStrip30']]],
+  ['unitrgbledstrip300_15',['UnitRGBLEDStrip300',['../classm5_1_1unit_1_1_unit_r_g_b_l_e_d_strip300.html#ab8651571f03cdf72889ad8bb0aa7c2d7',1,'m5::unit::UnitRGBLEDStrip300']]],
+  ['unitrgbledstrip60_16',['UnitRGBLEDStrip60',['../classm5_1_1unit_1_1_unit_r_g_b_l_e_d_strip60.html#a81d2563aaa4b2059143bd94724eae3aa',1,'m5::unit::UnitRGBLEDStrip60']]],
+  ['unitsk6812grb_17',['UnitSK6812GRB',['../classm5_1_1unit_1_1_unit_s_k6812_g_r_b.html#a23653acdfc189cdf50a579690ac426bd',1,'m5::unit::UnitSK6812GRB']]],
+  ['unitsk6812grbw_18',['UnitSK6812GRBW',['../classm5_1_1unit_1_1_unit_s_k6812_g_r_b_w.html#a077eac41732e769ada8687aa9d57abd1',1,'m5::unit::UnitSK6812GRBW']]],
+  ['unitws2812_19',['UnitWS2812',['../classm5_1_1unit_1_1_unit_w_s2812.html#afaf37612622dfbfc28b9a1b722b5139d',1,'m5::unit::UnitWS2812']]],
+  ['update_20',['update',['../classm5_1_1unit_1_1_unit_neco.html#a24956292957f3c38a6bfe20e053dc1a4',1,'m5::unit::UnitNeco']]]
 ];

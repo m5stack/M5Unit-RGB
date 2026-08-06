@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">M5Unit-RGB<span id="projectnumber">&#160;0.0.1 git rev:55cb205</span>
+   <div id="projectname">M5Unit-RGB<span id="projectnumber">&#160;0.0.2 git rev:51dfbe6</span>
    </div>
   </td>
  </tr>
@@ -112,19 +112,98 @@ $(function(){initNavTree('m5unit__rgb__utility_8hpp.html',''); initResizable(tru
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacem5.html">m5</a></td></tr>
-<tr class="memdesc:namespacem5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Top level namespace of M5stack. <br /></td></tr>
+<tr class="memdesc:namespacem5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Top level namespace of M5Stack. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a7f169d4ef8a5adc05307e2a2018073bb" id="r_a7f169d4ef8a5adc05307e2a2018073bb"><td class="memItemLeft" align="right" valign="top"><a id="a7f169d4ef8a5adc05307e2a2018073bb" name="a7f169d4ef8a5adc05307e2a2018073bb"></a>
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>m5::unit::rgb::hsv2rgb</b> (const uint8_t h, const uint8_t s, const uint8_t v)</td></tr>
-<tr class="memdesc:a7f169d4ef8a5adc05307e2a2018073bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">HSV to RGB. <br /></td></tr>
+<tr class="memitem:a7f169d4ef8a5adc05307e2a2018073bb" id="r_a7f169d4ef8a5adc05307e2a2018073bb"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="m5unit__rgb__utility_8cpp.html#a7f169d4ef8a5adc05307e2a2018073bb">m5::unit::rgb::hsv2rgb</a> (const uint8_t h, const uint8_t s, const uint8_t v)</td></tr>
+<tr class="memdesc:a7f169d4ef8a5adc05307e2a2018073bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">HSV to RGB.  <br /></td></tr>
 <tr class="separator:a7f169d4ef8a5adc05307e2a2018073bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7faaa1f73adb4e9e9ed69d5d9c646008" id="r_a7faaa1f73adb4e9e9ed69d5d9c646008"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7faaa1f73adb4e9e9ed69d5d9c646008">m5::unit::rgb::scale8</a> (const uint8_t a, const uint8_t b)</td></tr>
+<tr class="memdesc:a7faaa1f73adb4e9e9ed69d5d9c646008"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rounded 8-bit scale (divide-by-255)  <br /></td></tr>
+<tr class="separator:a7faaa1f73adb4e9e9ed69d5d9c646008"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Utilities for M5Unit-RGB. </p>
-</div></div><!-- contents -->
+</div><h2 class="groupheader">Function Documentation</h2>
+<a id="a7f169d4ef8a5adc05307e2a2018073bb" name="a7f169d4ef8a5adc05307e2a2018073bb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7f169d4ef8a5adc05307e2a2018073bb">&#9670;&#160;</a></span>hsv2rgb()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t m5::unit::rgb::hsv2rgb </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t</td>          <td class="paramname"><span class="paramname"><em>h</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t</td>          <td class="paramname"><span class="paramname"><em>s</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t</td>          <td class="paramname"><span class="paramname"><em>v</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>HSV to RGB. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">h</td><td>Hue (0-255) </td></tr>
+    <tr><td class="paramname">s</td><td>Saturation (0-255) </td></tr>
+    <tr><td class="paramname">v</td><td>Value (0-255) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Packed WRGB color (uint32_t) </dd></dl>
+
+</div>
+</div>
+<a id="a7faaa1f73adb4e9e9ed69d5d9c646008" name="a7faaa1f73adb4e9e9ed69d5d9c646008"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7faaa1f73adb4e9e9ed69d5d9c646008">&#9670;&#160;</a></span>scale8()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t m5::unit::rgb::scale8 </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t</td>          <td class="paramname"><span class="paramname"><em>a</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t</td>          <td class="paramname"><span class="paramname"><em>b</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Rounded 8-bit scale (divide-by-255) </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">a</td><td>Value to scale (0-255) </td></tr>
+    <tr><td class="paramname">b</td><td>Scale factor (0-255, where 255 = 100%) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><code>(a * b + 127) / 255</code>. Maps <code>scale8(255, 255) == 255</code> exactly (<code>&gt;&gt; 8</code> would give 254). </dd></dl>
+
+</div>
+</div>
+</div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->

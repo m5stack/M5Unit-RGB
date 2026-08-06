@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">M5Unit-RGB<span id="projectnumber">&#160;0.0.1 git rev:55cb205</span>
+   <div id="projectname">M5Unit-RGB<span id="projectnumber">&#160;0.0.2 git rev:51dfbe6</span>
    </div>
   </td>
  </tr>
@@ -112,15 +112,23 @@ $(function(){initNavTree('m5unit__rgb__utility_8hpp_source.html',''); initResiza
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceunit.html">unit</a> {</div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacergb.html">rgb</a> {</div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="keyword">extern</span> uint32_t <a class="code hl_function" href="m5unit__rgb__utility_8cpp.html#a7f169d4ef8a5adc05307e2a2018073bb">hsv2rgb</a>(<span class="keyword">const</span> uint8_t h, <span class="keyword">const</span> uint8_t s, <span class="keyword">const</span> uint8_t v);</div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>}  <span class="comment">// namespace rgb</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>}  <span class="comment">// namespace unit</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>}  <span class="comment">// namespace m5</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>uint32_t <a class="code hl_function" href="m5unit__rgb__utility_8cpp.html#a7f169d4ef8a5adc05307e2a2018073bb">hsv2rgb</a>(<span class="keyword">const</span> uint8_t h, <span class="keyword">const</span> uint8_t s, <span class="keyword">const</span> uint8_t v);</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
+<div class="foldopen" id="foldopen00033" data-start="{" data-end="}">
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="m5unit__rgb__utility_8hpp.html#a7faaa1f73adb4e9e9ed69d5d9c646008">   33</a></span><span class="keyword">inline</span> uint8_t <a class="code hl_function" href="m5unit__rgb__utility_8hpp.html#a7faaa1f73adb4e9e9ed69d5d9c646008">scale8</a>(<span class="keyword">const</span> uint8_t a, <span class="keyword">const</span> uint8_t b)</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>{</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span>uint8_t<span class="keyword">&gt;</span>((<span class="keyword">static_cast&lt;</span>uint16_t<span class="keyword">&gt;</span>(a) * b + 127) / 255);</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>}</div>
+</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>}  <span class="comment">// namespace rgb</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>}  <span class="comment">// namespace unit</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>}  <span class="comment">// namespace m5</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="am5unit__rgb__utility_8cpp_html_a7f169d4ef8a5adc05307e2a2018073bb"><div class="ttname"><a href="m5unit__rgb__utility_8cpp.html#a7f169d4ef8a5adc05307e2a2018073bb">m5::unit::rgb::hsv2rgb</a></div><div class="ttdeci">uint32_t hsv2rgb(const uint8_t h, const uint8_t s, const uint8_t v)</div><div class="ttdoc">HSV to RGB.</div><div class="ttdef"><b>Definition</b> m5unit_rgb_utility.cpp:16</div></div>
-<div class="ttc" id="anamespacem5_html"><div class="ttname"><a href="namespacem5.html">m5</a></div><div class="ttdoc">Top level namespace of M5stack.</div></div>
+<div class="ttc" id="am5unit__rgb__utility_8hpp_html_a7faaa1f73adb4e9e9ed69d5d9c646008"><div class="ttname"><a href="m5unit__rgb__utility_8hpp.html#a7faaa1f73adb4e9e9ed69d5d9c646008">m5::unit::rgb::scale8</a></div><div class="ttdeci">uint8_t scale8(const uint8_t a, const uint8_t b)</div><div class="ttdoc">Rounded 8-bit scale (divide-by-255)</div><div class="ttdef"><b>Definition</b> m5unit_rgb_utility.hpp:33</div></div>
+<div class="ttc" id="anamespacem5_html"><div class="ttname"><a href="namespacem5.html">m5</a></div><div class="ttdoc">Top level namespace of M5Stack.</div></div>
 <div class="ttc" id="anamespacergb_html"><div class="ttname"><a href="namespacergb.html">rgb</a></div><div class="ttdoc">For M5Unit-RGB.</div></div>
 <div class="ttc" id="anamespaceunit_html"><div class="ttname"><a href="namespaceunit.html">unit</a></div><div class="ttdoc">Unit-related namespace.</div></div>
 </div><!-- fragment --></div><!-- contents -->
