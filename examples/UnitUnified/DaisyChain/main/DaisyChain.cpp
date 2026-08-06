@@ -47,10 +47,10 @@ m5::unit::UnitRGBLEDStrip30 strip;
 constexpr uint8_t CHAIN_LEN{7};
 m5::unit::UnitLED* s_chain[CHAIN_LEN];
 
-// Per-unit LED offset and count within the flat chain (used by Demo C)
-constexpr uint16_t OFFSETS[CHAIN_LEN]{0, 3, 67, 131, 168, 183, 219};
-constexpr uint16_t COUNTS[CHAIN_LEN]{3, 64, 64, 37, 15, 36, 30};
-constexpr uint16_t TOTAL_LEDS{249};
+// Per-unit LED offset and count within the flat chain (used by Comet demo)
+constexpr uint16_t OFFSETS[CHAIN_LEN]{0, 3, 67, 131, 168, 183, 218};
+constexpr uint16_t COUNTS[CHAIN_LEN]{3, 64, 64, 37, 15, 35, 30};
+constexpr uint16_t TOTAL_LEDS{248};
 
 // Show entire chain via leaf
 void show_all()
@@ -90,7 +90,7 @@ uint8_t tri(uint16_t p)
 
 // =====================================================
 // Shared: rotation step for puzzle[0], puzzle[1], hex
-// step() called once per full loop completion by Demo C.
+// step() called once per full loop completion by Comet demo.
 // =====================================================
 namespace unit_rot {
 
@@ -183,7 +183,7 @@ void start()
 
     neco.setBrightness(10);
     neco.clear();
-    neco.fillRainbow(0, 6);  // 6 of 36 LEDs lit
+    neco.fillRainbow(0, 6);  // 6 of 35 LEDs lit
 
     strip.setBrightness(10);
     strip.clear();
@@ -409,10 +409,7 @@ void setup()
         !m5::unit::wiring::addGPIO(Units, rgb) ||  //
         !Units.begin()) {
         M5_LOGE("Failed to begin");
-        lcd.fillScreen(TFT_RED);
-        while (true) {
-            m5::utility::delay(10000);
-        }
+        m5::unit::wiring::failStop();
     }
     M5_LOGI("M5UnitUnified initialized");
     M5_LOGI("%s", Units.debugInfo().c_str());

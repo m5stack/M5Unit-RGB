@@ -49,8 +49,6 @@ m5::unit::UnitRGBLED15 rgbled;
 m5::unit::UnitNeco neco;  // Button API is not available that via PbHub
 m5::unit::UnitRGBLEDStrip30 strip;
 
-LGFX_Sprite sprite;
-
 void loop_rgb(const m5::unit::types::elapsed_time_t now)
 {
     constexpr uint8_t table[3][4 /* index, r,g,b */] = {{0, 100, 0, 0}, {2, 0, 0, 100}, {1, 100, 100, 0}};
@@ -111,9 +109,13 @@ void loop_rgbled(const m5::unit::types::elapsed_time_t now)
         ms      = now;
         int idx = roundTrip(++counter, 14);  // 0-14-0...
         rgbled.clear();
-        rgbled.setPixelColor(idx - 1, 32, 0, 0);
+        if (idx > 0) {
+            rgbled.setPixelColor(idx - 1, 32, 0, 0);
+        }
         rgbled.setPixelColor(idx, 128, 0, 0);
-        rgbled.setPixelColor(idx + 1, 32, 0, 0);
+        if (idx + 1 < static_cast<int>(rgbled.numPixels())) {
+            rgbled.setPixelColor(idx + 1, 32, 0, 0);
+        }
         rgbled.show();
     }
 }
@@ -172,10 +174,7 @@ void setup()
         !hub.add(neco, 4) ||             // PbHub ch:4 -> UnitNeco
         !hub.add(strip, 5)) {            // PbHub ch:5 -> UnitRGBLEDStrip
         M5_LOGE("Failed to connect units");
-        lcd.fillScreen(TFT_RED);
-        while (true) {
-            m5::utility::delay(10000);
-        }
+        m5::unit::wiring::failStop();
     }
 
     // Board-aware I2C: NessoN1 PortB -> SoftwareI2C, NanoC6/NanoH2 -> Ex_I2C, others -> Wire
@@ -183,20 +182,12 @@ void setup()
 
     if (!unit_ready) {
         M5_LOGE("Failed to begin");
-        lcd.fillScreen(TFT_RED);
-        while (true) {
-            m5::utility::delay(10000);
-        }
+        m5::unit::wiring::failStop();
     }
     M5_LOGI("M5UnitUnified initialized");
     M5_LOGI("%s", Units.debugInfo().c_str());
 
-    lcd.startWrite();
     lcd.fillScreen(TFT_DARKGREEN);
-
-    sprite.setPsram(false);
-    sprite.setColorDepth(1);
-    sprite.createSprite(8, 8);
 
     //
     rgb.setPixelColor(0, 100, 0, 0);

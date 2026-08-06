@@ -10,8 +10,6 @@
   sufficient for all LEDs.
   If the lights turn on unexpectedly, try lowering the brightness or reducing the
   number of lights turned on at once to see if that resolves the issue.
-  If the lights turn on unexpectedly, try lowering the brightness or reducing the number of lights turned on at once to
-  see if that resolves the issue.
 */
 #include <M5Unified.h>
 #include <M5UnitUnified.h>
@@ -43,9 +41,9 @@
 // #define USING_UNIT_RGBLED15
 // For Unit RGB LED Strip (A093)
 // #define USING_UNIT_RGBLED_STRIP30
-// For ATOM Matrix built-in 5x5 RGB LED
+// For ATOM Matrix built-in 5x5 RGB LED (C008-B)
 // #define USING_ATOM_MATRIX_RGB
-// For Hat NeoFlash
+// For Hat NeoFlash (U071)
 // #define USING_HAT_NEOFLASH
 #endif
 
@@ -154,10 +152,7 @@ void setup()
 
     if (!unit_ready) {
         M5_LOGE("Failed to begin");
-        lcd.fillScreen(TFT_RED);
-        while (true) {
-            m5::utility::delay(10000);
-        }
+        m5::unit::wiring::failStop();
     }
     M5_LOGI("M5UnitUnified initialized");
     M5_LOGI("%s", Units.debugInfo().c_str());
@@ -178,10 +173,10 @@ void loop()
 #if defined(USING_UNIT_NECO)
     if (unit.wasPressed()) {
         M5.Speaker.tone(4000, 20);
-        M5.Log.printf("WasPressed Neko\n");
+        M5.Log.printf("WasPressed Neco\n");
     }
     if (unit.wasReleased()) {
-        M5.Log.printf("WasReleased Neko\n");
+        M5.Log.printf("WasReleased Neco\n");
     }
 #endif
 
