@@ -40,6 +40,17 @@ public:
     //! @brief Update the unit
     virtual void update(const bool = false) override;
 
+    /*!
+      @brief Whether the button is usable on the current wiring
+      @return True if the RX pin was successfully configured as InputPullup at begin()
+      @note Determined at begin(); false if RX pin is unassigned or cannot support InputPullup
+      (e.g. ESP32 classic GPIO 34-39 are input-only with no internal pull-up).
+     */
+    inline bool buttonAvailable() const
+    {
+        return _btn_available;
+    }
+
 private:
     bool _btn_available{false};
 };
