@@ -38,6 +38,25 @@ protected:
 using TestSK6812GRB = TestLED<UnitSK6812GRB>;
 using TestWS2812    = TestLED<UnitWS2812>;
 
+// Fixture that pre-sets config.brightness=42 before begin() to prove
+// begin() applies config (guards against regression where brightness member
+// initializer alone would still yield the default 10).
+template <class U>
+class TestLED_ConfigApplied : public TestLED<U> {
+protected:
+    U* get_instance() override
+    {
+        auto ptr       = new U(NUM_OF_PIXELS);
+        auto cfg       = ptr->config();
+        cfg.brightness = 42;
+        ptr->config(cfg);
+        return ptr;
+    }
+};
+
+using TestSK6812GRB_Config = TestLED_ConfigApplied<UnitSK6812GRB>;
+using TestWS2812_Config    = TestLED_ConfigApplied<UnitWS2812>;
+
 namespace testing {
 namespace internal {
 
@@ -521,4 +540,16 @@ TEST_F(TestWS2812, All)
     config_test(unit.get());
     range_test(unit.get());
     hw_write_test(unit.get());
+}
+
+TEST_F(TestSK6812GRB_Config, BeginAppliesConfig)
+{
+    SCOPED_TRACE(ustr);
+    EXPECT_EQ(unit->brightness(), 42);
+}
+
+TEST_F(TestWS2812_Config, BeginAppliesConfig)
+{
+    SCOPED_TRACE(ustr);
+    EXPECT_EQ(unit->brightness(), 42);
 }
