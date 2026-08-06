@@ -31,6 +31,9 @@ bool UnitNeco::begin()
         if (ad) {
             const auto rx = ad->rx_pin();
             // Button needs an assigned GPIO with internal pull-up.
+            // GPIO_IS_VALID_OUTPUT_GPIO happens to exclude ESP32 classic input-only
+            // pins (GPIO 34-39) which also lack internal pull-up. On ESP32-S3/C6/H2
+            // all valid GPIOs pass, so the filter is effectively "usable for pullup".
             _btn_available = (rx >= 0) && GPIO_IS_VALID_OUTPUT_GPIO(rx);
             if (_btn_available) {
                 pinModeRX(gpio::Mode::InputPullup);

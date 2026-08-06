@@ -23,6 +23,7 @@ class UnitRGB : public UnitSK6812GRB {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitRGB, 0x00);
 
 public:
+    //! @brief Constructor (3 LEDs)
     UnitRGB() : UnitSK6812GRB(3 /* 3pixels */)
     {
         auto ccfg         = component_config();

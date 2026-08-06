@@ -29,27 +29,40 @@ class UnitHexLED37 : public BaseClass {
 
 public:
     using BaseClass::BaseClass;
+    //! @brief Default constructor (37 LEDs)
     UnitHexLED37() : BaseClass(37)
     {
     }
-    virtual uint16_t index_of(const uint16_t n) const override;
 
-    //! @brief Edge length of the hexagon (4 LEDs per edge)
+    /*!
+      @brief Edge length of the hexagon (4 LEDs per edge)
+      @return 4
+     */
     inline virtual uint16_t width() const override
     {
         return 4;
     }
-    //! @brief Number of rows in the hexagon (7 rows)
+    /*!
+      @brief Number of rows in the hexagon
+      @return 7
+     */
     inline virtual uint16_t height() const override
     {
         return 7;
     }
 
-    inline virtual uint8_t maxRotation() const
+    /*!
+      @brief Get the max rotation (6 steps: 0/60/120/180/240/300 deg)
+      @return 6
+     */
+    inline virtual uint8_t maxRotation() const override
     {
         // 0:0 1:60 2:120 3:180 4:240 5:300
         return 6;
     }
+
+protected:
+    virtual uint16_t index_of(const uint16_t n) const override;
 };
 
 /*!
@@ -60,6 +73,7 @@ class UnitHex : public UnitHexLED37<UnitWS2812> {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitHex, 0x00);
 
 public:
+    //! @brief Constructor
     UnitHex() : UnitHexLED37<UnitWS2812>()
     {
         auto ccfg         = component_config();
@@ -76,6 +90,7 @@ class UnitNeoHex : public UnitHexLED37<UnitSK6812GRB> {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitNeoHex, 0x00);
 
 public:
+    //! @brief Constructor
     UnitNeoHex() : UnitHexLED37<UnitSK6812GRB>()
     {
         auto ccfg         = component_config();

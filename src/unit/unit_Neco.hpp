@@ -25,17 +25,20 @@ class UnitNeco : public UnitWS2812, public m5::utility::button::Status {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitNeco, 0x00);
 
 public:
+    //! @brief Constructor (35 LEDs)
     UnitNeco() : UnitWS2812(35 /* 35 pixels */)
     {
         auto ccfg         = component_config();
         ccfg.max_children = 1;  // Can connect 1 Unit
         component_config(ccfg);
     }
-    //! @brief Begin the unit
+    /*!
+      @brief Begin the unit
+      @return True if successful
+     */
     virtual bool begin() override;
     //! @brief Update the unit
-    //! @param force Force update
-    virtual void update(const bool force = false) override;
+    virtual void update(const bool = false) override;
 
 private:
     bool _btn_available{false};

@@ -23,6 +23,7 @@ class HatNeoFlash : public UnitRectLED<18, 7, UnitWS2812> {
     M5_UNIT_COMPONENT_HPP_BUILDER(HatNeoFlash, 0x00);
 
 public:
+    //! @brief Constructor (18x7 = 126 LEDs)
     HatNeoFlash() : UnitRectLED<18, 7, UnitWS2812>()
     {
         auto ccfg         = component_config();

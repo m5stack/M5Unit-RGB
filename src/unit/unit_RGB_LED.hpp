@@ -5,7 +5,7 @@
  */
 /*!
   @file unit_RGB_LED.hpp
-  @brief RGB LED, RGB LED Strip  unit for M5UnitUnified
+  @brief RGB LED, RGB LED Strip unit for M5UnitUnified
 */
 #ifndef M5_UNIT_RGB_UNIT_RGB_LED_HPP
 #define M5_UNIT_RGB_UNIT_RGB_LED_HPP
@@ -24,6 +24,7 @@ class UnitRGBLED15 : public UnitSK6812GRB {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitRGBLED15, 0x00);
 
 public:
+    //! @brief Constructor (15 LEDs)
     UnitRGBLED15() : UnitSK6812GRB(15 /* 15 pixels */)
     {
         auto ccfg         = component_config();
@@ -41,6 +42,7 @@ class UnitRGBLED29 : public UnitSK6812GRB {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitRGBLED29, 0x00);
 
 public:
+    //! @brief Constructor (29 LEDs)
     UnitRGBLED29() : UnitSK6812GRB(29 /* 29 pixels */)
     {
         auto ccfg         = component_config();
@@ -58,6 +60,7 @@ class UnitRGBLED72 : public UnitSK6812GRB {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitRGBLED72, 0x00);
 
 public:
+    //! @brief Constructor (72 LEDs)
     UnitRGBLED72() : UnitSK6812GRB(72 /* 72 pixels */)
     {
         auto ccfg         = component_config();
@@ -75,6 +78,7 @@ class UnitRGBLED144 : public UnitSK6812GRB {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitRGBLED144, 0x00);
 
 public:
+    //! @brief Constructor (144 LEDs)
     UnitRGBLED144() : UnitSK6812GRB(144 /* 144 pixels */)
     {
         auto ccfg         = component_config();
@@ -92,6 +96,7 @@ class UnitRGBLED288 : public UnitSK6812GRB {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitRGBLED288, 0x00);
 
 public:
+    //! @brief Constructor (288 LEDs)
     UnitRGBLED288() : UnitSK6812GRB(288 /* 288 pixels */)
     {
         auto ccfg         = component_config();
@@ -109,6 +114,7 @@ class UnitRGBLEDStrip30 : public UnitSK6812GRB {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitRGBLEDStrip30, 0x00);
 
 public:
+    //! @brief Constructor (30 LEDs)
     UnitRGBLEDStrip30() : UnitSK6812GRB(30 /* 30 pixels */)
     {
         auto ccfg         = component_config();
@@ -126,6 +132,7 @@ class UnitRGBLEDStrip60 : public UnitSK6812GRB {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitRGBLEDStrip60, 0x00);
 
 public:
+    //! @brief Constructor (60 LEDs)
     UnitRGBLEDStrip60() : UnitSK6812GRB(60 /* 60 pixels */)
     {
         auto ccfg         = component_config();
@@ -143,6 +150,7 @@ class UnitRGBLEDStrip120 : public UnitSK6812GRB {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitRGBLEDStrip120, 0x00);
 
 public:
+    //! @brief Constructor (120 LEDs)
     UnitRGBLEDStrip120() : UnitSK6812GRB(120 /* 120 pixels */)
     {
         auto ccfg         = component_config();
@@ -160,6 +168,7 @@ class UnitRGBLEDStrip300 : public UnitSK6812GRB {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitRGBLEDStrip300, 0x00);
 
 public:
+    //! @brief Constructor (300 LEDs)
     UnitRGBLEDStrip300() : UnitSK6812GRB(300 /* 300 pixels */)
     {
         auto ccfg         = component_config();

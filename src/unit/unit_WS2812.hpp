@@ -23,9 +23,14 @@ class UnitWS2812 : public UnitLED {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitWS2812, 0x00);
 
 public:
+    /*!
+      @brief Constructor
+      @param num_of_pixels Number of pixels
+     */
     explicit UnitWS2812(const uint16_t num_of_pixels) : UnitLED(num_of_pixels, rgb::Order::grb24)
     {
     }
+    //! @brief Destructor
     virtual ~UnitWS2812()
     {
     }

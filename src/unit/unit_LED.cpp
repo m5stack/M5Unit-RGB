@@ -25,7 +25,7 @@ using namespace m5::unit::rgb;
 
 namespace {
 // Color order
-int8_t offset_table[][4] = {
+constexpr int8_t offset_table[][4] = {
     // 24bits
     {0, 1, 2, -1},  // rgb24
     {0, 2, 1, -1},  // rbg24
@@ -100,9 +100,9 @@ static void IRAM_ATTR led_rmt_translator(const void* src, rmt_item32_t* dest, si
                                          size_t* translated_size, size_t* item_num)
 {
     SimpleTranslatorContext* ctx{};
-    rmt_translator_get_context(item_num, (void**)&ctx);
+    rmt_translator_get_context(item_num, reinterpret_cast<void**>(&ctx));
 
-    const uint8_t* psrc   = (const uint8_t*)src;
+    const uint8_t* psrc   = static_cast<const uint8_t*>(src);
     size_t items_produced = 0;
     size_t bytes_consumed = 0;
 
@@ -194,13 +194,13 @@ public:
             const uint8_t* p = _unit.pixels().data() + i * align;
             float scale      = _unit.brightness() / 255.f;
             uint8_t colors[4]{};
-            colors[roff] = p[roff] * scale;
-            colors[goff] = p[goff] * scale;
-            colors[boff] = p[boff] * scale;
+            colors[roff] = static_cast<uint8_t>(p[roff] * scale);
+            colors[goff] = static_cast<uint8_t>(p[goff] * scale);
+            colors[boff] = static_cast<uint8_t>(p[boff] * scale);
             if (woff >= 0) {
-                colors[woff] = p[woff] * scale;
+                colors[woff] = static_cast<uint8_t>(p[woff] * scale);
             }
-            for (uint_fast8_t ci = 0; ci < align; ++ci) {
+            for (int ci = 0; ci < align; ++ci) {
                 uint8_t bit{0x80};
                 while (bit) {
                     v.push_back((colors[ci] & bit) ? one : zero);
@@ -228,13 +228,13 @@ public:
         for (uint32_t i = 0; i < led.numPixels(); ++i) {
             const uint8_t* p = led.pixels().data() + i * align;
             uint8_t colors[4]{};
-            colors[roff] = p[roff] * scale;
-            colors[goff] = p[goff] * scale;
-            colors[boff] = p[boff] * scale;
+            colors[roff] = static_cast<uint8_t>(p[roff] * scale);
+            colors[goff] = static_cast<uint8_t>(p[goff] * scale);
+            colors[boff] = static_cast<uint8_t>(p[boff] * scale);
             if (woff >= 0) {
-                colors[woff] = p[woff] * scale;
+                colors[woff] = static_cast<uint8_t>(p[woff] * scale);
             }
-            for (uint_fast8_t ci = 0; ci < align; ++ci) {
+            for (int ci = 0; ci < align; ++ci) {
                 uint8_t bit{0x80};
                 while (bit) {
                     buf.push_back((colors[ci] & bit) ? one : zero);
@@ -275,7 +275,7 @@ public:
         return v;
     }
 
-    virtual bool write(const uint8_t* data, const uint32_t size)
+    virtual bool write(const uint8_t* data, const uint32_t size) override
     {
         return _unit.writeWithTransaction(data, size, 50 /* alldone wait ms */) == m5::hal::error::error_t::OK;
     }
@@ -319,7 +319,7 @@ public:
         if (!ad) {
             return false;
         }
-        auto channel = (rmt_channel_t)ad->impl()->rmtTxChannel();
+        auto channel = static_cast<rmt_channel_t>(ad->impl()->rmtTxChannel());
         if (channel >= RMT_CHANNEL_MAX) {
             return false;
         }
@@ -350,6 +350,13 @@ public:
         if (err != ESP_OK) {
             M5_LIB_LOGE("rmt_wait_tx_done failed: %d", err);
             return false;
+        }
+        // Latch: hold line low for the chip's reset window (per rmt_item_reset())
+        const auto reset_it = _unit.rmt_item_reset();
+        const auto cfg_tx   = _unit.rmt_config();
+        if (reset_it.duration0 > 0 && cfg_tx.tx.tick_ns > 0) {
+            const uint32_t reset_us = (static_cast<uint32_t>(reset_it.duration0) * cfg_tx.tx.tick_ns + 999) / 1000;
+            m5::utility::delayMicroseconds(reset_us);
         }
         return true;
     }
@@ -420,7 +427,7 @@ public:
             M5_LIB_LOGE("rmt_transmit(reset) failed: %d", err);
             return false;
         }
-        err = rmt_tx_wait_all_done(tx_handle, pdMS_TO_TICKS(10));
+        err = rmt_tx_wait_all_done(tx_handle, pdMS_TO_TICKS(100));
         if (err != ESP_OK) {
             M5_LIB_LOGE("rmt_tx_wait_all_done(reset) failed: %d", err);
             return false;
@@ -452,7 +459,7 @@ public:
     {
     }
 
-    virtual UnitLED::container_type rgb888_items()
+    virtual UnitLED::container_type rgb888_items() override
     {
         UnitLED::container_type v;
         auto align        = 3 + _unit.hasWhite();
@@ -472,7 +479,7 @@ public:
         return v;
     }
 
-    virtual UnitLED::container_type rgb888_items_from_root()
+    virtual UnitLED::container_type rgb888_items_from_root() override
     {
         UnitLED::container_type v;
         // auto align = 3 + _unit.hasWhite();
@@ -503,7 +510,7 @@ public:
         return v;
     }
 
-    virtual bool write(const uint8_t* data, const uint32_t size)
+    virtual bool write(const uint8_t* data, const uint32_t size) override
     {
         return _unit.writeWithTransaction(data, size, true) == m5::hal::error::error_t::OK;
     }
@@ -689,8 +696,8 @@ void UnitLED::setRotation(const int8_t rot)
     if (!_ready) {
         return;
     }
-    auto prev    = _rot;
-    auto new_rot = rotation_of(rot);
+    const int8_t prev    = _rot;
+    const int8_t new_rot = static_cast<int8_t>(rotation_of(rot));
     if (new_rot == prev) {
         return;
     }

@@ -23,6 +23,7 @@ class UnitPuzzle : public UnitRectLED<8, 8, UnitWS2812> {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitPuzzle, 0x00);
 
 public:
+    //! @brief Constructor (8x8 = 64 LEDs)
     UnitPuzzle() : UnitRectLED<8, 8, UnitWS2812>()
     {
         auto ccfg         = component_config();

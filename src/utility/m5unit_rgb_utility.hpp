@@ -15,7 +15,13 @@ namespace m5 {
 namespace unit {
 namespace rgb {
 
-//! @brief HSV to RGB
+/*!
+  @brief HSV to RGB
+  @param h Hue (0-255)
+  @param s Saturation (0-255)
+  @param v Value (0-255)
+  @return Packed WRGB color (uint32_t)
+ */
 uint32_t hsv2rgb(const uint8_t h, const uint8_t s, const uint8_t v);
 
 /*!

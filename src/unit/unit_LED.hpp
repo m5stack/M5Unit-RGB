@@ -30,18 +30,39 @@ using wrgb32_color_t = uint32_t;
   @brief WRGB 32bits
 */
 union Color {
+    /*!
+      @brief Constructor from packed WRGB
+      @param c WRGB 32bits (default 0)
+     */
     explicit constexpr Color(const wrgb32_color_t c = 0) : wrgb{c}
     {
     }
+    /*!
+      @brief Constructor from RGB / RGBW components
+      @param rr Red
+      @param gg Green
+      @param bb Blue
+      @param ww White (default 0)
+     */
     constexpr Color(const uint8_t rr, const uint8_t gg, const uint8_t bb, const uint8_t ww = 0)
         : b{bb}, g{gg}, r{rr}, w{ww}
     {
     }
+    /*!
+      @brief Convert to packed WRGB
+      @return WRGB 32bits
+     */
     constexpr operator wrgb32_color_t() const
     {
         return wrgb;
     }
-    //! @brief Make Color from HSV
+    /*!
+      @brief Make Color from HSV
+      @param h Hue
+      @param s Saturation
+      @param v Value
+      @return Color
+     */
     static Color fromHSV(const uint8_t h, const uint8_t s, const uint8_t v);
 
     wrgb32_color_t wrgb{};  //!< WRGB 32bits
@@ -53,6 +74,12 @@ union Color {
     };
     uint8_t a[4];  //!< Array
 };
+/*!
+  @brief Compare two Colors
+  @param lhs Left-hand side
+  @param rhs Right-hand side
+  @return True if equal
+ */
 constexpr bool operator==(const Color& lhs, const Color& rhs)
 {
     return lhs.wrgb == rhs.wrgb;
@@ -103,13 +130,29 @@ enum class Order : int8_t {
     bgrw32,
 };
 
-//! @brief Offset of Red
+/*!
+  @brief Offset of Red
+  @param f Color order
+  @return Byte offset of Red in the packed pixel (-1 if not present)
+ */
 int8_t offsetR(const Order f);
-//! @brief Offset of Green
+/*!
+  @brief Offset of Green
+  @param f Color order
+  @return Byte offset of Green in the packed pixel (-1 if not present)
+ */
 int8_t offsetG(const Order f);
-//! @brief Offset of Blue
+/*!
+  @brief Offset of Blue
+  @param f Color order
+  @return Byte offset of Blue in the packed pixel (-1 if not present)
+ */
 int8_t offsetB(const Order f);
-//! @brief Offset of White
+/*!
+  @brief Offset of White
+  @param f Color order
+  @return Byte offset of White in the packed pixel (-1 if not present)
+ */
 int8_t offsetW(const Order f);
 }  // namespace rgb
 
@@ -170,18 +213,25 @@ public:
 
     ///@name Configuration for begin
     ///@{
-    /*! @brief Gets the configuration */
+    /*!
+      @brief Gets the configuration
+      @return config_t
+     */
     inline config_t config()
     {
         return _cfg;
     }
-    //! @brief Set the configuration
+    /*!
+      @brief Set the configuration
+      @param cfg config_t
+     */
     inline void config(const config_t& cfg)
     {
         _cfg = cfg;
     }
     ///@}
 
+    //! @brief Destructor
     virtual ~UnitLED()
     {
     }
@@ -195,66 +245,102 @@ public:
      */
     bool add(UnitLED& c, const int16_t channel);
 
-    //! @brief Begin the unit
+    /*!
+      @brief Begin the unit
+      @return True if successful
+     */
     virtual bool begin() override;
 
     ///@name Properties
     ///@{
-    //! @brief Number of the pixels
+    /*!
+      @brief Number of the pixels
+      @return Number of pixels
+     */
     inline uint16_t numPixels() const
     {
         return _numPixels;
     }
     /*!
       @brief Brightness
-      @note Scaling factor(255 = 100%)
+      @return Current brightness (255 = 100%)
+      @note Scaling factor (255 = 100%)
     */
     inline uint8_t brightness() const
     {
         return _brightness;
     }
 
+    /*!
+      @brief Logical width in pixels
+      @return Width
+     */
     inline virtual uint16_t width() const
     {
         return numPixels();
     }
+    /*!
+      @brief Logical height in pixels
+      @return Height
+     */
     inline virtual uint16_t height() const
     {
         return 1;
     }
 
-    //! @brief Has white data?
+    /*!
+      @brief Has white data?
+      @return True if the color order includes a white channel
+     */
     inline bool hasWhite() const
     {
         return (_order >= rgb::Order::hasWhite);
     }
-    //! @brief Color order
+    /*!
+      @brief Color order
+      @return rgb::Order
+     */
     inline rgb::Order order() const
     {
         return _order;
     }
-    //! @brief Offset of red
+    /*!
+      @brief Offset of red
+      @return Byte offset of Red (-1 if not present)
+     */
     inline int8_t offsetR() const
     {
         return _offsetR;
     }
-    //! @brief Offset of green
+    /*!
+      @brief Offset of green
+      @return Byte offset of Green (-1 if not present)
+     */
     inline int8_t offsetG() const
     {
         return _offsetG;
     }
-    //! @brief Offset of blue
+    /*!
+      @brief Offset of blue
+      @return Byte offset of Blue (-1 if not present)
+     */
     inline int8_t offsetB() const
     {
         return _offsetB;
     }
-    //! @brief Offset of white
+    /*!
+      @brief Offset of white
+      @return Byte offset of White (-1 if not present)
+     */
     inline int8_t offsetW() const
     {
         return _offsetW;
     }
 
-    //! @brief pixels container
+    /*!
+      @brief pixels container
+      @return Reference to the internal packed pixel buffer
+     */
     const container_type& pixels() const
     {
         return _pixels;
@@ -283,9 +369,15 @@ public:
 
     ///@name Apply
     ///@{
-    //! @brief Write pixel color to LED
+    /*!
+      @brief Write pixel color to LED
+      @return True if successful
+     */
     bool writePixels();
-    //! @brief Write pixel color to LED (alias)
+    /*!
+      @brief Write pixel color to LED (alias)
+      @return True if successful
+     */
     inline bool show()
     {
         return writePixels();
@@ -354,6 +446,9 @@ public:
      */
     inline bool setPixelColor(const uint16_t n, const rgb::Color& c)
     {
+        if (n >= _numPixels) {
+            return false;
+        }
         return set_pixel_color(index_of(n), c);
     }
     /*!
@@ -442,39 +537,59 @@ public:
     }
     ///@}
 
-    ///@note Calling writePixel or show is reflected in LEDs
+    ///@note Calling writePixels() or show() is reflected in LEDs
     ///@note 1 rot angle varies from unit to unit (e.g. Puzzle 90 deg Hex 60 deg)
     ///@note Rotation direction is clockwise
     ///@name Rotation
     ///@{
-    //! @brief Get the max rotation
+    /*!
+      @brief Get the max rotation
+      @return Number of discrete rotation steps
+     */
     inline virtual uint8_t maxRotation() const
     {
         return 2;  // 0,180 deg
     }
-    //! @brief Get the rotation angle per 1 (degree)
+    /*!
+      @brief Get the rotation angle per 1
+      @return Angle per rotation step (degree)
+     */
     inline float rotationDegree() const
     {
         return 360.f / maxRotation();
     }
-    //! @brief Get the rotation
+    /*!
+      @brief Get the rotation
+      @return Current rotation step
+     */
     inline int8_t rotation() const
     {
         return _rot;
     }
-    //! @brief Set the rotation
+    /*!
+      @brief Set the rotation
+      @param rot Rotation step
+     */
     void setRotation(const int8_t rot);
     ///@}
 
     ///@note Affected by rotation
     ///@name Pixels element access
     ///@{
-    //! @brief rvalue
+    /*!
+      @brief rvalue
+      @param i Position of the pixels
+      @return Color at position i
+     */
     rgb::Color operator[](const uint16_t i) const
     {
         return color(i);
     }
-    //! @brief lvalue
+    /*!
+      @brief lvalue
+      @param i Position of the pixels
+      @return Proxy that writes back on assignment
+     */
     PixelProxy operator[](const uint16_t i)
     {
         return PixelProxy(*this, i);
@@ -570,10 +685,7 @@ protected:
     void shift_right(const uint16_t count, const bool wrap);
 
 protected:
-    //! @brief Constructor
-    //! @param num_of_pixels Number of pixels
-    //! @param order Color order
-    //! @note Protected so only derived types with hardcoded Order (UnitRGB / UnitPuzzle / ...) can construct.
+    // Protected so only derived types with hardcoded Order (UnitRGB / UnitPuzzle / ...) can construct.
     explicit UnitLED(const uint16_t num_of_pixels, const rgb::Order order)
         : Component(0x00), _order{order}, _numPixels{num_of_pixels}
     {
