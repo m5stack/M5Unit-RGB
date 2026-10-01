@@ -11,11 +11,22 @@
 #include "utility/m5unit_rgb_utility.hpp"
 #include <M5Utility.hpp>
 #include <esp_random.h>
+
+// Direct GPIO drive needs RMT; ESP32-C2 / C61 have none, so only the PbHub path is available there.
+// M5UnitUnified before 0.6.0 does not define M5_UNIT_UNIFIED_HAS_RMT and supports RMT-capable chips only.
+#if !defined(M5_UNIT_UNIFIED_HAS_RMT) || M5_UNIT_UNIFIED_HAS_RMT
+#define M5_UNIT_RGB_HAS_RMT 1
+#else
+#define M5_UNIT_RGB_HAS_RMT 0
+#endif
+
+#if M5_UNIT_RGB_HAS_RMT
 #if defined(M5_UNIT_UNIFIED_USING_RMT_V2)
 #include <driver/rmt_tx.h>
 #include <driver/rmt_encoder.h>
 #else
 #include <driver/rmt.h>
+#endif
 #endif
 
 using namespace m5::utility::mmh3;
@@ -154,6 +165,7 @@ Color Color::fromHSV(const uint8_t h, const uint8_t s, const uint8_t v)
 }  // namespace rgb
 
 ///@cond
+#if M5_UNIT_RGB_HAS_RMT
 // For GPIO
 class InterfaceGPIO : public UnitLED::Interface {
 public:
@@ -452,6 +464,7 @@ public:
     rmt_encoder_handle_t _reset_encoder{};
 #endif
 };
+#endif  // M5_UNIT_RGB_HAS_RMT
 
 class InterfacePbHub : public UnitLED::Interface {
 public:
@@ -559,6 +572,7 @@ bool UnitLED::begin()
     // begin RMT if Root is not UnitPbHub
     M5_LIB_LOGI("Root is %s", p->deviceName());
     if (!is_unit_pbhub(p)) {
+#if M5_UNIT_RGB_HAS_RMT
         gpio::adapter_config_t cfg = rmt_config();
         // .channel and .gpio_num will set in begin(cfg)
         // Override RMT settings from config_t
@@ -574,6 +588,10 @@ bool UnitLED::begin()
             return false;
         }
         _interface.reset(new InterfaceGPIO(*this));
+#else
+        M5_LIB_LOGE("RMT is not supported on this SoC, connect via PbHub");
+        return false;
+#endif
     } else {
         _interface.reset(new InterfacePbHub(*this));
     }

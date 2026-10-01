@@ -22,6 +22,11 @@
 #include <vector>
 #include <set>
 
+// Every test fixture drives the LEDs over GPIO (RMT); ESP32-C2 / C61 have no RMT
+#if defined(M5_UNIT_UNIFIED_HAS_RMT) && !M5_UNIT_UNIFIED_HAS_RMT
+#error "Embedded LED tests require RMT"
+#endif
+
 using namespace m5::unit::googletest;
 using namespace m5::unit;
 using namespace m5::unit::rgb;
