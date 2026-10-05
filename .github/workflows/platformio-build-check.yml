@@ -132,6 +132,10 @@ jobs:
             board: Core
             framework: Arduino
             espressif32: latest
+          - example: MultiChannel
+            board: Core
+            framework: Arduino
+            espressif32: latest
 
     steps:
       - name: Checkout

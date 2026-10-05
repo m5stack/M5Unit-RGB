@@ -125,7 +125,7 @@ jobs:
           target: ${{ matrix.target }}
           path: examples/UnitUnified/Simple
 
-  # Other examples: fixed unit chains with no Kconfig variant, built on esp32 only
+  # Other examples: unit setup fixed in the source (no Kconfig variant), built on esp32 only
   # (oldest and latest IDF boundary).
   build-examples:
     name: ${{ matrix.idf }} esp32 ${{ matrix.example }}
@@ -136,7 +136,7 @@ jobs:
       max-parallel: 20
       matrix:
         idf: [v5.1.7, v6.1]
-        example: [DaisyChain]
+        example: [DaisyChain, MultiChannel]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
