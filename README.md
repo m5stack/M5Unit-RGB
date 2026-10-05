@@ -124,6 +124,25 @@ You must choose a define symbol for the unit you will use.
 #endif
 ```
 
+### For ESP-IDF settings
+
+> **NOTE:** The library and examples target ESP-IDF **5.1 or later** (5.x and 6.x).  
+> Direct GPIO drive needs RMT, so ESP32-C2 / ESP32-C61 (no RMT) are not supported targets.
+
+On ESP-IDF native builds (`idf.py`), the unit/board of the Simple example is selected via Kconfig instead of editing the source `#define`. `main/Kconfig.projbuild` sources `examples/UnitUnified/common/Kconfig.variant`, and `examples/UnitUnified/common/variant.cmake` maps the chosen `CONFIG_EXAMPLE_USING_*` to the source-level `USING_*` macro shared with the Arduino build.
+
+Pick the unit with `menuconfig`:
+
+```sh
+cd examples/UnitUnified/Simple
+idf.py set-target esp32s3              # or esp32 / esp32c3 / esp32c6 / esp32h2 / esp32p4
+idf.py menuconfig
+# -> M5Unit-RGB example -> Target unit / board -> choose ONE of the options offered
+idf.py build flash monitor
+```
+
+DaisyChain uses a fixed unit chain written in the source, so there is no unit to choose: build the example directory directly.
+
 ## Doxygen document
 [GitHub Pages](https://m5stack.github.io/M5Unit-RGB/)
 
