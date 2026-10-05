@@ -94,7 +94,7 @@ protected:
 };
 
 ///@cond
-using m5::utility::mmh3::operator"" _mmh3;
+using m5::utility::mmh3::operator""_mmh3;
 // class UnitRectLED
 template <const uint8_t WIDTH, const uint8_t HEIGHT, class BaseClass>
 const char UnitRectLED<WIDTH, HEIGHT, BaseClass>::name[] = "UnitRectLED";
