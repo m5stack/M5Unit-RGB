@@ -126,7 +126,7 @@ You must choose a define symbol for the unit you will use.
 
 ### For ESP-IDF settings
 
-> **NOTE:** The library and examples target ESP-IDF **5.1 or later** (5.x and 6.x).  
+> **NOTE:** The ESP-IDF native build (`idf.py`) targets ESP-IDF **5.1 or later** (5.x and 6.x).  
 > Direct GPIO drive needs RMT, so ESP32-C2 / ESP32-C61 (no RMT) are not supported targets.
 
 On ESP-IDF native builds (`idf.py`), the unit/board of the Simple example is selected via Kconfig instead of editing the source `#define`. `main/Kconfig.projbuild` sources `examples/UnitUnified/common/Kconfig.variant`, and `examples/UnitUnified/common/variant.cmake` maps the chosen `CONFIG_EXAMPLE_USING_*` to the source-level `USING_*` macro shared with the Arduino build.
