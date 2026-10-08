@@ -178,7 +178,7 @@ void setup()
     }
 
     // Board-aware I2C: NessoN1 PortB -> SoftwareI2C, NanoC6/NanoH2 -> Ex_I2C, others -> Wire
-    bool unit_ready = m5::unit::wiring::addI2C(Units, hub, 400000) && Units.begin();
+    bool unit_ready = m5::unit::wiring::addI2C(Units, hub) && Units.begin();
 
     if (!unit_ready) {
         M5_LOGE("Failed to begin");
