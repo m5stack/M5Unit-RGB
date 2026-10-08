@@ -141,7 +141,7 @@ idf.py menuconfig
 idf.py build flash monitor
 ```
 
-DaisyChain and MultiChannel fix their units in the source, so there is no unit to choose: build the example directory directly.
+DaisyChain, MultiChannel and ViaPbHub fix their units in the source, so there is no unit to choose: build the example directory directly.
 
 ## Doxygen document
 [GitHub Pages](https://m5stack.github.io/M5Unit-RGB/)
