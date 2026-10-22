@@ -45,7 +45,8 @@ protected:
     }
     inline virtual gpio::m5_rmt_item_t rmt_item_reset() override
     {
-        return gpio::m5_rmt_item_t{{1600, 0, 0, 0}};
+        // Same as WS2812 so SK6812 and WS2812 units can share one daisy chain
+        return gpio::m5_rmt_item_t{{6000, 0, 0, 0}};  // 300 us (WS2812C-2020 needs > 280 us)
     }
 };
 
