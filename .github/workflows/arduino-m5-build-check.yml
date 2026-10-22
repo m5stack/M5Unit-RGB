@@ -64,31 +64,34 @@ jobs:
           - "-DUSING_UNIT_RGB"
 
         board:
-          - arduino_nesso_n1
-          - m5stack_atom
-          - m5stack_atoms3
+          # Reduced from 24 to 9 boards: one per chip, plus the S3 boards with their own PSRAM / flash / USB build properties.
+          # The other boards differ only in the variant header, so the library code compiles the same.
+#          - arduino_nesso_n1  # ESP32-C6: represented by m5stack_nano_c6
+#          - m5stack_atom  # ESP32: represented by m5stack_core
+#          - m5stack_atoms3  # ESP32-S3: represented by m5stack_cores3
           - m5stack_atoms3r
-          - m5stack_capsule
+#          - m5stack_capsule  # ESP32-S3: represented by m5stack_cores3
           - m5stack_cardputer
           - m5stack_core
-          - m5stack_core2
-          - m5stack_coreink
+#          - m5stack_core2  # ESP32: represented by m5stack_core
+#          - m5stack_coreink  # ESP32: represented by m5stack_core
           - m5stack_cores3
-          - m5stack_dial
-          - m5stack_dinmeter
-          - m5stack_fire
+#          - m5stack_dial  # ESP32-S3: represented by m5stack_cores3
+#          - m5stack_dinmeter  # ESP32-S3: represented by m5stack_cores3
+#          - m5stack_fire  # ESP32: represented by m5stack_core
           - m5stack_nano_c6
-          - m5stack_paper
+          - m5stack_nano_h2
+#          - m5stack_paper  # ESP32: represented by m5stack_core
           - m5stack_papers3
-          - m5stack_stamp_s3
-          - m5stack_stickc
-          - m5stack_stickc_plus
-          - m5stack_stickc_plus2
+#          - m5stack_stamp_s3  # ESP32-S3: represented by m5stack_cores3
+#          - m5stack_stickc  # ESP32: represented by m5stack_core
+#          - m5stack_stickc_plus  # ESP32: represented by m5stack_core
+#          - m5stack_stickc_plus2  # ESP32: represented by m5stack_core
           - m5stack_sticks3
           - m5stack_tab5
 
         platform-version:
-          - 3.2.5
+          - 3.3.9
 
         platform:
           - m5stack
@@ -100,70 +103,84 @@ jobs:
           # Specific sketches
           - sketch: Simple
             platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
-            platform-version: 3.2.5
+            platform-version: 3.3.9
             platform: m5stack
             archi: esp32
             board: m5stack_core
             build-properties: "-DUSING_UNIT_PUZZLE"
           - sketch: Simple
             platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
-            platform-version: 3.2.5
+            platform-version: 3.3.9
             platform: m5stack
             archi: esp32
             board: m5stack_core
             build-properties: "-DUSING_UNIT_HEX"
           - sketch: Simple
             platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
-            platform-version: 3.2.5
+            platform-version: 3.3.9
             platform: m5stack
             archi: esp32
             board: m5stack_core
             build-properties: "-DUSING_UNIT_NEO_HEX"
           - sketch: Simple
             platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
-            platform-version: 3.2.5
+            platform-version: 3.3.9
             platform: m5stack
             archi: esp32
             board: m5stack_core
             build-properties: "-DUSING_UNIT_NECO"
           - sketch: Simple
             platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
-            platform-version: 3.2.5
+            platform-version: 3.3.9
             platform: m5stack
             archi: esp32
             board: m5stack_core
             build-properties: "-DUSING_UNIT_RGBLED15"
           - sketch: Simple
             platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
-            platform-version: 3.2.5
+            platform-version: 3.3.9
             platform: m5stack
             archi: esp32
             board: m5stack_core
             build-properties: "-DUSING_UNIT_RGBLED_STRIP30"
           - sketch: Simple
             platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
-            platform-version: 3.2.5
+            platform-version: 3.3.9
             platform: m5stack
             archi: esp32
             board: m5stack_atom
             build-properties: "-DUSING_ATOM_MATRIX_RGB"
+          - sketch: Simple
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform-version: 3.3.9
+            platform: m5stack
+            archi: esp32
+            board: m5stack_stickc_plus2
+            build-properties: "-DUSING_HAT_NEOFLASH"
+          - sketch: Simple
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform-version: 3.3.9
+            platform: m5stack
+            archi: esp32
+            board: m5stack_sticks3
+            build-properties: "-DUSING_HAT_NEOFLASH"
           - sketch: DaisyChain
             platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
-            platform-version: 3.2.5
+            platform-version: 3.3.9
             platform: m5stack
             archi: esp32
             board: m5stack_core
             build-properties: "-DUSING_UNIT_RGB"
           - sketch: ViaPbHub
             platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
-            platform-version: 3.2.5
+            platform-version: 3.3.9
             platform: m5stack
             archi: esp32
             board: m5stack_core
             build-properties: ""
           - sketch: MultiChannel
             platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
-            platform-version: 3.2.5
+            platform-version: 3.3.9
             platform: m5stack
             archi: esp32
             board: m5stack_core
