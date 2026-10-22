@@ -28,8 +28,6 @@ public:
     //! @brief Constructor (5x5 = 25 LEDs)
     UnitAtomMatrixRGB() : UnitRectLED<5, 5, UnitWS2812>()
     {
-        auto ccfg = component_config();
-        component_config(ccfg);
     }
     /*!
       @brief Begin the unit
