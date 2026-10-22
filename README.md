@@ -28,7 +28,7 @@ Unit Puzzle is a colorful light control unit composed of an 8x8 array of 64 WS28
 
 
 ### SKU:U071
-Hat NeoFlash is a NeoPixel LED hat with 126 (7x18) WS2812B programmable LEDs. It connects via the Hat port and supports daisy-chaining for expansion.
+Hat NeoFlash is a matrix RGB LED panel specifically designed for StickC. This PCB board, with a size of only 58x23.5mm, embeds a total of 126 programmable RGB LEDs (WS2812), allowing users to freely set its color and brightness. Besides achieving cool colorful lighting effects, its 7x18 matrix design provides a good digital display experience.
 
 
 ### SKU:C008-B
@@ -44,8 +44,6 @@ ATOM Matrix has a built-in 5x5 RGB LED matrix on the panel. This library can man
 
 
 ## Related Link
-See also examples using conventional methods here.
-
 - [Unit RGB - Document & Datasheet](https://docs.m5stack.com/en/unit/rgb)
 - [Unit RGB LED - Document & Datasheet](https://docs.m5stack.com/en/unit/neopixel)
 - [Unit Hex - Document & Datasheet](https://docs.m5stack.com/en/unit/hex)
@@ -57,7 +55,7 @@ See also examples using conventional methods here.
 - [M5AtomMatrix - Document & Datasheet](https://docs.m5stack.com/en/core/ATOM%20Matrix)
 
 
-## Required Libraries:
+## Required Libraries
 - [M5UnitUnified](https://github.com/m5stack/M5UnitUnified)
 - [M5Utility](https://github.com/m5stack/M5Utility)
 - [M5HAL](https://github.com/m5stack/M5HAL)
@@ -77,8 +75,6 @@ See also examples using conventional methods here.
 |UnitRGBLEDStrip|OK||
 |UnitNeco|OK|LED only, Button function NG|
 |UnitPuzzle|OK||
-|HatNeoFlash|NG|Hat port, not a Grove unit|
-|UnitAtomMatrixRGB|NG|Built-in LED, not an external unit|
 
 See also [M5Unit-HUB](https://github.com/m5stack/M5Unit-HUB)
 
@@ -97,7 +93,7 @@ See also [examples/UnitUnified](examples/UnitUnified)
 You must choose a define symbol for the unit you will use.
 (Rewrite source or specify with compile options)
 
-- Simple / ViaPbHub
+- Simple
 ```cpp
 // *************************************************************
 // Choose one define symbol to match the unit you are using
@@ -117,9 +113,9 @@ You must choose a define symbol for the unit you will use.
 // #define USING_UNIT_RGBLED15
 // For Unit RGB LED Strip (A093)
 // #define USING_UNIT_RGBLED_STRIP30
-// For ATOM Matrix built-in 5x5 RGB LED
+// For ATOM Matrix built-in 5x5 RGB LED (C008-B)
 // #define USING_ATOM_MATRIX_RGB
-// For Hat NeoFlash
+// For Hat NeoFlash (U071)
 // #define USING_HAT_NEOFLASH
 #endif
 ```
