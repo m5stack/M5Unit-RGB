@@ -95,7 +95,8 @@ jobs:
 
   # Chip coverage: Simple (UnitRGB, the Kconfig default) on every supported SoC. esp32 = classic
   # Xtensa dual-core (M5Unified touch-deprecation path). esp32c3 / esp32c6 / esp32h2 = RISC-V
-  # single-core, exercises the app_main CONFIG_FREERTOS_UNICORE feedIdle branch. esp32p4 (M5Stack
+  # single-core, exercises the app_main CONFIG_FREERTOS_UNICORE feedIdle branch. esp32c5 = RISC-V
+  # single-core supported from IDF 5.5 (so it is on the v5.5.4 / v6.1 rows only). esp32p4 (M5Stack
   # Tab5) = RISC-V dual-core; sdkconfig.defaults.esp32p4 overlay (chip-rev minimum keys) is auto-applied.
   build-chips:
     name: ${{ matrix.idf }} ${{ matrix.target }} Simple USING_UNIT_RGB
@@ -105,7 +106,7 @@ jobs:
       fail-fast: false
       max-parallel: 20
       matrix:
-        target: [esp32, esp32s3, esp32c3, esp32c6, esp32h2, esp32p4]
+        target: [esp32, esp32s3, esp32c3, esp32c5, esp32c6, esp32h2, esp32p4]
         # idf boundaries: 5.1.7 = oldest legacy-driver (5.0.x dropped: M5GFX needs esp_mm added
         # in 5.1), 5.4.4 = new driver/*_master.h + touch_sens.h era, 5.5.4 = latest 5.x,
         # 6.1 = latest (M5Unified/M5GFX support 6.x; 7.x is not verified yet).
@@ -114,6 +115,8 @@ jobs:
           # esp32p4 stable from IDF v5.3 (M5GFX P4 verified on 5.4/5.5). 5.1.7 not applicable.
           - target: esp32p4
             idf: v5.1.7
+          - {target: esp32c5, idf: v5.1.7}  # C5 is supported from IDF 5.5 (preview target on 5.4)
+          - {target: esp32c5, idf: v5.4.4}
           # Built by build-variants (USING_UNIT_RGB on v6.1 esp32s3)
           - target: esp32s3
             idf: v6.1
