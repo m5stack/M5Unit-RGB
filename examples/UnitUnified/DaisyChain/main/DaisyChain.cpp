@@ -11,7 +11,7 @@
 
   **** NOTICE *********************************************************************
   This example assumes the following connections
-  Core -> UnitRGB -> UnitPuzzle -> UnitPuzzle -> UnitHex -> UnitRGBLed15 -> UnitNeco
+  Core -> UnitRGB -> UnitPuzzle -> UnitPuzzle -> UnitHex -> UnitRGBLED15 -> UnitNeco
   -> UnitRGBLEDStrip30
 
   Modify the source code to suit your own connection situation.
@@ -59,9 +59,9 @@ void show_all()
 }
 
 // Shared HSV→RGB (S=1, V=v, H=0..359)
-Color hue_color(uint16_t h, uint8_t v)
+Color hue_color(const uint16_t hue, const uint8_t v)
 {
-    h %= 360;
+    const uint16_t h{static_cast<uint16_t>(hue % 360)};
     const uint8_t hi{static_cast<uint8_t>(h / 60)};
     const uint8_t f{static_cast<uint8_t>(static_cast<uint16_t>(v) * (h % 60) / 60)};
     const uint8_t q{static_cast<uint8_t>(v - f)};
@@ -82,9 +82,9 @@ Color hue_color(uint16_t h, uint8_t v)
 }
 
 // Triangle wave 0..255
-uint8_t tri(uint16_t p)
+uint8_t tri(const uint16_t phase)
 {
-    p &= 511;
+    const uint16_t p{static_cast<uint16_t>(phase & 511)};
     return p < 256 ? static_cast<uint8_t>(p) : static_cast<uint8_t>(511u - p);
 }
 
@@ -297,7 +297,7 @@ void update()
 
 // =====================================================
 // Demo B  Comet
-// Pixel comet + fading tail sweeps through all 249 LEDs.
+// Pixel comet + fading tail sweeps through all 248 LEDs.
 // Max simultaneous LEDs: TAIL_LEN (12)
 // =====================================================
 namespace demo_b {
