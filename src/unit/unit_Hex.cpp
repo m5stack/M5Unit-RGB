@@ -48,10 +48,6 @@ constexpr uint16_t index_table[6][37] = {
 namespace m5 {
 namespace unit {
 
-// explicit instantiation
-template class UnitHexLED37<UnitWS2812>;
-template class UnitHexLED37<UnitSK6812GRB>;
-
 // class UnitHexLED37
 template <class BaseClass>
 uint16_t UnitHexLED37<BaseClass>::index_of(const uint16_t n) const
@@ -75,6 +71,10 @@ const types::attr_t UnitHex::attr{attribute::AccessGPIO};
 const char UnitNeoHex::name[] = "UnitNeoHex";
 const types::uid_t UnitNeoHex::uid{"UnitNeoHex"_mmh3};
 const types::attr_t UnitNeoHex::attr{attribute::AccessGPIO};
+
+// explicit instantiation (must follow the member definitions; members defined after this point are not instantiated)
+template class UnitHexLED37<UnitWS2812>;
+template class UnitHexLED37<UnitSK6812GRB>;
 
 }  // namespace unit
 }  // namespace m5
