@@ -114,6 +114,9 @@ jobs:
           # esp32p4 stable from IDF v5.3 (M5GFX P4 verified on 5.4/5.5). 5.1.7 not applicable.
           - target: esp32p4
             idf: v5.1.7
+          # Built by build-variants (USING_UNIT_RGB on v6.1 esp32s3)
+          - target: esp32s3
+            idf: v6.1
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -125,10 +128,10 @@ jobs:
           target: ${{ matrix.target }}
           path: examples/UnitUnified/Simple
 
-  # Other examples: unit setup fixed in the source (no Kconfig variant), built on esp32 only
-  # (oldest and latest IDF boundary).
+  # Other examples: unit setup fixed in the source (no Kconfig variant), built on esp32
+  # (oldest and latest IDF boundary). ViaPbHub is also built on esp32c6 / esp32h2 / esp32p4.
   build-examples:
-    name: ${{ matrix.idf }} esp32 ${{ matrix.example }}
+    name: ${{ matrix.idf }} ${{ matrix.target }} ${{ matrix.example }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -137,6 +140,15 @@ jobs:
       matrix:
         idf: [v5.1.7, v6.1]
         example: [DaisyChain, MultiChannel, ViaPbHub]
+        target: [esp32]
+        include:
+          # ViaPbHub also on the C6 / H2 (NanoC6 / NanoH2) and P4 (Tab5) chips
+          - {example: ViaPbHub, target: esp32c6, idf: v5.1.7}
+          - {example: ViaPbHub, target: esp32c6, idf: v6.1}
+          - {example: ViaPbHub, target: esp32h2, idf: v5.1.7}
+          - {example: ViaPbHub, target: esp32h2, idf: v6.1}
+          # esp32p4 stable from IDF v5.3, so v6.1 only
+          - {example: ViaPbHub, target: esp32p4, idf: v6.1}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -145,5 +157,5 @@ jobs:
         uses: espressif/esp-idf-ci-action@v1
         with:
           esp_idf_version: ${{ matrix.idf }}
-          target: esp32
+          target: ${{ matrix.target }}
           path: examples/UnitUnified/${{ matrix.example }}
