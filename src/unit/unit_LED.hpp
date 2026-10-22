@@ -88,20 +88,21 @@ constexpr bool operator==(const Color& lhs, const Color& rhs)
 /*!
   @enum Order
   @brief Color order
+  @details Each name lists the bytes in the order they are sent, e.g. grb24 sends G, R, B
  */
 enum class Order : int8_t {
-    unknown = -1,
-    // 24 bits
+    unknown = -1,  //!< Not set (begin() fails)
+    // 24 bits (no white channel)
     rgb24,
     rbg24,
     grb24,
     gbr24,
     brg24,
     bgr24,
-    // 32 bits
-    hasWhite,
+    // 32 bits (with white channel)
+    hasWhite,  //!< First 32-bit order; orders >= hasWhite carry a white channel
     //
-    wrgb32 = hasWhite,
+    wrgb32 = hasWhite,  //!< Same value as hasWhite
     wrbg32,
     wgrb32,
     wgbr32,
@@ -217,7 +218,7 @@ public:
       @brief Gets the configuration
       @return config_t
      */
-    inline config_t config()
+    inline config_t config() const
     {
         return _cfg;
     }
@@ -264,7 +265,6 @@ public:
     /*!
       @brief Brightness
       @return Current brightness (255 = 100%)
-      @note Scaling factor (255 = 100%)
     */
     inline uint8_t brightness() const
     {
@@ -391,7 +391,7 @@ public:
       @brief Set the brightness
       @param b brightness (255 = 100%)
       @note Behaves similar to FastLED
-      @note Internal pixels's color is not changed
+      @note Internal pixel colors are not changed
       @note The brightness applied on writePixels()
      */
     inline void setBrightness(const uint8_t b)
@@ -617,7 +617,7 @@ public:
             return {};
         }
 
-        //! @brief Write pixels directly via the protocol-specific method
+        // Write pixels directly via the protocol-specific method
         virtual bool writePixelsDirect()
         {
             return false;
