@@ -37,8 +37,11 @@ public:
       @return True if successful
      */
     virtual bool begin() override;
-    //! @brief Update the unit
-    virtual void update(const bool = false) override;
+    /*!
+      @brief Update the button status
+      @param force Ignored (the button is read on every call)
+     */
+    virtual void update(const bool force = false) override;
 
     /*!
       @brief Whether the button is usable on the current wiring
