@@ -607,15 +607,6 @@ public:
         {
         }
         virtual bool write(const uint8_t*, const uint32_t) = 0;
-        // For items
-        virtual UnitLED::item_container_type items()
-        {
-            return {};
-        }
-        virtual UnitLED::item_container_type items_from_root()
-        {
-            return {};
-        }
         // For RGB888
         virtual UnitLED::container_type rgb888_items()
         {
@@ -626,7 +617,7 @@ public:
             return {};
         }
 
-        //! @brief Write pixels directly via protocol-specific method (bypasses items vector)
+        //! @brief Write pixels directly via the protocol-specific method
         virtual bool writePixelsDirect()
         {
             return false;
@@ -679,7 +670,6 @@ protected:
     }
 
     container_type rgb888_items();
-    item_container_type items();
 
     void shift_left(const uint16_t count, const bool wrap);
     void shift_right(const uint16_t count, const bool wrap);
