@@ -178,6 +178,27 @@ jobs:
             archi: esp32
             board: m5stack_core
             build-properties: ""
+          - sketch: ViaPbHub
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform-version: 3.3.9
+            platform: m5stack
+            archi: esp32
+            board: m5stack_nano_c6
+            build-properties: ""
+          - sketch: ViaPbHub
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform-version: 3.3.9
+            platform: m5stack
+            archi: esp32
+            board: m5stack_nano_h2
+            build-properties: ""
+          - sketch: ViaPbHub
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform-version: 3.3.9
+            platform: m5stack
+            archi: esp32
+            board: m5stack_tab5
+            build-properties: ""
           - sketch: MultiChannel
             platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
             platform-version: 3.3.9
