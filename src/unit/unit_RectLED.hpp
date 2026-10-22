@@ -37,8 +37,8 @@ public:
     UnitRectLED() : BaseClass(WIDTH * HEIGHT)
     {
     }
-    static constexpr uint8_t LED_WIDTH{WIDTH};
-    static constexpr uint8_t LED_HEIGHT{HEIGHT};
+    static constexpr uint8_t LED_WIDTH{WIDTH};    //!< Physical width in pixels (not affected by rotation)
+    static constexpr uint8_t LED_HEIGHT{HEIGHT};  //!< Physical height in pixels (not affected by rotation)
 
     /*!
       @brief Logical width considering rotation (0/180: WIDTH, 90/270: HEIGHT)
