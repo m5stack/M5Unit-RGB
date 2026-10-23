@@ -92,7 +92,7 @@ void loop_hex(const m5::unit::types::elapsed_time_t now)
 
 uint32_t round_trip(const uint32_t count, const uint32_t max)
 {
-    const uint32_t index = count % (2 * max);
+    const uint32_t index{count % (2 * max)};
     return (index <= max) ? index : 2 * max - index;
 }
 
