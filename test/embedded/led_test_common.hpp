@@ -434,12 +434,11 @@ inline void hex_rotation_test(UnitLED* unit)
 }
 
 // UnitNeco: button verification. If wiring cannot support InputPullup
-// (e.g. ESP32 classic GPIO 34-39), skip the read check with a warning log.
+// (e.g. ESP32 classic GPIO 34-39), the read check is reported as SKIPPED.
 inline void neco_button_test(UnitNeco* unit)
 {
     if (!unit->buttonAvailable()) {
-        M5_LIB_LOGW("Skipping Neco button read: RX pin cannot support InputPullup");
-        return;
+        GTEST_SKIP() << "RX pin cannot support InputPullup, so the button read is not checked";
     }
     unit->update();
     EXPECT_FALSE(unit->isPressed()) << "Button appears pressed at rest — check wiring";
