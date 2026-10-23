@@ -157,11 +157,6 @@ int8_t offsetW(const Order f)
     return offset_of(f, 3);
 }
 
-Color Color::fromHSV(const uint8_t h, const uint8_t s, const uint8_t v)
-{
-    return Color(hsv2rgb(h, s, v));
-}
-
 }  // namespace rgb
 
 ///@cond
