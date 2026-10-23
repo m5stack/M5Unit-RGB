@@ -1,7 +1,7 @@
 {
     "name": "M5Unit-RGB",
     "description": "Library for M5Stack UNIT RGB using M5UnitUnified",
-    "keywords": "m5stack, m5unitunified, rgb, led, sk6812, neopixel, ws2812",
+    "keywords": "m5stack,m5unitunified,rgb,led,sk6812,neopixel,ws2812",
     "authors": {
         "name": "M5Stack",
         "url": "https://www.m5stack.com"
