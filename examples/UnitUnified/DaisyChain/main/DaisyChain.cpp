@@ -119,11 +119,6 @@ void step()
 // Each unit runs a completely independent animation using
 // only its own local coordinate system — no chain offsets
 // or inter-unit position calculations needed.
-//
-// In FastLED this would require:
-//   leds[OFFSET + j] with manual per-segment offset tracking,
-//   manual brightness scaling, and manual pixel rotation.
-// Here each unit object encapsulates all of that.
 // =====================================================
 namespace demo_a {
 
