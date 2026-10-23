@@ -11,7 +11,6 @@
 #define M5_UNIT_RGB_UNIT_HEX_HPP
 
 #include "unit_SK6812.hpp"
-#include "unit_WS2812.hpp"
 
 namespace m5 {
 namespace unit {
@@ -67,14 +66,14 @@ protected:
 
 /*!
   @class m5::unit::UnitHex
-  @brief Hex Unit
+  @brief Hex Unit (SK6812 x 37)
 */
-class UnitHex : public UnitHexLED37<UnitWS2812> {
+class UnitHex : public UnitHexLED37<UnitSK6812GRB> {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitHex, 0x00);
 
 public:
     //! @brief Constructor
-    UnitHex() : UnitHexLED37<UnitWS2812>()
+    UnitHex() : UnitHexLED37<UnitSK6812GRB>()
     {
         auto ccfg         = component_config();
         ccfg.max_children = 1;  // Can connect 1 Unit

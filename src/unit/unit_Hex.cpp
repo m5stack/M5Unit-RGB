@@ -73,7 +73,6 @@ const types::uid_t UnitNeoHex::uid{"UnitNeoHex"_mmh3};
 const types::attr_t UnitNeoHex::attr{attribute::AccessGPIO};
 
 // explicit instantiation (must follow the member definitions; members defined after this point are not instantiated)
-template class UnitHexLED37<UnitWS2812>;
 template class UnitHexLED37<UnitSK6812GRB>;
 
 }  // namespace unit
