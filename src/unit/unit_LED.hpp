@@ -132,7 +132,7 @@ class UnitLED : public Component {
 
 public:
     using container_type      = std::vector<uint8_t>;              //!< pixel container
-    using item_container_type = std::vector<gpio::m5_rmt_item_t>;  //!< item container
+    using item_container_type = std::vector<gpio::m5_rmt_item_t>;  //!< RMT item container (unused, for compatibility)
 
     /*!
       @struct config_t
@@ -324,9 +324,8 @@ public:
     /*!
       @brief Set the brightness
       @param b brightness (255 = 100%)
-      @note Behaves similar to FastLED
       @note Internal pixel colors are not changed
-      @note The brightness applied on writePixels()
+      @note Applied with scale8() on writePixels()
      */
     inline void setBrightness(const uint8_t b)
     {
