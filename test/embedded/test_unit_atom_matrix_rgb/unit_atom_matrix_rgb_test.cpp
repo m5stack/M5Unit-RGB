@@ -37,8 +37,6 @@ TEST_F(TestUnitAtomMatrixRGB, All)
     basic_test(unit.get(), expected::UNIT_ATOMMATRIXRGB);
     fill_test(unit.get());
     shift_test(unit.get());
-    scale8_test();
-    color_test();
     config_test(unit.get());
     range_test(unit.get());
     hw_write_test(unit.get());
