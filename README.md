@@ -35,12 +35,18 @@ Hat NeoFlash is a matrix RGB LED panel specifically designed for StickC. This PC
 ATOM Matrix has a built-in 5x5 RGB LED matrix on the panel. This library can manage the LED matrix.
 
 > **Warning:** Do not set brightness too high. Excessive brightness can generate high temperatures and damage the LEDs and acrylic panel. Recommended brightness is 20 or less.
->
+
+
+### Hardware notes
 > **Note (large cascades / PbHub):** Two hardware limits apply to the cascaded examples (`DaisyChain`, `ViaPbHub`):
 > 1. **PbHub caps each channel at 74 LEDs.** LEDs past the 74th on any channel receive no data — e.g. running two Unit Puzzles (64 + 64) on a single PbHub channel leaves 54 LEDs in the second puzzle unlit.
 > 2. **USB-powered boards (NanoC6 / NanoH2, ~500 mA)** cannot supply enough current for the full example configurations; the 5V rail sags and downstream LEDs dim or go dark. Reduce total LED count, lower brightness, or use an external 5V power source.
 >
 > **Note (StickS3 + HatNeoFlash boot):** StickS3's Hat header uses GPIO 0 (ESP32-S3 boot-mode strap). HatNeoFlash's WS2812 DIN pulls GPIO 0 low at reset, forcing DOWNLOAD MODE (silent boot). Detach the Hat before flashing, then re-attach after the firmware starts.
+
+**UnitNeco button (direct GPIO connection)**
+- Button read requires an input GPIO with internal pull-up on the host's Grove port. Some boards route `port_b_in` to an input-only pin lacking pull-up (e.g. **M5Stack Core = GPIO 36**), on which the button is disabled at runtime (logged as `RX GPIO NN is not usable for button; button disabled`) — the LEDs still work.
+- To use the button on such boards, connect Neco to another port whose input pin has internal pull-up (e.g. Port A or Port C on boards that expose them) and add manually via `Units.add(unit, rx, tx)` with the chosen pins instead of `wiring::addGPIO`.
 
 
 ## Related Link
@@ -64,28 +70,6 @@ ATOM Matrix has a built-in 5x5 RGB LED matrix on the panel. This library can man
 
 - [M5Unit-RGB - MIT](LICENSE)
 
-## Support via [PbHub](https://docs.m5stack.com/en/unit/pbhub_1.1)
-
-|Unit|Support|Note|
-|---|---|---|
-|UnitRGB|OK||
-|UnitRGBLED|OK||
-|UnitHex|OK||
-|UnitNeoHex|OK||
-|UnitRGBLEDStrip|OK||
-|UnitNeco|OK|LED only, Button function NG|
-|UnitPuzzle|OK||
-
-See also [M5Unit-HUB](https://github.com/m5stack/M5Unit-HUB)
-
-### Limitations via PbHub
-- Each channel can control up to **MAX 74 LEDs each**
-- **Button status of UnitNeco** cannot be retrieved
-
-## Limitations for UnitNeco button (direct GPIO connection)
-- Button read requires an input GPIO with internal pull-up on the host's Grove port. Some boards route `port_b_in` to an input-only pin lacking pull-up (e.g. **M5Stack Core = GPIO 36**), on which the button is disabled at runtime (logged as `RX GPIO NN is not usable for button; button disabled`) — the LEDs still work.
-- To use the button on such boards, connect Neco to another port whose input pin has internal pull-up (e.g. Port A or Port C on boards that expose them) and add manually via `Units.add(unit, rx, tx)` with the chosen pins instead of `wiring::addGPIO`.
-
 ## Examples
 See also [examples/UnitUnified](examples/UnitUnified)
 
@@ -98,7 +82,9 @@ You must choose a define symbol for the unit you will use.
 // *************************************************************
 // Choose one define symbol to match the unit you are using
 // *************************************************************
-#if !defined(USING_UNIT_RGB) && !defined(USING_UNIT_PUZZLE) && ...
+#if !defined(USING_UNIT_RGB) && !defined(USING_UNIT_PUZZLE) && !defined(USING_UNIT_HEX) &&        \
+    !defined(USING_UNIT_NEO_HEX) && !defined(USING_UNIT_NECO) && !defined(USING_UNIT_RGBLED15) && \
+    !defined(USING_UNIT_RGBLED_STRIP30) && !defined(USING_ATOM_MATRIX_RGB) && !defined(USING_HAT_NEOFLASH)
 // For Unit RGB (U003)
 // #define USING_UNIT_RGB
 // For Unit Puzzle (U193)
@@ -138,6 +124,24 @@ idf.py build flash monitor
 ```
 
 DaisyChain, MultiChannel and ViaPbHub fix their units in the source, so there is no unit to choose: build the example directory directly.
+
+## Support via [PbHub](https://docs.m5stack.com/en/unit/pbhub_1.1)
+
+|Unit|Support|Note|
+|---|---|---|
+|UnitRGB|OK||
+|UnitRGBLED|OK||
+|UnitHex|OK||
+|UnitNeoHex|OK||
+|UnitRGBLEDStrip|OK||
+|UnitNeco|OK|LED only, Button function NG|
+|UnitPuzzle|OK||
+
+See also [M5Unit-HUB](https://github.com/m5stack/M5Unit-HUB)
+
+### Limitations via PbHub
+- Each channel can control up to **MAX 74 LEDs each**
+- **Button status of UnitNeco** cannot be retrieved
 
 ## Doxygen document
 [GitHub Pages](https://m5stack.github.io/M5Unit-RGB/)
