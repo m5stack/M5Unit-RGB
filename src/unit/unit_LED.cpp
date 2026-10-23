@@ -373,15 +373,15 @@ public:
         auto roff         = _unit.offsetR();
         auto goff         = _unit.offsetG();
         auto boff         = _unit.offsetB();
-        const float scale = _unit.brightness() / 255.f;
+        const uint8_t bri = _unit.brightness();
 
         v.reserve(_unit.numPixels() * 3);
 
         for (uint32_t i = 0; i < _unit.numPixels(); ++i) {
             const uint8_t* p = _unit.pixels().data() + i * align;
-            v.emplace_back(static_cast<uint8_t>(p[roff] * scale));
-            v.emplace_back(static_cast<uint8_t>(p[goff] * scale));
-            v.emplace_back(static_cast<uint8_t>(p[boff] * scale));
+            v.emplace_back(rgb::scale8(p[roff], bri));
+            v.emplace_back(rgb::scale8(p[goff], bri));
+            v.emplace_back(rgb::scale8(p[boff], bri));
         }
         return v;
     }
