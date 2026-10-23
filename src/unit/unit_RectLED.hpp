@@ -10,6 +10,8 @@
 #ifndef M5_UNIT_RGB_UNIT_RECT_LED_HPP
 #define M5_UNIT_RGB_UNIT_RECT_LED_HPP
 
+#include <m5_utility/murmurhash3.hpp>
+
 #include "unit_LED.hpp"
 #include "unit_SK6812.hpp"
 #include "unit_WS2812.hpp"

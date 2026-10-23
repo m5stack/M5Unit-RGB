@@ -10,8 +10,9 @@
 #ifndef M5_UNIT_RGB_UNIT_NECO_HPP
 #define M5_UNIT_RGB_UNIT_NECO_HPP
 
+#include <m5_utility/button_status.hpp>
+
 #include "unit_WS2812.hpp"
-#include "m5_utility/button_status.hpp"
 
 namespace m5 {
 namespace unit {
