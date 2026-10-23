@@ -18,7 +18,7 @@ namespace unit {
 /*!
   @class m5::unit::UnitHexLED37
   @brief Unit comprising 37 LED hexagons
-  @details Base class for UnitHEX, UnitNeoHex
+  @details Base class for UnitHex, UnitNeoHex
   @tparam BaseClass Parent LED chip class
 */
 template <class BaseClass>
