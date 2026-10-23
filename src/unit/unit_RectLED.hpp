@@ -94,12 +94,12 @@ protected:
 };
 
 ///@cond
-using m5::utility::mmh3::operator""_mmh3;
 // class UnitRectLED
 template <const uint8_t WIDTH, const uint8_t HEIGHT, class BaseClass>
 const char UnitRectLED<WIDTH, HEIGHT, BaseClass>::name[] = "UnitRectLED";
 template <const uint8_t WIDTH, const uint8_t HEIGHT, class BaseClass>
-const types::uid_t UnitRectLED<WIDTH, HEIGHT, BaseClass>::uid{"UnitRectLED"_mmh3};
+const types::uid_t UnitRectLED<WIDTH, HEIGHT, BaseClass>::uid{
+    m5::utility::mmh3::calculate("UnitRectLED", sizeof("UnitRectLED") - 1)};
 template <const uint8_t WIDTH, const uint8_t HEIGHT, class BaseClass>
 const types::attr_t UnitRectLED<WIDTH, HEIGHT, BaseClass>::attr{types::attribute::AccessGPIO};
 ///@endcond
