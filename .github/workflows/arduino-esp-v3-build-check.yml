@@ -152,6 +152,13 @@ jobs:
             archi: esp32
             board: m5stack_stickc_plus2
             build-properties: "-DUSING_HAT_NEOFLASH"
+          - sketch: Simple
+            platform-url: https://espressif.github.io/arduino-esp32/package_esp32_index.json
+            platform-version: 3.3.12
+            platform: esp32
+            archi: esp32
+            board: arduino_nesso_n1
+            build-properties: "-DUSING_HAT_NEOFLASH"
           - sketch: DaisyChain
             platform-url: https://espressif.github.io/arduino-esp32/package_esp32_index.json
             platform-version: 3.3.12
@@ -165,6 +172,13 @@ jobs:
             platform: esp32
             archi: esp32
             board: m5stack_core
+            build-properties: ""
+          - sketch: ViaPbHub
+            platform-url: https://espressif.github.io/arduino-esp32/package_esp32_index.json
+            platform-version: 3.3.12
+            platform: esp32
+            archi: esp32
+            board: m5stack_cores3
             build-properties: ""
           - sketch: ViaPbHub
             platform-url: https://espressif.github.io/arduino-esp32/package_esp32_index.json

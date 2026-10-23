@@ -150,6 +150,10 @@ jobs:
             framework: Arduino
             espressif32: latest
           - example: ViaPbHub
+            board: CoreS3
+            framework: Arduino
+            espressif32: latest
+          - example: ViaPbHub
             board: NanoC6
             framework: Arduino
             espressif32: latest
