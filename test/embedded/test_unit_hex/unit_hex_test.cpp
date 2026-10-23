@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 /*
-  UnitTest for UnitHex (SKU A045, 37 x WS2812 hexagonal)
+  UnitTest for UnitHex (SKU A045, 37 x SK6812GRB hexagonal)
 */
 #include "../led_test_common.hpp"
 
