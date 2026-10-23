@@ -31,7 +31,7 @@ using namespace m5::unit::googletest;
 using namespace m5::unit;
 using namespace m5::unit::rgb;
 
-inline constexpr Color COLOR_BLACK{};
+constexpr Color COLOR_BLACK{};
 
 // Expected static properties for a given SKU (used by basic_test).
 struct BasicExpect {
@@ -315,14 +315,6 @@ inline void shift_test(UnitLED* unit)
     unit->clear();
 }
 
-inline void config_test(UnitLED* unit)
-{
-    auto cfg       = unit->config();
-    cfg.brightness = 42;
-    unit->config(cfg);
-    EXPECT_EQ(unit->config().brightness, 42);
-}
-
 inline void range_test(UnitLED* unit)
 {
     constexpr Color R(255, 0, 0);
@@ -362,7 +354,10 @@ inline void hw_write_test(UnitLED* unit)
 // Rotation test for RectLED (WIDTH x HEIGHT grid, 4 rotation steps).
 inline void rect_rotation_test(UnitLED* unit, uint16_t W, uint16_t H)
 {
-    ASSERT_EQ(unit->maxRotation(), 4u);
+    EXPECT_EQ(unit->maxRotation(), 4u);
+    if (unit->maxRotation() != 4u) {
+        return;
+    }
 
     constexpr Color R(255, 0, 0);
     constexpr Color B(0, 0, 255);
@@ -405,7 +400,10 @@ inline void rect_rotation_test(UnitLED* unit, uint16_t W, uint16_t H)
 // Rotation test for HexLED37 (6 rotation steps: 0/60/120/180/240/300 deg).
 inline void hex_rotation_test(UnitLED* unit)
 {
-    ASSERT_EQ(unit->maxRotation(), 6u);
+    EXPECT_EQ(unit->maxRotation(), 6u);
+    if (unit->maxRotation() != 6u) {
+        return;
+    }
 
     constexpr Color R(255, 0, 0);
 
@@ -420,6 +418,16 @@ inline void hex_rotation_test(UnitLED* unit)
         unit->setPixelColor(0, R);
         EXPECT_NE(unit->absoluteColor(0), R) << "rot=" << int(rot);
     }
+
+    unit->setRotation(1);
+    unit->clear();
+    unit->setPixelColor(0, R);
+    EXPECT_EQ(unit->absoluteColor(3), R) << "rot60: logical[0] -> physical 3";
+
+    unit->setRotation(3);
+    unit->clear();
+    unit->setPixelColor(0, R);
+    EXPECT_EQ(unit->absoluteColor(36), R) << "rot180: logical[0] -> physical 36";
 
     unit->setRotation(0);
     unit->clear();

@@ -21,6 +21,19 @@ protected:
     }
 };
 
+// BeginAppliesConfig fixture: pre-set config.brightness=42 before begin().
+class TestHatNeoFlash_Config : public TestHatNeoFlash {
+protected:
+    HatNeoFlash* get_instance() override
+    {
+        auto* ptr      = new HatNeoFlash();
+        auto cfg       = ptr->config();
+        cfg.brightness = 42;
+        ptr->config(cfg);
+        return ptr;
+    }
+};
+
 namespace testing {
 namespace internal {
 template <>
@@ -37,7 +50,6 @@ TEST_F(TestHatNeoFlash, All)
     basic_test(unit.get(), expected::HAT_NEOFLASH);
     fill_test(unit.get());
     shift_test(unit.get());
-    config_test(unit.get());
     range_test(unit.get());
     hw_write_test(unit.get());
 }
@@ -46,4 +58,10 @@ TEST_F(TestHatNeoFlash, RectRotation)
 {
     SCOPED_TRACE(ustr);
     rect_rotation_test(unit.get(), 18, 7);
+}
+
+TEST_F(TestHatNeoFlash_Config, BeginAppliesConfig)
+{
+    SCOPED_TRACE(ustr);
+    EXPECT_EQ(unit->brightness(), 42);
 }

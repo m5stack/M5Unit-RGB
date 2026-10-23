@@ -8,7 +8,8 @@
 */
 #include "../led_test_common.hpp"
 
-using TestUnitNeoHex = TestSKU<UnitNeoHex>;
+using TestUnitNeoHex        = TestSKU<UnitNeoHex>;
+using TestUnitNeoHex_Config = TestSKU_ConfigApplied<UnitNeoHex>;
 
 namespace testing {
 namespace internal {
@@ -26,7 +27,6 @@ TEST_F(TestUnitNeoHex, All)
     basic_test(unit.get(), expected::UNIT_NEOHEX);
     fill_test(unit.get());
     shift_test(unit.get());
-    config_test(unit.get());
     range_test(unit.get());
     hw_write_test(unit.get());
 }
@@ -35,4 +35,10 @@ TEST_F(TestUnitNeoHex, HexRotation)
 {
     SCOPED_TRACE(ustr);
     hex_rotation_test(unit.get());
+}
+
+TEST_F(TestUnitNeoHex_Config, BeginAppliesConfig)
+{
+    SCOPED_TRACE(ustr);
+    EXPECT_EQ(unit->brightness(), 42);
 }
