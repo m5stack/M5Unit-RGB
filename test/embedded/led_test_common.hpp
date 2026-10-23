@@ -9,6 +9,9 @@
 #ifndef M5_UNIT_RGB_LED_TEST_COMMON_HPP
 #define M5_UNIT_RGB_LED_TEST_COMMON_HPP
 
+#include <algorithm>
+#include <string>
+
 #include <gtest/gtest.h>
 #include <Wire.h>
 #include <M5Unified.h>
@@ -16,11 +19,6 @@
 #include <googletest/test_template.hpp>
 #include <M5UnitUnifiedRGB.h>
 #include <wiring/m5_unit_unified_wiring.hpp>
-#include <chrono>
-#include <cmath>
-#include <iostream>
-#include <vector>
-#include <set>
 
 // Every test fixture drives the LEDs over GPIO (RMT); ESP32-C2 / C61 have no RMT
 #if defined(M5_UNIT_UNIFIED_HAS_RMT) && !M5_UNIT_UNIFIED_HAS_RMT
@@ -352,7 +350,7 @@ inline void hw_write_test(UnitLED* unit)
 }
 
 // Rotation test for RectLED (WIDTH x HEIGHT grid, 4 rotation steps).
-inline void rect_rotation_test(UnitLED* unit, uint16_t W, uint16_t H)
+inline void rect_rotation_test(UnitLED* unit, const uint16_t W, const uint16_t H)
 {
     EXPECT_EQ(unit->maxRotation(), 4u);
     if (unit->maxRotation() != 4u) {
