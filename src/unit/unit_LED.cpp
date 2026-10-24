@@ -11,6 +11,7 @@
 #include "utility/m5unit_rgb_utility.hpp"
 #include <M5Utility.hpp>
 #include <esp_random.h>
+#include <algorithm>
 
 // Direct GPIO drive needs RMT; ESP32-C2 / C61 have none, so only the PbHub path is available there.
 // M5UnitUnified before 0.6.0 does not define M5_UNIT_UNIFIED_HAS_RMT and supports RMT-capable chips only.
@@ -93,6 +94,27 @@ inline bool is_unit_led(const Component* u)
 {
     return (u->category() == category_t::UnitLED);
 }
+
+// Largest value of the 15-bit duration fields of an RMT item
+constexpr uint32_t RMT_DURATION_MAX{32767};
+
+#if M5_UNIT_RGB_HAS_RMT
+// Actual RMT TX resolution (Hz), 0 when M5UnitUnified is older than 0.6.4 (no tx_resolution_hz())
+inline uint32_t tx_resolution_of(const AdapterGPIO* ad)
+{
+#if defined(M5_UNIT_UNIFIED_VERSION)
+#if M5_UNIT_UNIFIED_VERSION >= M5_UNIT_UNIFIED_VERSION_VAL(0, 6, 4)
+    return ad->tx_resolution_hz();
+#else
+    (void)ad;
+    return 0;
+#endif
+#else
+    (void)ad;
+    return 0;
+#endif
+}
+#endif
 
 inline bool is_unit_pbhub(const Component* u)
 {
@@ -228,6 +250,7 @@ public:
         if (channel >= RMT_CHANNEL_MAX) {
             return false;
         }
+        _unit._rmt_resolution_hz = tx_resolution_of(ad);
 
         // 1. Build brightness-applied byte buffer
         std::vector<UnitLED*> tree;
@@ -257,10 +280,11 @@ public:
             return false;
         }
         // Latch: hold line low for the chip's reset window (per rmt_item_reset())
-        const auto reset_it = _unit.rmt_item_reset();
-        const auto cfg_tx   = _unit.rmt_config();
-        if (reset_it.duration0 > 0 && cfg_tx.tx.tick_ns > 0) {
-            const uint32_t reset_us = (static_cast<uint32_t>(reset_it.duration0) * cfg_tx.tx.tick_ns + 999) / 1000;
+        const auto reset_it   = _unit.rmt_item_reset();
+        const uint32_t res_hz = _unit.rmt_resolution_hz();
+        if (reset_it.duration0 > 0 && res_hz > 0) {
+            const uint32_t reset_us =
+                static_cast<uint32_t>((static_cast<uint64_t>(reset_it.duration0) * 1000000ULL + res_hz - 1) / res_hz);
             m5::utility::delayMicroseconds(reset_us);
         }
         return true;
@@ -276,6 +300,7 @@ public:
         if (!tx_handle) {
             return false;
         }
+        _unit._rmt_resolution_hz = tx_resolution_of(ad);
 
         // 1. Build tree and brightness-applied byte buffer
         std::vector<UnitLED*> tree;
@@ -653,6 +678,36 @@ bool UnitLED::set_pixel_color(const uint16_t n, const Color& c)
         p[_offsetW] = c.w;
     }
     return true;
+}
+
+uint32_t UnitLED::rmt_resolution_hz()
+{
+    if (_rmt_resolution_hz) {
+        return _rmt_resolution_hz;
+    }
+    const uint32_t tick_ns = rmt_config().tx.tick_ns;
+    return tick_ns ? 1000000000UL / tick_ns : 0;
+}
+
+gpio::m5_rmt_item_t UnitLED::rmt_item_from_ns(const uint32_t high_ns, const uint32_t low_ns)
+{
+    const uint32_t res_hz = rmt_resolution_hz();
+    gpio::m5_rmt_item_t item{};
+    item.duration0 = std::min<uint32_t>(rgb::ticks_from_ns(high_ns, res_hz), RMT_DURATION_MAX);
+    item.level0    = 1;
+    item.duration1 = std::min<uint32_t>(rgb::ticks_from_ns(low_ns, res_hz), RMT_DURATION_MAX);
+    item.level1    = 0;
+    return item;
+}
+
+gpio::m5_rmt_item_t UnitLED::rmt_item_low_from_ns(const uint32_t low_ns)
+{
+    gpio::m5_rmt_item_t item{};
+    item.duration0 = std::min<uint32_t>(rgb::ticks_from_ns(low_ns, rmt_resolution_hz()), RMT_DURATION_MAX);
+    item.level0    = 0;
+    item.duration1 = 0;
+    item.level1    = 0;
+    return item;
 }
 
 UnitLED::container_type UnitLED::rgb888_items()

@@ -582,6 +582,13 @@ protected:
     {
         return gpio::m5_rmt_item_t{};
     }
+    // RMT TX resolution (Hz) used to convert durations to ticks.
+    // The actual one from M5UnitUnified 0.6.4 or later, otherwise the one requested by rmt_config().tx.tick_ns
+    uint32_t rmt_resolution_hz();
+    // RMT item of a data bit: high for high_ns, then low for low_ns
+    gpio::m5_rmt_item_t rmt_item_from_ns(const uint32_t high_ns, const uint32_t low_ns);
+    // RMT item that holds the line low for low_ns (reset / latch)
+    gpio::m5_rmt_item_t rmt_item_low_from_ns(const uint32_t low_ns);
     inline container_type& pixels()
     {
         return _pixels;
@@ -629,6 +636,7 @@ private:
     container_type _pixels{};  // Order by rgb::Order
     std::unique_ptr<Interface> _interface{};
     config_t _cfg{};
+    uint32_t _rmt_resolution_hz{};  // 0 = unknown, see rmt_resolution_hz()
 
     friend class InterfaceGPIO;
     friend class InterfacePbHub;

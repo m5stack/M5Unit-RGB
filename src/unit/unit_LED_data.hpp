@@ -5,7 +5,7 @@
  */
 /*!
   @file unit_LED_data.hpp
-  @brief Color type for M5Unit-RGB
+  @brief Color type and data line timing for M5Unit-RGB
 
   Kept apart from unit_LED.hpp so the native (host) tests can include it
   without pulling in M5UnitComponent.
@@ -90,6 +90,30 @@ constexpr bool operator==(const Color& lhs, const Color& rhs)
 {
     return lhs.wrgb == rhs.wrgb;
 }
+
+/*!
+  @brief Convert a duration to RMT ticks
+  @param ns Duration (ns)
+  @param resolution_hz RMT resolution (Hz)
+  @return Ticks, rounded to the nearest (not clamped to the 15-bit RMT duration)
+ */
+constexpr uint32_t ticks_from_ns(const uint32_t ns, const uint32_t resolution_hz)
+{
+    return static_cast<uint32_t>((static_cast<uint64_t>(ns) * resolution_hz + 500000000ULL) / 1000000000ULL);
+}
+
+/*!
+  @namespace timing
+  @brief Data line timing shared by the SK6812 and WS2812 units (ns)
+  @details Within the SK6812, WS2812B, WS2812C-2020 and WS2812E-V5 datasheets, so both kinds can share one daisy chain
+ */
+namespace timing {
+constexpr uint32_t T0H_NS{350};       //!< 0 code, high
+constexpr uint32_t T0L_NS{800};       //!< 0 code, low
+constexpr uint32_t T1H_NS{700};       //!< 1 code, high
+constexpr uint32_t T1L_NS{600};       //!< 1 code, low
+constexpr uint32_t RESET_NS{300000};  //!< Reset (latch), WS2812C-2020 needs > 280 us
+}  // namespace timing
 
 }  // namespace rgb
 }  // namespace unit

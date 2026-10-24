@@ -37,18 +37,19 @@ public:
 
 protected:
     virtual gpio::adapter_config_t rmt_config() override;
+    // Timing in ns (rgb::timing), converted to ticks at the actual RMT resolution.
+    // Same as SK6812 so SK6812 and WS2812 units can share one daisy chain
     inline virtual gpio::m5_rmt_item_t rmt_item_one() override
     {
-        return gpio::m5_rmt_item_t{{14, 1, 12, 0}};
+        return rmt_item_from_ns(rgb::timing::T1H_NS, rgb::timing::T1L_NS);
     }
     inline virtual gpio::m5_rmt_item_t rmt_item_zero() override
     {
-        return gpio::m5_rmt_item_t{{7, 1, 16, 0}};
+        return rmt_item_from_ns(rgb::timing::T0H_NS, rgb::timing::T0L_NS);
     }
     inline virtual gpio::m5_rmt_item_t rmt_item_reset() override
     {
-        // Same as SK6812 so SK6812 and WS2812 units can share one daisy chain
-        return gpio::m5_rmt_item_t{{6000, 0, 0, 0}};  // 300 us (WS2812C-2020 needs > 280 us)
+        return rmt_item_low_from_ns(rgb::timing::RESET_NS);
     }
 };
 
