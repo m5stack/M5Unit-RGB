@@ -10,6 +10,7 @@ var hierarchy =
         [ "m5::unit::UnitSK6812", "classm5_1_1unit_1_1_unit_s_k6812.html", [
           [ "m5::unit::UnitSK6812GRB", "classm5_1_1unit_1_1_unit_s_k6812_g_r_b.html", [
             [ "m5::unit::UnitHexLED37< UnitSK6812GRB >", "classm5_1_1unit_1_1_unit_hex_l_e_d37.html", [
+              [ "m5::unit::UnitHex", "classm5_1_1unit_1_1_unit_hex.html", null ],
               [ "m5::unit::UnitNeoHex", "classm5_1_1unit_1_1_unit_neo_hex.html", null ]
             ] ],
             [ "m5::unit::UnitRGB", "classm5_1_1unit_1_1_unit_r_g_b.html", null ],
@@ -26,9 +27,6 @@ var hierarchy =
           [ "m5::unit::UnitSK6812GRBW", "classm5_1_1unit_1_1_unit_s_k6812_g_r_b_w.html", null ]
         ] ],
         [ "m5::unit::UnitWS2812", "classm5_1_1unit_1_1_unit_w_s2812.html", [
-          [ "m5::unit::UnitHexLED37< UnitWS2812 >", "classm5_1_1unit_1_1_unit_hex_l_e_d37.html", [
-            [ "m5::unit::UnitHex", "classm5_1_1unit_1_1_unit_hex.html", null ]
-          ] ],
           [ "m5::unit::UnitRectLED< 18, 7, UnitWS2812 >", "classm5_1_1unit_1_1_unit_rect_l_e_d.html", [
             [ "m5::unit::HatNeoFlash", "classm5_1_1unit_1_1_hat_neo_flash.html", null ]
           ] ],

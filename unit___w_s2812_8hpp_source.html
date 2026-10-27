@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">M5Unit-RGB<span id="projectnumber">&#160;0.0.2 git rev:51dfbe6</span>
+   <div id="projectname">M5Unit-RGB<span id="projectnumber">&#160;0.1.0 git rev:b7fdb9a</span>
    </div>
   </td>
  </tr>
@@ -129,24 +129,25 @@ $(function(){initNavTree('unit___w_s2812_8hpp_source.html',''); initResizable(tr
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="keyword">protected</span>:</div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="keyword">virtual</span> gpio::adapter_config_t rmt_config() <span class="keyword">override</span>;</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="keyword">inline</span> <span class="keyword">virtual</span> gpio::m5_rmt_item_t rmt_item_one()<span class="keyword"> override</span></div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="keyword">    </span>{</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>        <span class="keywordflow">return</span> gpio::m5_rmt_item_t{{14, 1, 12, 0}};</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    }</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <span class="keyword">inline</span> <span class="keyword">virtual</span> gpio::m5_rmt_item_t rmt_item_zero()<span class="keyword"> override</span></div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="keyword">    </span>{</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>        <span class="keywordflow">return</span> gpio::m5_rmt_item_t{{7, 1, 16, 0}};</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    }</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="keyword">inline</span> <span class="keyword">virtual</span> gpio::m5_rmt_item_t rmt_item_reset()<span class="keyword"> override</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="keyword">    </span>{</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>        <span class="comment">//        return gpio::m5_rmt_item_t{{1000, 0, 0, 0}};  // 50us</span></div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>        <span class="keywordflow">return</span> gpio::m5_rmt_item_t{{1600, 0, 0, 0}};  <span class="comment">// Same as SK6812 (Measures for SK/WS mixed daisy chain)</span></div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    }</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>};</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>}  <span class="comment">// namespace unit</span></div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>}  <span class="comment">// namespace m5</span></div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="comment">// Timing in ns (rgb::timing), converted to ticks at the actual RMT resolution.</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="comment">// Same as SK6812 so SK6812 and WS2812 units can share one daisy chain</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keyword">inline</span> <span class="keyword">virtual</span> gpio::m5_rmt_item_t rmt_item_one()<span class="keyword"> override</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="keyword">    </span>{</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>        <span class="keywordflow">return</span> rmt_item_from_ns(rgb::timing::T1H_NS, rgb::timing::T1L_NS);</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    }</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keyword">inline</span> <span class="keyword">virtual</span> gpio::m5_rmt_item_t rmt_item_zero()<span class="keyword"> override</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="keyword">    </span>{</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        <span class="keywordflow">return</span> rmt_item_from_ns(rgb::timing::T0H_NS, rgb::timing::T0L_NS);</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    }</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <span class="keyword">inline</span> <span class="keyword">virtual</span> gpio::m5_rmt_item_t rmt_item_reset()<span class="keyword"> override</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="keyword">    </span>{</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>        <span class="keywordflow">return</span> rmt_item_low_from_ns(rgb::timing::RESET_NS);</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    }</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>};</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>}  <span class="comment">// namespace unit</span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>}  <span class="comment">// namespace m5</span></div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aclassm5_1_1unit_1_1_unit_l_e_d_html"><div class="ttname"><a href="classm5_1_1unit_1_1_unit_l_e_d.html">m5::unit::UnitLED</a></div><div class="ttdoc">LED base unit.</div></div>
 <div class="ttc" id="aclassm5_1_1unit_1_1_unit_w_s2812_html_a4748ed16033133f708967e94ff709c78"><div class="ttname"><a href="classm5_1_1unit_1_1_unit_w_s2812.html#a4748ed16033133f708967e94ff709c78">m5::unit::UnitWS2812::~UnitWS2812</a></div><div class="ttdeci">virtual ~UnitWS2812()</div><div class="ttdoc">Destructor.</div><div class="ttdef"><b>Definition</b> unit_WS2812.hpp:34</div></div>
 <div class="ttc" id="aclassm5_1_1unit_1_1_unit_w_s2812_html_afaf37612622dfbfc28b9a1b722b5139d"><div class="ttname"><a href="classm5_1_1unit_1_1_unit_w_s2812.html#afaf37612622dfbfc28b9a1b722b5139d">m5::unit::UnitWS2812::UnitWS2812</a></div><div class="ttdeci">UnitWS2812(const uint16_t num_of_pixels)</div><div class="ttdoc">Constructor.</div><div class="ttdef"><b>Definition</b> unit_WS2812.hpp:30</div></div>

@@ -1,9 +1,7 @@
 var unit___l_e_d_8hpp =
 [
-    [ "m5::unit::rgb::Color", "unionm5_1_1unit_1_1rgb_1_1_color.html", "unionm5_1_1unit_1_1rgb_1_1_color" ],
     [ "m5::unit::UnitLED", "classm5_1_1unit_1_1_unit_l_e_d.html", "classm5_1_1unit_1_1_unit_l_e_d" ],
     [ "m5::unit::UnitLED::config_t", "structm5_1_1unit_1_1_unit_l_e_d_1_1config__t.html", "structm5_1_1unit_1_1_unit_l_e_d_1_1config__t" ],
-    [ "wrgb32_color_t", "unit___l_e_d_8hpp.html#a431e735a30d3253188073ec822932007", null ],
     [ "Order", "unit___l_e_d_8hpp.html#a7418e9e0cbb497521207b66f0c5b9e49", [
       [ "unknown", "unit___l_e_d_8hpp.html#a7418e9e0cbb497521207b66f0c5b9e49aad921d60486366258809553a3db49a4a", null ],
       [ "rgb24", "unit___l_e_d_8hpp.html#a7418e9e0cbb497521207b66f0c5b9e49adb89a9da565723ef77473ec650a05b0a", null ],
@@ -41,6 +39,5 @@ var unit___l_e_d_8hpp =
     [ "offsetB", "unit___l_e_d_8hpp.html#ac1386fdae16ee4658ee1459dc0084b6a", null ],
     [ "offsetG", "unit___l_e_d_8hpp.html#ae5fb228f7b31c2099f3cdd36330bc958", null ],
     [ "offsetR", "unit___l_e_d_8hpp.html#a14a712130ccc13c23c4099a1d2a929a0", null ],
-    [ "offsetW", "unit___l_e_d_8hpp.html#a0ce5dcb53c3d2a35eb86cd3d539b7622", null ],
-    [ "operator==", "unit___l_e_d_8hpp.html#a0e3375987dc3f4195727f3c28c8e73d2", null ]
+    [ "offsetW", "unit___l_e_d_8hpp.html#a0ce5dcb53c3d2a35eb86cd3d539b7622", null ]
 ];

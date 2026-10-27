@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">M5Unit-RGB<span id="projectnumber">&#160;0.0.2 git rev:51dfbe6</span>
+   <div id="projectname">M5Unit-RGB<span id="projectnumber">&#160;0.1.0 git rev:b7fdb9a</span>
    </div>
   </td>
  </tr>
@@ -99,7 +99,6 @@ $(function(){initNavTree('unit___l_e_d_8hpp.html',''); initResizable(true); });
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#namespaces">Namespaces</a> &#124;
-<a href="#typedef-members">Typedefs</a> &#124;
 <a href="#enum-members">Enumerations</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">unit_LED.hpp File Reference</div></div>
@@ -108,16 +107,14 @@ $(function(){initNavTree('unit___l_e_d_8hpp.html',''); initResizable(true); });
 
 <p>LED base unit for M5UnitUnified.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &lt;M5UnitComponent.hpp&gt;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="unit___l_e_d__data_8hpp_source.html">unit_LED_data.hpp</a>&quot;</code><br />
+<code>#include &lt;M5UnitComponent.hpp&gt;</code><br />
 <code>#include &lt;vector&gt;</code><br />
 </div>
 <p><a href="unit___l_e_d_8hpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">union &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="unionm5_1_1unit_1_1rgb_1_1_color.html">m5::unit::rgb::Color</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">WRGB 32bits.  <a href="unionm5_1_1unit_1_1rgb_1_1_color.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classm5_1_1unit_1_1_unit_l_e_d.html">m5::unit::UnitLED</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">LED base unit.  <a href="classm5_1_1unit_1_1_unit_l_e_d.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -130,21 +127,11 @@ Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacem5.html">m5</a></td></tr>
 <tr class="memdesc:namespacem5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Top level namespace of M5Stack. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacergb.html">rgb</a></td></tr>
-<tr class="memdesc:namespacergb"><td class="mdescLeft">&#160;</td><td class="mdescRight">For M5Unit-RGB. <br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
-Typedefs</h2></td></tr>
-<tr class="memitem:a431e735a30d3253188073ec822932007" id="r_a431e735a30d3253188073ec822932007"><td class="memItemLeft" align="right" valign="top"><a id="a431e735a30d3253188073ec822932007" name="a431e735a30d3253188073ec822932007"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><b>m5::unit::rgb::wrgb32_color_t</b> = uint32_t</td></tr>
-<tr class="memdesc:a431e735a30d3253188073ec822932007"><td class="mdescLeft">&#160;</td><td class="mdescRight">WRGB 32bits. <br /></td></tr>
-<tr class="separator:a431e735a30d3253188073ec822932007"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
-<tr class="memitem:a7418e9e0cbb497521207b66f0c5b9e49" id="r_a7418e9e0cbb497521207b66f0c5b9e49"><td class="memItemLeft" align="right" valign="top"><a id="a7418e9e0cbb497521207b66f0c5b9e49" name="a7418e9e0cbb497521207b66f0c5b9e49"></a>enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7418e9e0cbb497521207b66f0c5b9e49">m5::unit::rgb::Order</a> : int8_t { <br />
-&#160;&#160;<b>unknown</b> = -1
+<tr class="memitem:a7418e9e0cbb497521207b66f0c5b9e49" id="r_a7418e9e0cbb497521207b66f0c5b9e49"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7418e9e0cbb497521207b66f0c5b9e49">m5::unit::rgb::Order</a> : int8_t { <br />
+&#160;&#160;<a class="el" href="#a7418e9e0cbb497521207b66f0c5b9e49aad921d60486366258809553a3db49a4a">unknown</a> = -1
 , <b>rgb24</b>
 , <b>rbg24</b>
 , <b>grb24</b>
@@ -152,9 +139,9 @@ Enumerations</h2></td></tr>
 &#160;&#160;<b>gbr24</b>
 , <b>brg24</b>
 , <b>bgr24</b>
-, <b>hasWhite</b>
+, <a class="el" href="#a7418e9e0cbb497521207b66f0c5b9e49a6ce9cd626396122a1080a513101bf844">hasWhite</a>
 , <br />
-&#160;&#160;<b>wrgb32</b> = hasWhite
+&#160;&#160;<a class="el" href="#a7418e9e0cbb497521207b66f0c5b9e49a2e8b2e35882de51669d4e34e64dfaa0d">wrgb32</a> = hasWhite
 , <b>wrbg32</b>
 , <b>wgrb32</b>
 , <b>wgbr32</b>
@@ -185,14 +172,11 @@ Enumerations</h2></td></tr>
 , <b>bgrw32</b>
 <br />
  }</td></tr>
-<tr class="memdesc:a7418e9e0cbb497521207b66f0c5b9e49"><td class="mdescLeft">&#160;</td><td class="mdescRight">Color order. <br /></td></tr>
+<tr class="memdesc:a7418e9e0cbb497521207b66f0c5b9e49"><td class="mdescLeft">&#160;</td><td class="mdescRight">Color order.  <a href="#a7418e9e0cbb497521207b66f0c5b9e49">More...</a><br /></td></tr>
 <tr class="separator:a7418e9e0cbb497521207b66f0c5b9e49"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a0e3375987dc3f4195727f3c28c8e73d2" id="r_a0e3375987dc3f4195727f3c28c8e73d2"><td class="memItemLeft" align="right" valign="top">constexpr bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0e3375987dc3f4195727f3c28c8e73d2">m5::unit::rgb::operator==</a> (const <a class="el" href="unionm5_1_1unit_1_1rgb_1_1_color.html">Color</a> &amp;lhs, const <a class="el" href="unionm5_1_1unit_1_1rgb_1_1_color.html">Color</a> &amp;rhs)</td></tr>
-<tr class="memdesc:a0e3375987dc3f4195727f3c28c8e73d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compare two Colors.  <br /></td></tr>
-<tr class="separator:a0e3375987dc3f4195727f3c28c8e73d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a14a712130ccc13c23c4099a1d2a929a0" id="r_a14a712130ccc13c23c4099a1d2a929a0"><td class="memItemLeft" align="right" valign="top">int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="unit___l_e_d_8cpp.html#a14a712130ccc13c23c4099a1d2a929a0">m5::unit::rgb::offsetR</a> (const <a class="el" href="#a7418e9e0cbb497521207b66f0c5b9e49">Order</a> f)</td></tr>
 <tr class="memdesc:a14a712130ccc13c23c4099a1d2a929a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Offset of Red.  <br /></td></tr>
 <tr class="separator:a14a712130ccc13c23c4099a1d2a929a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -208,7 +192,41 @@ Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>LED base unit for M5UnitUnified. </p>
-</div><h2 class="groupheader">Function Documentation</h2>
+</div><h2 class="groupheader">Enumeration Type Documentation</h2>
+<a id="a7418e9e0cbb497521207b66f0c5b9e49" name="a7418e9e0cbb497521207b66f0c5b9e49"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7418e9e0cbb497521207b66f0c5b9e49">&#9670;&#160;</a></span>Order</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="#a7418e9e0cbb497521207b66f0c5b9e49">m5::unit::rgb::Order</a> : int8_t</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Color order. </p>
+<p>Each name lists the bytes in the order they are sent, e.g. grb24 sends G, R, B </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a7418e9e0cbb497521207b66f0c5b9e49aad921d60486366258809553a3db49a4a" name="a7418e9e0cbb497521207b66f0c5b9e49aad921d60486366258809553a3db49a4a"></a>unknown&#160;</td><td class="fielddoc"><p>Not set (begin() fails) </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a7418e9e0cbb497521207b66f0c5b9e49a6ce9cd626396122a1080a513101bf844" name="a7418e9e0cbb497521207b66f0c5b9e49a6ce9cd626396122a1080a513101bf844"></a>hasWhite&#160;</td><td class="fielddoc"><p>First 32-bit order; orders &gt;= hasWhite carry a white channel. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a7418e9e0cbb497521207b66f0c5b9e49a2e8b2e35882de51669d4e34e64dfaa0d" name="a7418e9e0cbb497521207b66f0c5b9e49a2e8b2e35882de51669d4e34e64dfaa0d"></a>wrgb32&#160;</td><td class="fielddoc"><p>Same value as hasWhite. </p>
+</td></tr>
+</table>
+
+</div>
+</div>
+<h2 class="groupheader">Function Documentation</h2>
 <a id="ac1386fdae16ee4658ee1459dc0084b6a" name="ac1386fdae16ee4658ee1459dc0084b6a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac1386fdae16ee4658ee1459dc0084b6a">&#9670;&#160;</a></span>offsetB()</h2>
 
@@ -310,45 +328,6 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Byte offset of White in the packed pixel (-1 if not present) </dd></dl>
-
-</div>
-</div>
-<a id="a0e3375987dc3f4195727f3c28c8e73d2" name="a0e3375987dc3f4195727f3c28c8e73d2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0e3375987dc3f4195727f3c28c8e73d2">&#9670;&#160;</a></span>operator==()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool m5::unit::rgb::operator== </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="unionm5_1_1unit_1_1rgb_1_1_color.html">Color</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>lhs</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="unionm5_1_1unit_1_1rgb_1_1_color.html">Color</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>rhs</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">constexpr</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Compare two Colors. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">lhs</td><td>Left-hand side </td></tr>
-    <tr><td class="paramname">rhs</td><td>Right-hand side </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>True if equal </dd></dl>
 
 </div>
 </div>

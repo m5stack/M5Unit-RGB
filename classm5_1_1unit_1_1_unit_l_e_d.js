@@ -10,7 +10,7 @@ var classm5_1_1unit_1_1_unit_l_e_d =
     [ "brightness", "classm5_1_1unit_1_1_unit_l_e_d.html#a96099c07297c9ff53a9015c4ef8fb678", null ],
     [ "clear", "classm5_1_1unit_1_1_unit_l_e_d.html#a9fdfe7d2fbab146c2142f193cfb16013", null ],
     [ "color", "classm5_1_1unit_1_1_unit_l_e_d.html#a1704fe1c590838f43e42af47a0c15991", null ],
-    [ "config", "classm5_1_1unit_1_1_unit_l_e_d.html#a5db889625030fc039ed86fbd0a1f7bb1", null ],
+    [ "config", "classm5_1_1unit_1_1_unit_l_e_d.html#ab7787c52e7df6cf0b03e6c845505f2e7", null ],
     [ "config", "classm5_1_1unit_1_1_unit_l_e_d.html#aa2692f71dbc363eadba179bbe50e3458", null ],
     [ "fill", "classm5_1_1unit_1_1_unit_l_e_d.html#a5beffe40a1362d54e4aad792f400f425", null ],
     [ "fillGradation", "classm5_1_1unit_1_1_unit_l_e_d.html#aec2c3e2f90d55bfc39f27e0fc5b13cfd", null ],

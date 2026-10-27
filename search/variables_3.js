@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['mem_5fblocks_0',['mem_blocks',['../structm5_1_1unit_1_1_unit_l_e_d_1_1config__t.html#a97d5939144f8db16f10460c1b3b38fbf',1,'m5::unit::UnitLED::config_t']]]
+  ['led_5fheight_0',['LED_HEIGHT',['../classm5_1_1unit_1_1_unit_rect_l_e_d.html#a97e5468958d131a099b982ca094e76b8',1,'m5::unit::UnitRectLED']]],
+  ['led_5fwidth_1',['LED_WIDTH',['../classm5_1_1unit_1_1_unit_rect_l_e_d.html#a0caa66152acd3cc875693444c1a82304',1,'m5::unit::UnitRectLED']]]
 ];
