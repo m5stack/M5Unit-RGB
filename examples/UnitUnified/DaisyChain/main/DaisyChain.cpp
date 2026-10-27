@@ -157,12 +157,14 @@ uint16_t s_strip_hue{0};
 void start()
 {
     // Each unit initialized in its own coordinate system — no offset knowledge
+    unit_rot::reset();  // undo the rotations Demo B applied (puzzle[0], puzzle[1], hex)
+
     rgb.setBrightness(10);
     rgb.clear();
     rgb.setPixelColor(0, Color(255, 0, 0));
 
     puzzle[0].setBrightness(10);
-    puzzle[0].setRotation(0);
+    puzzle[0].clear();
     puzzle[0].fillRainbow(0, 8);  // one row of rainbow, rest dark
 
     puzzle[1].setBrightness(10);
@@ -170,6 +172,7 @@ void start()
     for (auto& v : s_spark) v = 0;
 
     hex.setBrightness(10);
+    hex.clear();
     hex.fill(hue_color(0, 255), 0, 7);  // 7 of 37 LEDs lit
 
     tape.setBrightness(10);
