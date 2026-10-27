@@ -10,6 +10,8 @@
 #ifndef M5_UNIT_RGB_UNIT_RECT_LED_HPP
 #define M5_UNIT_RGB_UNIT_RECT_LED_HPP
 
+#include <m5_utility/murmurhash3.hpp>
+
 #include "unit_LED.hpp"
 #include "unit_SK6812.hpp"
 #include "unit_WS2812.hpp"
@@ -37,8 +39,8 @@ public:
     UnitRectLED() : BaseClass(WIDTH * HEIGHT)
     {
     }
-    static constexpr uint8_t LED_WIDTH{WIDTH};
-    static constexpr uint8_t LED_HEIGHT{HEIGHT};
+    static constexpr uint8_t LED_WIDTH{WIDTH};    //!< Physical width in pixels (not affected by rotation)
+    static constexpr uint8_t LED_HEIGHT{HEIGHT};  //!< Physical height in pixels (not affected by rotation)
 
     /*!
       @brief Logical width considering rotation (0/180: WIDTH, 90/270: HEIGHT)
@@ -94,12 +96,12 @@ protected:
 };
 
 ///@cond
-using m5::utility::mmh3::operator"" _mmh3;
 // class UnitRectLED
 template <const uint8_t WIDTH, const uint8_t HEIGHT, class BaseClass>
 const char UnitRectLED<WIDTH, HEIGHT, BaseClass>::name[] = "UnitRectLED";
 template <const uint8_t WIDTH, const uint8_t HEIGHT, class BaseClass>
-const types::uid_t UnitRectLED<WIDTH, HEIGHT, BaseClass>::uid{"UnitRectLED"_mmh3};
+const types::uid_t UnitRectLED<WIDTH, HEIGHT, BaseClass>::uid{
+    m5::utility::mmh3::calculate("UnitRectLED", sizeof("UnitRectLED") - 1)};
 template <const uint8_t WIDTH, const uint8_t HEIGHT, class BaseClass>
 const types::attr_t UnitRectLED<WIDTH, HEIGHT, BaseClass>::attr{types::attribute::AccessGPIO};
 ///@endcond

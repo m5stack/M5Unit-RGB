@@ -10,98 +10,33 @@
 #ifndef M5_UNIT_RGB_UNIT_LED_HPP
 #define M5_UNIT_RGB_UNIT_LED_HPP
 
+#include "unit_LED_data.hpp"
 #include <M5UnitComponent.hpp>
 #include <vector>
 
 namespace m5 {
 namespace unit {
 
-/*!
-  @namespace rgb
-  @brief For M5Unit-RGB
- */
 namespace rgb {
-
-//! @brief WRGB 32bits
-using wrgb32_color_t = uint32_t;
-
-/*!
-  @union Color
-  @brief WRGB 32bits
-*/
-union Color {
-    /*!
-      @brief Constructor from packed WRGB
-      @param c WRGB 32bits (default 0)
-     */
-    explicit constexpr Color(const wrgb32_color_t c = 0) : wrgb{c}
-    {
-    }
-    /*!
-      @brief Constructor from RGB / RGBW components
-      @param rr Red
-      @param gg Green
-      @param bb Blue
-      @param ww White (default 0)
-     */
-    constexpr Color(const uint8_t rr, const uint8_t gg, const uint8_t bb, const uint8_t ww = 0)
-        : b{bb}, g{gg}, r{rr}, w{ww}
-    {
-    }
-    /*!
-      @brief Convert to packed WRGB
-      @return WRGB 32bits
-     */
-    constexpr operator wrgb32_color_t() const
-    {
-        return wrgb;
-    }
-    /*!
-      @brief Make Color from HSV
-      @param h Hue
-      @param s Saturation
-      @param v Value
-      @return Color
-     */
-    static Color fromHSV(const uint8_t h, const uint8_t s, const uint8_t v);
-
-    wrgb32_color_t wrgb{};  //!< WRGB 32bits
-    struct {
-        uint8_t b;  //!< Blue
-        uint8_t g;  //!< Green
-        uint8_t r;  //!< Red
-        uint8_t w;  //!< White
-    };
-    uint8_t a[4];  //!< Array
-};
-/*!
-  @brief Compare two Colors
-  @param lhs Left-hand side
-  @param rhs Right-hand side
-  @return True if equal
- */
-constexpr bool operator==(const Color& lhs, const Color& rhs)
-{
-    return lhs.wrgb == rhs.wrgb;
-}
 
 /*!
   @enum Order
   @brief Color order
+  @details Each name lists the bytes in the order they are sent, e.g. grb24 sends G, R, B
  */
 enum class Order : int8_t {
-    unknown = -1,
-    // 24 bits
+    unknown = -1,  //!< Not set (begin() fails)
+    // 24 bits (no white channel)
     rgb24,
     rbg24,
     grb24,
     gbr24,
     brg24,
     bgr24,
-    // 32 bits
-    hasWhite,
+    // 32 bits (with white channel)
+    hasWhite,  //!< First 32-bit order; orders >= hasWhite carry a white channel
     //
-    wrgb32 = hasWhite,
+    wrgb32 = hasWhite,  //!< Same value as hasWhite
     wrbg32,
     wgrb32,
     wgbr32,
@@ -197,7 +132,7 @@ class UnitLED : public Component {
 
 public:
     using container_type      = std::vector<uint8_t>;              //!< pixel container
-    using item_container_type = std::vector<gpio::m5_rmt_item_t>;  //!< item container
+    using item_container_type = std::vector<gpio::m5_rmt_item_t>;  //!< RMT item container (unused, for compatibility)
 
     /*!
       @struct config_t
@@ -217,7 +152,7 @@ public:
       @brief Gets the configuration
       @return config_t
      */
-    inline config_t config()
+    inline config_t config() const
     {
         return _cfg;
     }
@@ -264,7 +199,6 @@ public:
     /*!
       @brief Brightness
       @return Current brightness (255 = 100%)
-      @note Scaling factor (255 = 100%)
     */
     inline uint8_t brightness() const
     {
@@ -390,9 +324,8 @@ public:
     /*!
       @brief Set the brightness
       @param b brightness (255 = 100%)
-      @note Behaves similar to FastLED
-      @note Internal pixels's color is not changed
-      @note The brightness applied on writePixels()
+      @note Internal pixel colors are not changed
+      @note Applied with scale8() on writePixels()
      */
     inline void setBrightness(const uint8_t b)
     {
@@ -607,15 +540,6 @@ public:
         {
         }
         virtual bool write(const uint8_t*, const uint32_t) = 0;
-        // For items
-        virtual UnitLED::item_container_type items()
-        {
-            return {};
-        }
-        virtual UnitLED::item_container_type items_from_root()
-        {
-            return {};
-        }
         // For RGB888
         virtual UnitLED::container_type rgb888_items()
         {
@@ -626,7 +550,7 @@ public:
             return {};
         }
 
-        //! @brief Write pixels directly via protocol-specific method (bypasses items vector)
+        // Write pixels directly via the protocol-specific method
         virtual bool writePixelsDirect()
         {
             return false;
@@ -658,6 +582,13 @@ protected:
     {
         return gpio::m5_rmt_item_t{};
     }
+    // RMT TX resolution (Hz) used to convert durations to ticks.
+    // The actual one from M5UnitUnified 0.6.4 or later, otherwise the one requested by rmt_config().tx.tick_ns
+    uint32_t rmt_resolution_hz();
+    // RMT item of a data bit: high for high_ns, then low for low_ns
+    gpio::m5_rmt_item_t rmt_item_from_ns(const uint32_t high_ns, const uint32_t low_ns);
+    // RMT item that holds the line low for low_ns (reset / latch)
+    gpio::m5_rmt_item_t rmt_item_low_from_ns(const uint32_t low_ns);
     inline container_type& pixels()
     {
         return _pixels;
@@ -679,7 +610,6 @@ protected:
     }
 
     container_type rgb888_items();
-    item_container_type items();
 
     void shift_left(const uint16_t count, const bool wrap);
     void shift_right(const uint16_t count, const bool wrap);
@@ -706,6 +636,7 @@ private:
     container_type _pixels{};  // Order by rgb::Order
     std::unique_ptr<Interface> _interface{};
     config_t _cfg{};
+    uint32_t _rmt_resolution_hz{};  // 0 = unknown, see rmt_resolution_hz()
 
     friend class InterfaceGPIO;
     friend class InterfacePbHub;

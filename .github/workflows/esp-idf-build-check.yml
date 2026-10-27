@@ -1,0 +1,164 @@
+name: Build(esp-idf-native)
+
+on:
+  push:
+    tags-ignore:
+      - '*.*.*'
+      - 'v*.*.*'
+    branches:
+      - '*'
+    paths:
+      - 'src/**.cpp'
+      - 'src/**.hpp'
+      - 'src/**.h'
+      - 'src/**.c'
+      - 'CMakeLists.txt'
+      - 'idf_component.yml'
+      - 'examples/UnitUnified/**.cpp'
+      - 'examples/UnitUnified/**.hpp'
+      - 'examples/UnitUnified/**.h'
+      - 'examples/UnitUnified/**.c'
+      - 'examples/UnitUnified/**/CMakeLists.txt'
+      - 'examples/UnitUnified/**/Kconfig.projbuild'
+      - 'examples/UnitUnified/**/idf_component.yml'
+      - 'examples/UnitUnified/common/**'
+      - '.github/workflows/esp-idf-build-check.yml'
+  pull_request:
+    paths:
+      - 'src/**.cpp'
+      - 'src/**.hpp'
+      - 'src/**.h'
+      - 'src/**.c'
+      - 'CMakeLists.txt'
+      - 'idf_component.yml'
+      - 'examples/UnitUnified/**.cpp'
+      - 'examples/UnitUnified/**.hpp'
+      - 'examples/UnitUnified/**.h'
+      - 'examples/UnitUnified/**.c'
+      - 'examples/UnitUnified/**/CMakeLists.txt'
+      - 'examples/UnitUnified/**/Kconfig.projbuild'
+      - 'examples/UnitUnified/**/idf_component.yml'
+      - 'examples/UnitUnified/common/**'
+      - '.github/workflows/esp-idf-build-check.yml'
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Cross design: unit variants of Simple on esp32s3 with the latest IDF, chip x IDF coverage with the
+# default variant (UnitRGB), and the other examples on esp32 only. Every unit shares the same
+# RMT / LED code path, so repeating each variant per chip or per IDF adds no coverage.
+# Only RMT-capable SoCs are built (ESP32-C2 / C61 have no RMT; see idf_component.yml targets).
+jobs:
+  # Variant coverage: every unit/board choice of Simple on esp32s3 (LCD-capable dual-core with PSRAM).
+  build-variants:
+    name: ${{ matrix.idf }} esp32s3 Simple ${{ matrix.variant }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        idf: [v6.1]
+        variant:
+          - USING_UNIT_RGB
+          - USING_UNIT_PUZZLE
+          - USING_UNIT_HEX
+          - USING_UNIT_NEO_HEX
+          - USING_UNIT_NECO
+          - USING_UNIT_RGBLED15
+          - USING_UNIT_RGBLED_STRIP30
+          - USING_ATOM_MATRIX_RGB
+          - USING_HAT_NEOFLASH
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Kconfig variant
+        # The example's own sdkconfig.defaults is not read (top CMakeLists points SDKCONFIG_DEFAULTS
+        # at common/sdkconfig.defaults). Append the choice to common/ in the CI workspace only.
+        run: |
+          echo "" >> examples/UnitUnified/common/sdkconfig.defaults
+          echo "CONFIG_EXAMPLE_${{ matrix.variant }}=y" >> examples/UnitUnified/common/sdkconfig.defaults
+
+      - name: ESP-IDF build
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: ${{ matrix.idf }}
+          target: esp32s3
+          path: examples/UnitUnified/Simple
+
+  # Chip coverage: Simple (UnitRGB, the Kconfig default) on every supported SoC. esp32 = classic
+  # Xtensa dual-core (M5Unified touch-deprecation path). esp32c3 / esp32c6 / esp32h2 = RISC-V
+  # single-core, exercises the app_main CONFIG_FREERTOS_UNICORE feedIdle branch. esp32c5 = RISC-V
+  # single-core supported from IDF 5.5 (so it is on the v5.5.4 / v6.1 rows only). esp32p4 (M5Stack
+  # Tab5) = RISC-V dual-core; sdkconfig.defaults.esp32p4 overlay (chip-rev minimum keys) is auto-applied.
+  build-chips:
+    name: ${{ matrix.idf }} ${{ matrix.target }} Simple USING_UNIT_RGB
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        target: [esp32, esp32s3, esp32c3, esp32c5, esp32c6, esp32h2, esp32p4]
+        # idf boundaries: 5.1.7 = oldest legacy-driver (5.0.x dropped: M5GFX needs esp_mm added
+        # in 5.1), 5.4.4 = new driver/*_master.h + touch_sens.h era, 5.5.4 = latest 5.x,
+        # 6.1 = latest (M5Unified/M5GFX support 6.x; 7.x is not verified yet).
+        idf: [v5.1.7, v5.4.4, v5.5.4, v6.1]
+        exclude:
+          # esp32p4 stable from IDF v5.3 (M5GFX P4 verified on 5.4/5.5). 5.1.7 not applicable.
+          - target: esp32p4
+            idf: v5.1.7
+          - {target: esp32c5, idf: v5.1.7}  # C5 is supported from IDF 5.5 (preview target on 5.4)
+          - {target: esp32c5, idf: v5.4.4}
+          # Built by build-variants (USING_UNIT_RGB on v6.1 esp32s3)
+          - target: esp32s3
+            idf: v6.1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: ESP-IDF build
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: ${{ matrix.idf }}
+          target: ${{ matrix.target }}
+          path: examples/UnitUnified/Simple
+
+  # Other examples: unit setup fixed in the source (no Kconfig variant), built on esp32
+  # (oldest and latest IDF boundary). ViaPbHub is also built on esp32c6 / esp32h2 / esp32p4.
+  build-examples:
+    name: ${{ matrix.idf }} ${{ matrix.target }} ${{ matrix.example }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        idf: [v5.1.7, v6.1]
+        example: [DaisyChain, MultiChannel, ViaPbHub]
+        target: [esp32]
+        include:
+          # ViaPbHub also on the C6 / H2 (NanoC6 / NanoH2) and P4 (Tab5) chips
+          - {example: ViaPbHub, target: esp32c6, idf: v5.1.7}
+          - {example: ViaPbHub, target: esp32c6, idf: v6.1}
+          - {example: ViaPbHub, target: esp32h2, idf: v5.1.7}
+          - {example: ViaPbHub, target: esp32h2, idf: v6.1}
+          # esp32p4 stable from IDF v5.3, so v6.1 only
+          - {example: ViaPbHub, target: esp32p4, idf: v6.1}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: ESP-IDF build
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: ${{ matrix.idf }}
+          target: ${{ matrix.target }}
+          path: examples/UnitUnified/${{ matrix.example }}

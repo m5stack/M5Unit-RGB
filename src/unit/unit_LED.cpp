@@ -11,11 +11,23 @@
 #include "utility/m5unit_rgb_utility.hpp"
 #include <M5Utility.hpp>
 #include <esp_random.h>
+#include <algorithm>
+
+// Direct GPIO drive needs RMT; ESP32-C2 / C61 have none, so only the PbHub path is available there.
+// M5UnitUnified before 0.6.0 does not define M5_UNIT_UNIFIED_HAS_RMT and supports RMT-capable chips only.
+#if !defined(M5_UNIT_UNIFIED_HAS_RMT) || M5_UNIT_UNIFIED_HAS_RMT
+#define M5_UNIT_RGB_HAS_RMT 1
+#else
+#define M5_UNIT_RGB_HAS_RMT 0
+#endif
+
+#if M5_UNIT_RGB_HAS_RMT
 #if defined(M5_UNIT_UNIFIED_USING_RMT_V2)
 #include <driver/rmt_tx.h>
 #include <driver/rmt_encoder.h>
 #else
 #include <driver/rmt.h>
+#endif
 #endif
 
 using namespace m5::utility::mmh3;
@@ -63,10 +75,10 @@ constexpr int8_t offset_table[][4] = {
     {2, 1, 0, 3},  // bgrw32
 };
 
-int8_t offset_of(const Order f, uint8_t off)
+int8_t offset_of(const Order f, const uint8_t off)
 {
-    auto i = m5::stl::to_underlying(f);
-    if (i >= 0 && i < m5::stl::size(offset_table) && off < 4) {
+    const auto i = m5::stl::to_underlying(f);
+    if (i >= 0 && static_cast<size_t>(i) < m5::stl::size(offset_table) && off < 4) {
         return offset_table[i][off];
     }
     return -1;
@@ -83,7 +95,28 @@ inline bool is_unit_led(const Component* u)
     return (u->category() == category_t::UnitLED);
 }
 
-inline bool is_unit_pbhub(Component* u)
+// Largest value of the 15-bit duration fields of an RMT item
+constexpr uint32_t RMT_DURATION_MAX{32767};
+
+#if M5_UNIT_RGB_HAS_RMT
+// Actual RMT TX resolution (Hz), 0 when M5UnitUnified is older than 0.6.4 (no tx_resolution_hz())
+inline uint32_t tx_resolution_of(const AdapterGPIO* ad)
+{
+#if defined(M5_UNIT_UNIFIED_VERSION)
+#if M5_UNIT_UNIFIED_VERSION >= M5_UNIT_UNIFIED_VERSION_VAL(0, 6, 4)
+    return ad->tx_resolution_hz();
+#else
+    (void)ad;
+    return 0;
+#endif
+#else
+    (void)ad;
+    return 0;
+#endif
+}
+#endif
+
+inline bool is_unit_pbhub(const Component* u)
 {
     static constexpr types::uid_t pbhub_uid{"UnitPbHub"_mmh3};
     return u->identifier() == pbhub_uid;
@@ -146,14 +179,10 @@ int8_t offsetW(const Order f)
     return offset_of(f, 3);
 }
 
-Color Color::fromHSV(const uint8_t h, const uint8_t s, const uint8_t v)
-{
-    return Color(hsv2rgb(h, s, v));
-}
-
 }  // namespace rgb
 
 ///@cond
+#if M5_UNIT_RGB_HAS_RMT
 // For GPIO
 class InterfaceGPIO : public UnitLED::Interface {
 public:
@@ -173,115 +202,13 @@ public:
     }
 #endif
 
-    virtual UnitLED::item_container_type items() override
-    {
-        const int bits_per_pixel  = 24 + 8 * _unit.hasWhite();
-        const uint32_t total_bits = _unit.numPixels() * bits_per_pixel;
-
-        auto align = 3 + _unit.hasWhite();
-        auto roff  = _unit.offsetR();
-        auto goff  = _unit.offsetG();
-        auto boff  = _unit.offsetB();
-        auto woff  = _unit.offsetW();
-
-        UnitLED::item_container_type v;
-        v.reserve(total_bits + 1 /*reset*/);
-
-        const auto one  = _unit.rmt_item_one();
-        const auto zero = _unit.rmt_item_zero();
-
-        for (uint32_t i = 0; i < _unit.numPixels(); ++i) {
-            const uint8_t* p = _unit.pixels().data() + i * align;
-            float scale      = _unit.brightness() / 255.f;
-            uint8_t colors[4]{};
-            colors[roff] = static_cast<uint8_t>(p[roff] * scale);
-            colors[goff] = static_cast<uint8_t>(p[goff] * scale);
-            colors[boff] = static_cast<uint8_t>(p[boff] * scale);
-            if (woff >= 0) {
-                colors[woff] = static_cast<uint8_t>(p[woff] * scale);
-            }
-            for (int ci = 0; ci < align; ++ci) {
-                uint8_t bit{0x80};
-                while (bit) {
-                    v.push_back((colors[ci] & bit) ? one : zero);
-                    bit >>= 1;
-                }
-            }
-        }
-        // M5_LIB_LOGV("Make %u/%zu->%zu items", _unit.numPixels(), _unit.pixels().size(), v.size());
-        return v;
-    }
-
-    // Append RMT items for a single LED unit directly into buf (no temporary vector)
-    static void append_items(UnitLED& led, UnitLED::item_container_type& buf)
-    {
-        auto align = 3 + led.hasWhite();
-        auto roff  = led.offsetR();
-        auto goff  = led.offsetG();
-        auto boff  = led.offsetB();
-        auto woff  = led.offsetW();
-
-        const auto one    = led.rmt_item_one();
-        const auto zero   = led.rmt_item_zero();
-        const float scale = led.brightness() / 255.f;
-
-        for (uint32_t i = 0; i < led.numPixels(); ++i) {
-            const uint8_t* p = led.pixels().data() + i * align;
-            uint8_t colors[4]{};
-            colors[roff] = static_cast<uint8_t>(p[roff] * scale);
-            colors[goff] = static_cast<uint8_t>(p[goff] * scale);
-            colors[boff] = static_cast<uint8_t>(p[boff] * scale);
-            if (woff >= 0) {
-                colors[woff] = static_cast<uint8_t>(p[woff] * scale);
-            }
-            for (int ci = 0; ci < align; ++ci) {
-                uint8_t bit{0x80};
-                while (bit) {
-                    buf.push_back((colors[ci] & bit) ? one : zero);
-                    bit >>= 1;
-                }
-            }
-        }
-    }
-
-    virtual UnitLED::item_container_type items_from_root() override
-    {
-        // 1. Walk to root and count total pixels
-        uint32_t cnt = _unit.numPixels();
-        auto p       = _unit.parent();
-        while (p && is_unit_led(p)) {
-            cnt += static_cast<UnitLED*>(p)->numPixels();
-            p = p->parent();
-        }
-
-        // 2. Single buffer allocation
-        auto align = 3 + _unit.hasWhite();
-        UnitLED::item_container_type v;
-        v.reserve(cnt * align * 8 + 1 /*reset*/);
-
-        // 3. Walk from root, append items directly
-        p = &_unit;
-        while (p && p->parent() && is_unit_led(p->parent())) {
-            p = p->parent();
-        }
-        while (p && p != &_unit) {
-            append_items(*static_cast<UnitLED*>(p), v);
-            p = p->child(0);
-        }
-        append_items(_unit, v);
-
-        // 4. Reset item
-        v.push_back(_unit.rmt_item_reset());
-        return v;
-    }
-
     virtual bool write(const uint8_t* data, const uint32_t size) override
     {
         return _unit.writeWithTransaction(data, size, 50 /* alldone wait ms */) == m5::hal::error::error_t::OK;
     }
 
     // Build tree: root → leaf
-    void build_tree(std::vector<UnitLED*>& tree)
+    void build_tree(std::vector<UnitLED*>& tree) const
     {
         Component* p = &_unit;
         while (p->parent() && is_unit_led(p->parent())) {
@@ -295,10 +222,10 @@ public:
     }
 
     // Build brightness-applied byte buffer from tree
-    void build_pixel_bytes(const std::vector<UnitLED*>& tree, std::vector<uint8_t>& buf)
+    static void build_pixel_bytes(const std::vector<UnitLED*>& tree, std::vector<uint8_t>& buf)
     {
         uint32_t total = 0;
-        for (auto* led : tree) {
+        for (const auto* led : tree) {
             total += led->numPixels() * (3 + led->hasWhite());
         }
         buf.reserve(total);
@@ -323,6 +250,7 @@ public:
         if (channel >= RMT_CHANNEL_MAX) {
             return false;
         }
+        _unit._rmt_resolution_hz = tx_resolution_of(ad);
 
         // 1. Build brightness-applied byte buffer
         std::vector<UnitLED*> tree;
@@ -352,10 +280,11 @@ public:
             return false;
         }
         // Latch: hold line low for the chip's reset window (per rmt_item_reset())
-        const auto reset_it = _unit.rmt_item_reset();
-        const auto cfg_tx   = _unit.rmt_config();
-        if (reset_it.duration0 > 0 && cfg_tx.tx.tick_ns > 0) {
-            const uint32_t reset_us = (static_cast<uint32_t>(reset_it.duration0) * cfg_tx.tx.tick_ns + 999) / 1000;
+        const auto reset_it   = _unit.rmt_item_reset();
+        const uint32_t res_hz = _unit.rmt_resolution_hz();
+        if (reset_it.duration0 > 0 && res_hz > 0) {
+            const uint32_t reset_us =
+                static_cast<uint32_t>((static_cast<uint64_t>(reset_it.duration0) * 1000000ULL + res_hz - 1) / res_hz);
             m5::utility::delayMicroseconds(reset_us);
         }
         return true;
@@ -371,6 +300,7 @@ public:
         if (!tx_handle) {
             return false;
         }
+        _unit._rmt_resolution_hz = tx_resolution_of(ad);
 
         // 1. Build tree and brightness-applied byte buffer
         std::vector<UnitLED*> tree;
@@ -410,14 +340,14 @@ public:
             M5_LIB_LOGE("rmt_transmit failed: %d", err);
             return false;
         }
-        err = rmt_tx_wait_all_done(tx_handle, pdMS_TO_TICKS(100));
+        err = rmt_tx_wait_all_done(tx_handle, 100);
         if (err != ESP_OK) {
             M5_LIB_LOGE("rmt_tx_wait_all_done failed: %d", err);
             return false;
         }
 
         // 4. Send reset pulse
-        auto reset_enc = _copy_encoder_for_reset();
+        auto reset_enc = copy_encoder_for_reset();
         if (!reset_enc) {
             return false;
         }
@@ -427,7 +357,7 @@ public:
             M5_LIB_LOGE("rmt_transmit(reset) failed: %d", err);
             return false;
         }
-        err = rmt_tx_wait_all_done(tx_handle, pdMS_TO_TICKS(100));
+        err = rmt_tx_wait_all_done(tx_handle, 100);
         if (err != ESP_OK) {
             M5_LIB_LOGE("rmt_tx_wait_all_done(reset) failed: %d", err);
             return false;
@@ -435,7 +365,8 @@ public:
         return true;
     }
 
-    rmt_encoder_handle_t _copy_encoder_for_reset()
+private:
+    rmt_encoder_handle_t copy_encoder_for_reset()
     {
         if (!_reset_encoder) {
             rmt_copy_encoder_config_t cfg{};
@@ -452,6 +383,7 @@ public:
     rmt_encoder_handle_t _reset_encoder{};
 #endif
 };
+#endif  // M5_UNIT_RGB_HAS_RMT
 
 class InterfacePbHub : public UnitLED::Interface {
 public:
@@ -466,15 +398,15 @@ public:
         auto roff         = _unit.offsetR();
         auto goff         = _unit.offsetG();
         auto boff         = _unit.offsetB();
-        const float scale = _unit.brightness() / 255.f;
+        const uint8_t bri = _unit.brightness();
 
         v.reserve(_unit.numPixels() * 3);
 
         for (uint32_t i = 0; i < _unit.numPixels(); ++i) {
             const uint8_t* p = _unit.pixels().data() + i * align;
-            v.emplace_back(p[roff] * scale);
-            v.emplace_back(p[goff] * scale);
-            v.emplace_back(p[boff] * scale);
+            v.emplace_back(rgb::scale8(p[roff], bri));
+            v.emplace_back(rgb::scale8(p[goff], bri));
+            v.emplace_back(rgb::scale8(p[boff], bri));
         }
         return v;
     }
@@ -482,7 +414,6 @@ public:
     virtual UnitLED::container_type rgb888_items_from_root() override
     {
         UnitLED::container_type v;
-        // auto align = 3 + _unit.hasWhite();
 
         // Get the number of items from the root LED
         uint32_t cnt = _unit.numPixels();
@@ -492,7 +423,6 @@ public:
             p = p->parent();
         }
         v.reserve(cnt * 3);
-        // M5_LIB_LOGE("  reserve:%u %u", cnt, cnt * (3 + hasWhite()) * 8);
 
         // Get the items from the root LED
         p = &_unit;
@@ -559,6 +489,7 @@ bool UnitLED::begin()
     // begin RMT if Root is not UnitPbHub
     M5_LIB_LOGI("Root is %s", p->deviceName());
     if (!is_unit_pbhub(p)) {
+#if M5_UNIT_RGB_HAS_RMT
         gpio::adapter_config_t cfg = rmt_config();
         // .channel and .gpio_num will set in begin(cfg)
         // Override RMT settings from config_t
@@ -574,6 +505,10 @@ bool UnitLED::begin()
             return false;
         }
         _interface.reset(new InterfaceGPIO(*this));
+#else
+        M5_LIB_LOGE("RMT is not supported on this SoC, connect via PbHub");
+        return false;
+#endif
     } else {
         _interface.reset(new InterfacePbHub(*this));
     }
@@ -666,11 +601,11 @@ bool UnitLED::fillGradation(const rgb::Color& firstClr, const rgb::Color& lastCl
     }
 
     for (uint16_t i = 0; i < num - 1; ++i) {
-        float ratio = static_cast<float>(i) / (num - 1);
-        uint8_t r   = static_cast<uint8_t>(firstClr.r + ratio * (lastClr.r - firstClr.r));
-        uint8_t g   = static_cast<uint8_t>(firstClr.g + ratio * (lastClr.g - firstClr.g));
-        uint8_t b   = static_cast<uint8_t>(firstClr.b + ratio * (lastClr.b - firstClr.b));
-        uint8_t w   = static_cast<uint8_t>(firstClr.w + ratio * (lastClr.w - firstClr.w));
+        const float ratio = static_cast<float>(i) / (num - 1);
+        const uint8_t r   = static_cast<uint8_t>(firstClr.r + ratio * (lastClr.r - firstClr.r));
+        const uint8_t g   = static_cast<uint8_t>(firstClr.g + ratio * (lastClr.g - firstClr.g));
+        const uint8_t b   = static_cast<uint8_t>(firstClr.b + ratio * (lastClr.b - firstClr.b));
+        const uint8_t w   = static_cast<uint8_t>(firstClr.w + ratio * (lastClr.w - firstClr.w));
         setPixelColor(first + i, Color(r, g, b, w));
     }
     setPixelColor(first + num - 1, lastClr);
@@ -735,7 +670,6 @@ bool UnitLED::set_pixel_color(const uint16_t n, const Color& c)
     if (!_ready || n >= _numPixels) {
         return false;
     }
-    //        M5_LIB_LOGV("[%u]:%08X", n, c.wrgb);
     uint8_t* p  = _pixels.data() + n * (3 + hasWhite());
     p[_offsetR] = c.r;
     p[_offsetG] = c.g;
@@ -746,9 +680,34 @@ bool UnitLED::set_pixel_color(const uint16_t n, const Color& c)
     return true;
 }
 
-UnitLED::item_container_type UnitLED::items()
+uint32_t UnitLED::rmt_resolution_hz()
 {
-    return _interface->items();
+    if (_rmt_resolution_hz) {
+        return _rmt_resolution_hz;
+    }
+    const uint32_t tick_ns = rmt_config().tx.tick_ns;
+    return tick_ns ? 1000000000UL / tick_ns : 0;
+}
+
+gpio::m5_rmt_item_t UnitLED::rmt_item_from_ns(const uint32_t high_ns, const uint32_t low_ns)
+{
+    const uint32_t res_hz = rmt_resolution_hz();
+    gpio::m5_rmt_item_t item{};
+    item.duration0 = std::min<uint32_t>(rgb::ticks_from_ns(high_ns, res_hz), RMT_DURATION_MAX);
+    item.level0    = 1;
+    item.duration1 = std::min<uint32_t>(rgb::ticks_from_ns(low_ns, res_hz), RMT_DURATION_MAX);
+    item.level1    = 0;
+    return item;
+}
+
+gpio::m5_rmt_item_t UnitLED::rmt_item_low_from_ns(const uint32_t low_ns)
+{
+    gpio::m5_rmt_item_t item{};
+    item.duration0 = std::min<uint32_t>(rgb::ticks_from_ns(low_ns, rmt_resolution_hz()), RMT_DURATION_MAX);
+    item.level0    = 0;
+    item.duration1 = 0;
+    item.level1    = 0;
+    return item;
 }
 
 UnitLED::container_type UnitLED::rgb888_items()
@@ -789,7 +748,7 @@ void UnitLED::shift_left(const uint16_t count, const bool wrap)
     }
 }
 
-void UnitLED::shift_right(uint16_t count, bool wrap)
+void UnitLED::shift_right(const uint16_t count, const bool wrap)
 {
     if (!_ready) {
         return;

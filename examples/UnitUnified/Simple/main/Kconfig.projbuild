@@ -1,0 +1,2 @@
+# The "Target unit / board" choice is shared by all UnitUnified examples that offer one.
+rsource "../../common/Kconfig.variant"

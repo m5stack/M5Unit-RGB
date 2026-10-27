@@ -9,6 +9,7 @@
 */
 #include "unit_WS2812.hpp"
 #include <M5Utility.hpp>
+#include <sdkconfig.h>  // CONFIG_IDF_TARGET_*
 
 using namespace m5::utility::mmh3;
 using namespace m5::unit::types;
@@ -25,8 +26,13 @@ const types::attr_t UnitWS2812::attr{attribute::AccessGPIO};
 adapter_config_t UnitWS2812::rmt_config()
 {
     adapter_config_t cfg{};
-    cfg.mode                   = Mode::RmtTX;
-    cfg.tx.tick_ns             = 50;
+    cfg.mode = Mode::RmtTX;
+#if defined(CONFIG_IDF_TARGET_ESP32H2)
+    // The H2 RMT clock is 32 MHz: 31 ns selects 32 MHz (50 ns would give 16 MHz)
+    cfg.tx.tick_ns = 31;
+#else
+    cfg.tx.tick_ns = 50;
+#endif
     cfg.tx.mem_blocks          = 4;
     cfg.tx.idle_output_enabled = true;
     cfg.tx.idle_level_high     = false;

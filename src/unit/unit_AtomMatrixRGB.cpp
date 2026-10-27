@@ -34,7 +34,7 @@ bool UnitAtomMatrixRGB::begin()
     }
     auto ad = asAdapter<AdapterGPIO>(Adapter::Type::GPIO);
     if (!ad || ad->tx_pin() != ATOM_MATRIX_LED_PIN) {
-        M5_LIB_LOGE("Illegal adapter %u", ad ? ad->tx_pin() : -1);
+        M5_LIB_LOGE("Illegal adapter %d", ad ? static_cast<int>(ad->tx_pin()) : -1);
         return false;
     }
     return UnitLED::begin();

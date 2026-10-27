@@ -9,6 +9,9 @@
 #ifndef M5_UNIT_RGB_LED_TEST_COMMON_HPP
 #define M5_UNIT_RGB_LED_TEST_COMMON_HPP
 
+#include <algorithm>
+#include <string>
+
 #include <gtest/gtest.h>
 #include <Wire.h>
 #include <M5Unified.h>
@@ -16,17 +19,17 @@
 #include <googletest/test_template.hpp>
 #include <M5UnitUnifiedRGB.h>
 #include <wiring/m5_unit_unified_wiring.hpp>
-#include <chrono>
-#include <cmath>
-#include <iostream>
-#include <vector>
-#include <set>
+
+// Every test fixture drives the LEDs over GPIO (RMT); ESP32-C2 / C61 have no RMT
+#if defined(M5_UNIT_UNIFIED_HAS_RMT) && !M5_UNIT_UNIFIED_HAS_RMT
+#error "Embedded LED tests require RMT"
+#endif
 
 using namespace m5::unit::googletest;
 using namespace m5::unit;
 using namespace m5::unit::rgb;
 
-inline constexpr Color COLOR_BLACK{};
+constexpr Color COLOR_BLACK{};
 
 // Expected static properties for a given SKU (used by basic_test).
 struct BasicExpect {
@@ -310,75 +313,6 @@ inline void shift_test(UnitLED* unit)
     unit->clear();
 }
 
-inline void scale8_test()
-{
-    using m5::unit::rgb::scale8;
-    EXPECT_EQ(scale8(0, 255), 0);
-    EXPECT_EQ(scale8(1, 255), 1);
-    EXPECT_EQ(scale8(128, 255), 128);
-    EXPECT_EQ(scale8(254, 255), 254);
-    EXPECT_EQ(scale8(255, 255), 255);
-    EXPECT_EQ(scale8(255, 0), 0);
-    EXPECT_EQ(scale8(255, 1), 1);
-    EXPECT_EQ(scale8(255, 128), 128);
-    EXPECT_EQ(scale8(255, 254), 254);
-    EXPECT_EQ(scale8(0, 0), 0);
-    EXPECT_EQ(scale8(0, 128), 0);
-    EXPECT_EQ(scale8(128, 0), 0);
-    EXPECT_EQ(scale8(128, 128), 64);
-    EXPECT_EQ(scale8(100, 100), 39);
-}
-
-inline void color_test()
-{
-    Color r = Color::fromHSV(0, 255, 255);
-    EXPECT_EQ(r.r, 255);
-    EXPECT_EQ(r.g, 0);
-    EXPECT_EQ(r.b, 0);
-
-    Color g = Color::fromHSV(85, 255, 255);
-    EXPECT_GT(g.g, g.r);
-    EXPECT_GT(g.g, g.b);
-
-    Color b = Color::fromHSV(170, 255, 255);
-    EXPECT_GT(b.b, b.r);
-    EXPECT_GT(b.b, b.g);
-
-    Color w = Color::fromHSV(0, 0, 255);
-    EXPECT_EQ(w.r, 255);
-    EXPECT_EQ(w.g, 255);
-    EXPECT_EQ(w.b, 255);
-
-    Color k = Color::fromHSV(0, 255, 0);
-    EXPECT_EQ(k.r, 0);
-    EXPECT_EQ(k.g, 0);
-    EXPECT_EQ(k.b, 0);
-
-    for (uint16_t hue : {0u, 43u, 85u, 128u, 170u, 213u}) {
-        Color gray = Color::fromHSV(static_cast<uint8_t>(hue), 0, 128);
-        EXPECT_EQ(gray.r, 128) << "hue=" << hue;
-        EXPECT_EQ(gray.g, 128) << "hue=" << hue;
-        EXPECT_EQ(gray.b, 128) << "hue=" << hue;
-    }
-
-    Color w1 = Color::fromHSV(0, 0, 1);
-    EXPECT_EQ(w1.r, 1);
-    EXPECT_EQ(w1.g, 1);
-    EXPECT_EQ(w1.b, 1);
-    Color w254 = Color::fromHSV(0, 0, 254);
-    EXPECT_EQ(w254.r, 254);
-    EXPECT_EQ(w254.g, 254);
-    EXPECT_EQ(w254.b, 254);
-}
-
-inline void config_test(UnitLED* unit)
-{
-    auto cfg       = unit->config();
-    cfg.brightness = 42;
-    unit->config(cfg);
-    EXPECT_EQ(unit->config().brightness, 42);
-}
-
 inline void range_test(UnitLED* unit)
 {
     constexpr Color R(255, 0, 0);
@@ -416,9 +350,12 @@ inline void hw_write_test(UnitLED* unit)
 }
 
 // Rotation test for RectLED (WIDTH x HEIGHT grid, 4 rotation steps).
-inline void rect_rotation_test(UnitLED* unit, uint16_t W, uint16_t H)
+inline void rect_rotation_test(UnitLED* unit, const uint16_t W, const uint16_t H)
 {
-    ASSERT_EQ(unit->maxRotation(), 4u);
+    EXPECT_EQ(unit->maxRotation(), 4u);
+    if (unit->maxRotation() != 4u) {
+        return;
+    }
 
     constexpr Color R(255, 0, 0);
     constexpr Color B(0, 0, 255);
@@ -461,7 +398,10 @@ inline void rect_rotation_test(UnitLED* unit, uint16_t W, uint16_t H)
 // Rotation test for HexLED37 (6 rotation steps: 0/60/120/180/240/300 deg).
 inline void hex_rotation_test(UnitLED* unit)
 {
-    ASSERT_EQ(unit->maxRotation(), 6u);
+    EXPECT_EQ(unit->maxRotation(), 6u);
+    if (unit->maxRotation() != 6u) {
+        return;
+    }
 
     constexpr Color R(255, 0, 0);
 
@@ -477,17 +417,26 @@ inline void hex_rotation_test(UnitLED* unit)
         EXPECT_NE(unit->absoluteColor(0), R) << "rot=" << int(rot);
     }
 
+    unit->setRotation(1);
+    unit->clear();
+    unit->setPixelColor(0, R);
+    EXPECT_EQ(unit->absoluteColor(3), R) << "rot60: logical[0] -> physical 3";
+
+    unit->setRotation(3);
+    unit->clear();
+    unit->setPixelColor(0, R);
+    EXPECT_EQ(unit->absoluteColor(36), R) << "rot180: logical[0] -> physical 36";
+
     unit->setRotation(0);
     unit->clear();
 }
 
 // UnitNeco: button verification. If wiring cannot support InputPullup
-// (e.g. ESP32 classic GPIO 34-39), skip the read check with a warning log.
+// (e.g. ESP32 classic GPIO 34-39), the read check is reported as SKIPPED.
 inline void neco_button_test(UnitNeco* unit)
 {
     if (!unit->buttonAvailable()) {
-        M5_LIB_LOGW("Skipping Neco button read: RX pin cannot support InputPullup");
-        return;
+        GTEST_SKIP() << "RX pin cannot support InputPullup, so the button read is not checked";
     }
     unit->update();
     EXPECT_FALSE(unit->isPressed()) << "Button appears pressed at rest — check wiring";

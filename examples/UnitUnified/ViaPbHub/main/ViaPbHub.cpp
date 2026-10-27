@@ -16,7 +16,7 @@
                    |
                    +--> ch:4 UnitNeco
                    |
-                   +--> ch5: UnitRGBLEDStrip30
+                   +--> ch:5 UnitRGBLEDStrip30
 
   Hardware limits (see README "Note (large cascades / PbHub)"):
     1. PbHub caps each channel at 74 LEDs. On ch:1 (64+64=128), the second Puzzle's
@@ -46,7 +46,7 @@ m5::unit::UnitPuzzle puzzle[2];
 m5::unit::UnitHex hex;
 m5::unit::UnitNeoHex neoHex;
 m5::unit::UnitRGBLED15 rgbled;
-m5::unit::UnitNeco neco;  // Button API is not available that via PbHub
+m5::unit::UnitNeco neco;  // Button API is not available via PbHub
 m5::unit::UnitRGBLEDStrip30 strip;
 
 void loop_rgb(const m5::unit::types::elapsed_time_t now)
@@ -68,8 +68,7 @@ void loop_rgb(const m5::unit::types::elapsed_time_t now)
 void loop_puzzle(const m5::unit::types::elapsed_time_t now)
 {
     /*
-      NOTICE!: The PbHUB can manage up to 74 LEDs per channel
-      So, note that the second LED of the puzzle only lights up 10
+      NOTICE: PbHub handles up to 74 LEDs per channel, so only the first 10 LEDs of the second Puzzle light up
      */
     static auto ms = m5::utility::millis();
     if (now - ms > 50) {
@@ -91,13 +90,10 @@ void loop_hex(const m5::unit::types::elapsed_time_t now)
     }
 }
 
-uint32_t roundTrip(uint32_t count, uint32_t max)
+uint32_t round_trip(const uint32_t count, const uint32_t max)
 {
-    uint32_t period   = 2 * max;
-    uint32_t index    = count % period;
-    int32_t diff      = static_cast<int32_t>(index) - static_cast<int32_t>(max);
-    uint32_t abs_diff = (diff ^ (diff >> 31)) - (diff >> 31);
-    return max - abs_diff;
+    const uint32_t index{count % (2 * max)};
+    return (index <= max) ? index : 2 * max - index;
 }
 
 void loop_rgbled(const m5::unit::types::elapsed_time_t now)
@@ -107,7 +103,7 @@ void loop_rgbled(const m5::unit::types::elapsed_time_t now)
 
     if (now - ms > 30) {
         ms      = now;
-        int idx = roundTrip(++counter, 14);  // 0-14-0...
+        int idx = round_trip(++counter, 14);  // 0-14-0...
         rgbled.clear();
         if (idx > 0) {
             rgbled.setPixelColor(idx - 1, 32, 0, 0);
@@ -126,7 +122,8 @@ void loop_neco(const m5::unit::types::elapsed_time_t now)
     static uint32_t counter{};
 
     if (now - ms > 40) {
-        int idx = roundTrip(++counter, 17);  // 0-17-0...
+        ms      = now;
+        int idx = round_trip(++counter, 17);  // 0-17-0...
 
         neco.clear();
         if (idx == 17) {
@@ -143,12 +140,23 @@ void loop_neco(const m5::unit::types::elapsed_time_t now)
 void loop_strip(const m5::unit::types::elapsed_time_t now)
 {
     static auto ms = m5::utility::millis();
-    static uint32_t counter{};
 
     if (now - ms > 2000) {
         ms = now;
         strip.fillRandom();
         strip.show();
+    }
+}
+
+bool paused{};
+
+// PbHub writes the LEDs one at a time and waits for the hub to output them, so a full channel (74 LEDs)
+// takes about 170 ms. Read the button between the units so that a press is not missed
+void poll_button()
+{
+    M5.update();
+    if (M5.BtnA.wasPressed()) {
+        paused = !paused;
     }
 }
 
@@ -172,13 +180,13 @@ void setup()
         !hub.add(hex, 2) ||              // PbHub ch:2 -> UnitHex
         !hub.add(rgbled, 3) ||           // PbHub ch:3 -> UnitRGBLED15
         !hub.add(neco, 4) ||             // PbHub ch:4 -> UnitNeco
-        !hub.add(strip, 5)) {            // PbHub ch:5 -> UnitRGBLEDStrip
+        !hub.add(strip, 5)) {            // PbHub ch:5 -> UnitRGBLEDStrip30
         M5_LOGE("Failed to connect units");
         m5::unit::wiring::failStop();
     }
 
     // Board-aware I2C: NessoN1 PortB -> SoftwareI2C, NanoC6/NanoH2 -> Ex_I2C, others -> Wire
-    bool unit_ready = m5::unit::wiring::addI2C(Units, hub, 400000) && Units.begin();
+    bool unit_ready = m5::unit::wiring::addI2C(Units, hub) && Units.begin();
 
     if (!unit_ready) {
         M5_LOGE("Failed to begin");
@@ -206,21 +214,52 @@ void setup()
 
 void loop()
 {
-    M5.update();
+    poll_button();
     Units.update();
 
-    static bool pause{};
-    if (M5.BtnA.wasClicked()) {
-        pause = !pause;
-    }
-
-    if (!pause) {
+    if (!paused) {
         auto now = m5::utility::millis();
         loop_rgb(now);
+        poll_button();
         loop_puzzle(now);
+        poll_button();
         loop_hex(now);
+        poll_button();
         loop_rgbled(now);
+        poll_button();
         loop_neco(now);
+        poll_button();
         loop_strip(now);
     }
 }
+
+#if !defined(ARDUINO)
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <esp_timer.h>
+
+#if CONFIG_FREERTOS_UNICORE
+static inline void feedIdleTaskPeriodically(void)
+{
+    constexpr uint32_t FEED_INTERVAL_MS   = 2000;
+    constexpr TickType_t FEED_SLEEP_TICKS = pdMS_TO_TICKS(5);
+    static uint32_t s_last_feed_ms{};
+    const uint32_t now_ms{static_cast<uint32_t>(esp_timer_get_time() / 1000)};
+    if (now_ms - s_last_feed_ms >= FEED_INTERVAL_MS) {
+        s_last_feed_ms = now_ms;
+        vTaskDelay(FEED_SLEEP_TICKS);
+    }
+}
+#endif
+
+extern "C" void app_main(void)
+{
+    setup();
+    for (;;) {
+#if CONFIG_FREERTOS_UNICORE
+        feedIdleTaskPeriodically();
+#endif
+        loop();
+    }
+}
+#endif

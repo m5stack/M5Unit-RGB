@@ -19,8 +19,6 @@
 #include <esp_random.h>
 #include <driver/gpio.h>
 
-// *********************************************************************
-// Choose using unit
 // *************************************************************
 // Choose one define symbol to match the unit you are using
 // *************************************************************
@@ -54,31 +52,31 @@ namespace {
 auto& lcd = M5.Display;
 m5::unit::UnitUnified Units;
 #if defined(USING_UNIT_RGB)
-#pragma message "Using: USING_UNIT_RGB"
+#pragma message("Using: USING_UNIT_RGB")
 m5::unit::UnitRGB unit;
 #elif defined(USING_UNIT_PUZZLE)
-#pragma message "Using: USING_UNIT_PUZZLE"
+#pragma message("Using: USING_UNIT_PUZZLE")
 m5::unit::UnitPuzzle unit;
 #elif defined(USING_UNIT_HEX)
-#pragma message "Using: USING_UNIT_HEX"
+#pragma message("Using: USING_UNIT_HEX")
 m5::unit::UnitHex unit;
 #elif defined(USING_UNIT_NEO_HEX)
-#pragma message "Using: USING_UNIT_NEO_HEX"
+#pragma message("Using: USING_UNIT_NEO_HEX")
 m5::unit::UnitNeoHex unit;
 #elif defined(USING_UNIT_NECO)
-#pragma message "Using: USING_UNIT_NECO"
+#pragma message("Using: USING_UNIT_NECO")
 m5::unit::UnitNeco unit;
 #elif defined(USING_UNIT_RGBLED15)
-#pragma message "Using: USING_UNIT_RGBLED15"
+#pragma message("Using: USING_UNIT_RGBLED15")
 m5::unit::UnitRGBLED15 unit;
 #elif defined(USING_UNIT_RGBLED_STRIP30)
-#pragma message "Using: USING_UNIT_RGBLED_STRIP30"
+#pragma message("Using: USING_UNIT_RGBLED_STRIP30")
 m5::unit::UnitRGBLEDStrip30 unit;
 #elif defined(USING_ATOM_MATRIX_RGB)
-#pragma message "Using: USING_ATOM_MATRIX_RGB"
+#pragma message("Using: USING_ATOM_MATRIX_RGB")
 m5::unit::UnitAtomMatrixRGB unit;
 #elif defined(USING_HAT_NEOFLASH)
-#pragma message "Using: USING_HAT_NEOFLASH"
+#pragma message("Using: USING_HAT_NEOFLASH")
 m5::unit::HatNeoFlash unit;
 #else
 #error Choose unit!
@@ -89,9 +87,9 @@ void log_pixel_color()
     std::string s{};
     for (uint32_t i = 0; i < unit.numPixels(); ++i) {
         Color c = unit.absoluteColor(i);
-        s += m5::utility::formatString("[%02u]:(%3u,%3u,%3u,%3u)\n", i, c.w, c.r, c.g, c.b);
+        s += m5::utility::formatString("[%02u]:(%3u,%3u,%3u,%3u)\n", static_cast<unsigned int>(i), c.w, c.r, c.g, c.b);
     }
-    M5.Log.printf(s.c_str());
+    M5.Log.printf("%s", s.c_str());
 }
 
 void draw_pixel_color()
@@ -204,7 +202,7 @@ void loop()
                 draw_pixel_color();
                 break;
 
-            case 2:  // brightness 16
+            case 2:  // brightness 10
                 // Pixel values are retained despite changes in brightness
                 M5.Log.printf("==== brightness on\n");
                 unit.setBrightness(10);
@@ -363,7 +361,6 @@ void loop()
                 }
             } break;
         }
-        //        M5.Speaker.tone(2000, 20);
         if (++func > 9) {
             static int8_t rot{};
             --rot;                  // Rotate counter clock wise
@@ -373,3 +370,34 @@ void loop()
         }
     }
 }
+
+#if !defined(ARDUINO)
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <esp_timer.h>
+
+#if CONFIG_FREERTOS_UNICORE
+static inline void feedIdleTaskPeriodically(void)
+{
+    constexpr uint32_t FEED_INTERVAL_MS   = 2000;
+    constexpr TickType_t FEED_SLEEP_TICKS = pdMS_TO_TICKS(5);
+    static uint32_t s_last_feed_ms{};
+    const uint32_t now_ms{static_cast<uint32_t>(esp_timer_get_time() / 1000)};
+    if (now_ms - s_last_feed_ms >= FEED_INTERVAL_MS) {
+        s_last_feed_ms = now_ms;
+        vTaskDelay(FEED_SLEEP_TICKS);
+    }
+}
+#endif
+
+extern "C" void app_main(void)
+{
+    setup();
+    for (;;) {
+#if CONFIG_FREERTOS_UNICORE
+        feedIdleTaskPeriodically();
+#endif
+        loop();
+    }
+}
+#endif

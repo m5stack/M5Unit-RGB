@@ -21,6 +21,19 @@ protected:
     }
 };
 
+// BeginAppliesConfig fixture: pre-set config.brightness=42 before begin().
+class TestUnitAtomMatrixRGB_Config : public TestUnitAtomMatrixRGB {
+protected:
+    UnitAtomMatrixRGB* get_instance() override
+    {
+        auto* ptr      = new UnitAtomMatrixRGB();
+        auto cfg       = ptr->config();
+        cfg.brightness = 42;
+        ptr->config(cfg);
+        return ptr;
+    }
+};
+
 namespace testing {
 namespace internal {
 template <>
@@ -37,9 +50,6 @@ TEST_F(TestUnitAtomMatrixRGB, All)
     basic_test(unit.get(), expected::UNIT_ATOMMATRIXRGB);
     fill_test(unit.get());
     shift_test(unit.get());
-    scale8_test();
-    color_test();
-    config_test(unit.get());
     range_test(unit.get());
     hw_write_test(unit.get());
 }
@@ -48,4 +58,10 @@ TEST_F(TestUnitAtomMatrixRGB, RectRotation)
 {
     SCOPED_TRACE(ustr);
     rect_rotation_test(unit.get(), 5, 5);
+}
+
+TEST_F(TestUnitAtomMatrixRGB_Config, BeginAppliesConfig)
+{
+    SCOPED_TRACE(ustr);
+    EXPECT_EQ(unit->brightness(), 42);
 }

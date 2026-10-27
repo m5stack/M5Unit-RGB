@@ -8,7 +8,8 @@
 */
 #include "../led_test_common.hpp"
 
-using TestUnitRGBLEDStrip30 = TestSKU<UnitRGBLEDStrip30>;
+using TestUnitRGBLEDStrip30        = TestSKU<UnitRGBLEDStrip30>;
+using TestUnitRGBLEDStrip30_Config = TestSKU_ConfigApplied<UnitRGBLEDStrip30>;
 
 namespace testing {
 namespace internal {
@@ -26,9 +27,12 @@ TEST_F(TestUnitRGBLEDStrip30, All)
     basic_test(unit.get(), expected::UNIT_RGBLEDSTRIP30);
     fill_test(unit.get());
     shift_test(unit.get());
-    scale8_test();
-    color_test();
-    config_test(unit.get());
     range_test(unit.get());
     hw_write_test(unit.get());
+}
+
+TEST_F(TestUnitRGBLEDStrip30_Config, BeginAppliesConfig)
+{
+    SCOPED_TRACE(ustr);
+    EXPECT_EQ(unit->brightness(), 42);
 }

@@ -10,8 +10,9 @@
 #ifndef M5_UNIT_RGB_UNIT_NECO_HPP
 #define M5_UNIT_RGB_UNIT_NECO_HPP
 
+#include <m5_utility/button_status.hpp>
+
 #include "unit_WS2812.hpp"
-#include "m5_utility/button_status.hpp"
 
 namespace m5 {
 namespace unit {
@@ -37,8 +38,11 @@ public:
       @return True if successful
      */
     virtual bool begin() override;
-    //! @brief Update the unit
-    virtual void update(const bool = false) override;
+    /*!
+      @brief Update the button status
+      @param force Ignored (the button is read on every call)
+     */
+    virtual void update(const bool force = false) override;
 
     /*!
       @brief Whether the button is usable on the current wiring

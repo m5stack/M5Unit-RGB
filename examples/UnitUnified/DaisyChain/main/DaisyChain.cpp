@@ -11,7 +11,7 @@
 
   **** NOTICE *********************************************************************
   This example assumes the following connections
-  Core -> UnitRGB -> UnitPuzzle -> UnitPuzzle -> UnitHex -> UnitRGBLed15 -> UnitNeco
+  Core -> UnitRGB -> UnitPuzzle -> UnitPuzzle -> UnitHex -> UnitRGBLED15 -> UnitNeco
   -> UnitRGBLEDStrip30
 
   Modify the source code to suit your own connection situation.
@@ -59,9 +59,9 @@ void show_all()
 }
 
 // Shared HSV→RGB (S=1, V=v, H=0..359)
-Color hue_color(uint16_t h, uint8_t v)
+Color hue_color(const uint16_t hue, const uint8_t v)
 {
-    h %= 360;
+    const uint16_t h{static_cast<uint16_t>(hue % 360)};
     const uint8_t hi{static_cast<uint8_t>(h / 60)};
     const uint8_t f{static_cast<uint8_t>(static_cast<uint16_t>(v) * (h % 60) / 60)};
     const uint8_t q{static_cast<uint8_t>(v - f)};
@@ -82,9 +82,9 @@ Color hue_color(uint16_t h, uint8_t v)
 }
 
 // Triangle wave 0..255
-uint8_t tri(uint16_t p)
+uint8_t tri(const uint16_t phase)
 {
-    p &= 511;
+    const uint16_t p{static_cast<uint16_t>(phase & 511)};
     return p < 256 ? static_cast<uint8_t>(p) : static_cast<uint8_t>(511u - p);
 }
 
@@ -119,11 +119,6 @@ void step()
 // Each unit runs a completely independent animation using
 // only its own local coordinate system — no chain offsets
 // or inter-unit position calculations needed.
-//
-// In FastLED this would require:
-//   leds[OFFSET + j] with manual per-segment offset tracking,
-//   manual brightness scaling, and manual pixel rotation.
-// Here each unit object encapsulates all of that.
 // =====================================================
 namespace demo_a {
 
@@ -162,12 +157,14 @@ uint16_t s_strip_hue{0};
 void start()
 {
     // Each unit initialized in its own coordinate system — no offset knowledge
+    unit_rot::reset();  // undo the rotations Demo B applied (puzzle[0], puzzle[1], hex)
+
     rgb.setBrightness(10);
     rgb.clear();
     rgb.setPixelColor(0, Color(255, 0, 0));
 
     puzzle[0].setBrightness(10);
-    puzzle[0].setRotation(0);
+    puzzle[0].clear();
     puzzle[0].fillRainbow(0, 8);  // one row of rainbow, rest dark
 
     puzzle[1].setBrightness(10);
@@ -175,6 +172,7 @@ void start()
     for (auto& v : s_spark) v = 0;
 
     hex.setBrightness(10);
+    hex.clear();
     hex.fill(hue_color(0, 255), 0, 7);  // 7 of 37 LEDs lit
 
     tape.setBrightness(10);
@@ -297,7 +295,7 @@ void update()
 
 // =====================================================
 // Demo B  Comet
-// Pixel comet + fading tail sweeps through all 249 LEDs.
+// Pixel comet + fading tail sweeps through all 248 LEDs.
 // Max simultaneous LEDs: TAIL_LEN (12)
 // =====================================================
 namespace demo_b {
@@ -444,3 +442,34 @@ void loop()
     }
     m5::utility::delay(1);
 }
+
+#if !defined(ARDUINO)
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <esp_timer.h>
+
+#if CONFIG_FREERTOS_UNICORE
+static inline void feedIdleTaskPeriodically(void)
+{
+    constexpr uint32_t FEED_INTERVAL_MS   = 2000;
+    constexpr TickType_t FEED_SLEEP_TICKS = pdMS_TO_TICKS(5);
+    static uint32_t s_last_feed_ms{};
+    const uint32_t now_ms{static_cast<uint32_t>(esp_timer_get_time() / 1000)};
+    if (now_ms - s_last_feed_ms >= FEED_INTERVAL_MS) {
+        s_last_feed_ms = now_ms;
+        vTaskDelay(FEED_SLEEP_TICKS);
+    }
+}
+#endif
+
+extern "C" void app_main(void)
+{
+    setup();
+    for (;;) {
+#if CONFIG_FREERTOS_UNICORE
+        feedIdleTaskPeriodically();
+#endif
+        loop();
+    }
+}
+#endif

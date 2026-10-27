@@ -1,0 +1,10 @@
+## Dependencies for the ESP-IDF build of the MultiChannel example.
+## - M5Unit-RGB is taken from this repository itself (self reference via path).
+## - M5UnitUnified is declared as a dependency of M5Unit-RGB's root idf_component.yml
+##   and pulled in transitively by the component manager.
+## - M5Unified >=0.2.17 pulls in M5GFX transitively.
+dependencies:
+  idf: ">=5.1"
+  m5stack/M5Unit-RGB:
+    path: "../../../.."
+  m5stack/M5Unified: ">=0.2.17"

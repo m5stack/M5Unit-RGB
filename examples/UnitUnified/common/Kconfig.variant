@@ -1,0 +1,33 @@
+# Shared "Target unit / board" selection for the M5Unit-RGB UnitUnified examples (ESP-IDF).
+# rsource'd from main/Kconfig.projbuild of the examples that offer a unit choice (Simple). The chosen
+# CONFIG_EXAMPLE_USING_* is mapped to the source-level USING_* macro in common/variant.cmake
+# (shared with the Arduino build).
+menu "M5Unit-RGB example"
+
+choice EXAMPLE_RGB_VARIANT
+    prompt "Target unit / board"
+    default EXAMPLE_USING_UNIT_RGB
+    help
+        Which LED unit this example drives.
+
+    config EXAMPLE_USING_UNIT_RGB
+        bool "Unit RGB (U003)"
+    config EXAMPLE_USING_UNIT_PUZZLE
+        bool "Unit Puzzle (U193)"
+    config EXAMPLE_USING_UNIT_HEX
+        bool "Unit Hex (A045)"
+    config EXAMPLE_USING_UNIT_NEO_HEX
+        bool "Unit NeoHex (A045-B)"
+    config EXAMPLE_USING_UNIT_NECO
+        bool "Unit Neco (U163)"
+    config EXAMPLE_USING_UNIT_RGBLED15
+        bool "Unit RGB LED (A035)"
+    config EXAMPLE_USING_UNIT_RGBLED_STRIP30
+        bool "Unit RGB LED Strip (A093)"
+    config EXAMPLE_USING_ATOM_MATRIX_RGB
+        bool "ATOM Matrix built-in 5x5 RGB LED (C008-B)"
+    config EXAMPLE_USING_HAT_NEOFLASH
+        bool "Hat NeoFlash (U071)"
+endchoice
+
+endmenu
