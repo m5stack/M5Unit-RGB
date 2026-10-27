@@ -148,6 +148,18 @@ void loop_strip(const m5::unit::types::elapsed_time_t now)
     }
 }
 
+bool paused{};
+
+// PbHub writes the LEDs one at a time and waits for the hub to output them, so a full channel (74 LEDs)
+// takes about 170 ms. Read the button between the units so that a press is not missed
+void poll_button()
+{
+    M5.update();
+    if (M5.BtnA.wasPressed()) {
+        paused = !paused;
+    }
+}
+
 }  // namespace
 
 void setup()
@@ -202,21 +214,21 @@ void setup()
 
 void loop()
 {
-    M5.update();
+    poll_button();
     Units.update();
 
-    static bool pause{};
-    if (M5.BtnA.wasClicked()) {
-        pause = !pause;
-    }
-
-    if (!pause) {
+    if (!paused) {
         auto now = m5::utility::millis();
         loop_rgb(now);
+        poll_button();
         loop_puzzle(now);
+        poll_button();
         loop_hex(now);
+        poll_button();
         loop_rgbled(now);
+        poll_button();
         loop_neco(now);
+        poll_button();
         loop_strip(now);
     }
 }
