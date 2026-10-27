@@ -15,9 +15,10 @@
   The unit types default to UnitRGB (Unit1) and UnitNeco (Unit2); change UNIT_1_TYPE / UNIT_2_TYPE
   to suit your units (e.g. -D UNIT_2_TYPE=m5::unit::UnitHex).
 
-  RMT v1 (ESP-IDF 4.x / Arduino 2.x): each TX channel borrows the memory blocks of the following
-  channels (4 blocks by default), so this example lowers it to 2 blocks per unit to fit two units
-  on chips with few TX channels (ESP32-S3: ch0-3). Long chains may need more blocks.
+  Each TX channel takes 4 RMT memory blocks by default (RMT v1: borrowed from the following
+  channels, RMT v2: mem_block_symbols = 4 blocks). On chips with 4 TX blocks (ESP32-S3 / ESP32-P4)
+  the first unit would take them all and the second one fails to get a channel, so this example
+  lowers it to 2 blocks per unit. Long chains may need more blocks.
   *********************************************************************************
 
   BtnA: cycle the color pattern
@@ -129,8 +130,7 @@ void setup()
     }
     M5_LOGI("Unit1 GPIO:%d Unit2 GPIO:%d", pins[0], pins[1]);
 
-#if !defined(M5_UNIT_UNIFIED_USING_RMT_V2)
-    // RMT v1: 2 memory blocks per unit so that two units fit (see NOTICE above)
+    // 2 memory blocks per unit so that two units fit (see NOTICE above)
     {
         auto cfg1       = unit1.config();
         cfg1.mem_blocks = 2;
@@ -139,7 +139,6 @@ void setup()
         cfg2.mem_blocks = 2;
         unit2.config(cfg2);
     }
-#endif
 
     const bool unit_ready = Units.add(unit1, static_cast<int8_t>(-1), pins[0]) &&
                             Units.add(unit2, static_cast<int8_t>(-1), pins[1]) && Units.begin();
